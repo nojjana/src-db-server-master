@@ -6,12 +6,14 @@ export interface Program {
     controllerJoin(socket: SrcSocket): boolean;
 }
 
+
 export enum ProgramName {
     NOT_IN_LOBBY,
     MAIN_MENU,
     LABYRINTH,
     SPACESHIP,
     WHACK_A_MOLE,
+    SHAKER,
     VARIANZ_TEST,
-    LAST_TEST
+    LAST_TEST,
 }
