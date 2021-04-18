@@ -136,9 +136,13 @@ export class ShakerProgram implements Program {
     }
 
     private hammerHit(): void {
+        // TODO shaking = true;
         this.hit = true;
         setTimeout(() => {this.hit = false;}, 300);
     }
+
+    // method: stopShaking()
+    // shaking = false;
 
     private setDisplayShakerBuildListener(): void {
         let displays = this.lobbyController.getDisplays();
@@ -292,6 +296,9 @@ export class ShakerProgram implements Program {
                 if (pair.bodyA.label === 'Hammer' || pair.bodyB.label === 'Hammer') {
                     if (pair.bodyA.label === 'Mole') {
                         if (this.hit) {
+                            // TODO fruit falls
+                            // TODO catch fruit -> später
+                            // TODO reset
                             this.resetMole();
                             this.score += this.scoreInc;
                         }
