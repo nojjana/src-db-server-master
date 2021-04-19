@@ -116,7 +116,7 @@ export class ShakerProgram implements Program {
     private setControllerDataListeners(): void {
         if(this.moveController && this.hitController) {
             // this.moveController.addSocketListener('controllerData', this.setGravity.bind(this));
-            this.moveController.addSocketListener('controllerData', this.hammerHit.bind(this));
+            this.moveController.addSocketListener('controllerData', this.hammerHit.bind(this));  // controllerData kommt an -> hammerHit wird ausgeführt (hit = true)
             this.hitController.addSocketListener('controllerData', this.hammerHit.bind(this));
             // TODO
             this.hitController.addSocketListener('controllerData', this.startShaking.bind(this));
@@ -165,7 +165,7 @@ export class ShakerProgram implements Program {
         this.shaking = true;
         console.log('startShaking. shaking = '+this.shaking);
         this.makeObjectFall();
-        setTimeout(() => {this.shaking = false;}, 300);
+        //setTimeout(() => {this.shaking = false;}, 300);
     }
 
     private stopShaking(): void {
@@ -174,6 +174,7 @@ export class ShakerProgram implements Program {
     }
 
     private makeObjectFall(): void {
+        // TODO wird noch nicht gebraucht (?) da in collisionActive block
         console.log("makeObjectFall called")
         // fall auslösen
         this.makeFall = true;
