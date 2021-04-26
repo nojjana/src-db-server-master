@@ -376,6 +376,7 @@ export class ShakerProgram implements Program {
 
             this.lobbyController.sendToDisplays('updateHammer', [this.hammer.position.x, this.hammer.position.y, this.mole.position.x, this.mole.position.y, this.hit, this.score]);
             this.lobbyController.sendToDisplays('updateShaking', [this.shaking]);
+            this.lobbyController.sendToDisplays('reachedShaker', [this.shaking]);
         }, 1000 / fps);
     }
 
