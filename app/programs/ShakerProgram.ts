@@ -12,6 +12,7 @@ export class ShakerProgram implements Program {
     private hit = false;
     private shaking = false;
     private makeFall = false;
+    private changeObject = false;
     private engine?: Matter.Engine;
     private numberOfTilesWidth = 5;
     private numberOfTilesHeight = 4;
@@ -181,6 +182,11 @@ export class ShakerProgram implements Program {
         console.log('makeFall = '+this.makeFall);
         // zurücksetzen auf false
         setTimeout(() => {this.makeFall = false;}, 300);
+    }
+
+    private changeShakingObject(): void {
+        console.log("changeShakingObject called")
+        this.changeObject = true;
     }
 
     private setDisplayShakerBuildListener(): void {
@@ -356,6 +362,9 @@ export class ShakerProgram implements Program {
                 if (this.makeFall) {
                     console.log("makeFall true. do sth now.")
                 }
+                if (this.changeObject) {
+                    console.log("changeObject")
+                }
             }
         });
 
@@ -376,7 +385,6 @@ export class ShakerProgram implements Program {
 
             this.lobbyController.sendToDisplays('updateHammer', [this.hammer.position.x, this.hammer.position.y, this.mole.position.x, this.mole.position.y, this.hit, this.score]);
             this.lobbyController.sendToDisplays('updateShaking', [this.shaking]);
-            this.lobbyController.sendToDisplays('reachedShaker', [this.shaking]);
         }, 1000 / fps);
     }
 
