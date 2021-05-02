@@ -176,16 +176,14 @@ export class ShakerProgram implements Program {
 
     private makeObjectFall(): void {
         // TODO wird noch nicht gebraucht (?) da in collisionActive block
-        console.log("--------- makeObjectFall called");
         // fall auslösen
         this.makeFall = true;
         // Baumwechsel auslösen
         this.reachedShaker = true;
-
         // zurücksetzen auf false  
         setTimeout(() => {this.makeFall = false;}, 300);
         // reachedShaker zurücksetzen auf false
-        setTimeout(() => {this.reachedShaker = false;}, 100);
+        setTimeout(() => {this.reachedShaker = false;}, 50);
     }
 
     private setDisplayShakerBuildListener(): void {
@@ -312,8 +310,6 @@ export class ShakerProgram implements Program {
                 y: this.halfTileSize + this.getRandomInt(this.numberOfTilesHeight) * this.tileSize
             });
         this.moleTimerId.refresh();
-
-        //TODO: updateShakingObject
     }
 
     private initHammer(): void {
