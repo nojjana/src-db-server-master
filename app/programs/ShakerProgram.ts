@@ -12,7 +12,7 @@ export class ShakerProgram implements Program {
     private hit = false;
     private shaking = false;
     private makeFall = false;
-    private changeObject = false;
+    private reachedShaker = false;
     private engine?: Matter.Engine;
     private numberOfTilesWidth = 5;
     private numberOfTilesHeight = 4;
@@ -176,17 +176,16 @@ export class ShakerProgram implements Program {
 
     private makeObjectFall(): void {
         // TODO wird noch nicht gebraucht (?) da in collisionActive block
-        console.log("makeObjectFall called")
+        console.log("--------- makeObjectFall called");
         // fall auslösen
         this.makeFall = true;
         console.log('makeFall = '+this.makeFall);
+        this.reachedShaker = true;
+        this.lobbyController.sendToDisplays('reachedShaker', true);
+        console.log("--------- reachedShaker sentToDisplay")  
         // zurücksetzen auf false
         setTimeout(() => {this.makeFall = false;}, 300);
-    }
-
-    private changeShakingObject(): void {
-        console.log("changeShakingObject called")
-        this.changeObject = true;
+    //    this.reachedShaker = false;
     }
 
     private setDisplayShakerBuildListener(): void {
@@ -313,6 +312,8 @@ export class ShakerProgram implements Program {
                 y: this.halfTileSize + this.getRandomInt(this.numberOfTilesHeight) * this.tileSize
             });
         this.moleTimerId.refresh();
+
+        //TODO: updateShakingObject
     }
 
     private initHammer(): void {
@@ -343,7 +344,7 @@ export class ShakerProgram implements Program {
                         if (this.hit) {
                             // TODO fruit falls
                             // TODO catch fruit -> später
-                            // TODO reset
+                            // TODO reset    
                             this.resetMole();
                             this.score += this.scoreInc;
                         }
@@ -358,13 +359,25 @@ export class ShakerProgram implements Program {
                 //TODO
                 if (this.shaking) {
                     this.makeObjectFall();
+                    /* this.reachedShaker = true;
+                    this.lobbyController.sendToDisplays('rachedShaker', true);
+                    console.log("--------- reachedShaker sentToDisplay") */
                 }
                 if (this.makeFall) {
                     console.log("makeFall true. do sth now.")
-                }
-                if (this.changeObject) {
+                   }
+
+                //if fallingObject === container
+                    //this.reachedShaker = true;
+                    //this.lobbyController.sendToDisplays('rachedShaker', true);
+                    // console.log("-------------------------------------------------------- BODY A setUpEvent: this.reachedShaker = true")
+                //    this.reachedShaker = false;
+            
+
+                //if (shakingObjectIngredient === )
+                /* if (this.changeObject) {
                     console.log("changeObject")
-                }
+                } */
             }
         });
 
@@ -385,6 +398,8 @@ export class ShakerProgram implements Program {
 
             this.lobbyController.sendToDisplays('updateHammer', [this.hammer.position.x, this.hammer.position.y, this.mole.position.x, this.mole.position.y, this.hit, this.score]);
             this.lobbyController.sendToDisplays('updateShaking', [this.shaking]);
+            //this.lobbyController.sendToDisplays('reachedShaker', [this.reachedShaker]);
+            
         }, 1000 / fps);
     }
 
