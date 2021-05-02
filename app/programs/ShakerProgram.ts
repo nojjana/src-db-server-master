@@ -179,13 +179,13 @@ export class ShakerProgram implements Program {
         console.log("--------- makeObjectFall called");
         // fall auslösen
         this.makeFall = true;
-        console.log('makeFall = '+this.makeFall);
+        // Baumwechsel auslösen
         this.reachedShaker = true;
-        this.lobbyController.sendToDisplays('reachedShaker', true);
-        console.log("--------- reachedShaker sentToDisplay")  
-        // zurücksetzen auf false
+
+        // zurücksetzen auf false  
         setTimeout(() => {this.makeFall = false;}, 300);
-    //    this.reachedShaker = false;
+        // reachedShaker zurücksetzen auf false
+        setTimeout(() => {this.reachedShaker = false;}, 100);
     }
 
     private setDisplayShakerBuildListener(): void {
@@ -355,31 +355,17 @@ export class ShakerProgram implements Program {
                         }
                     }
                 }
-
-                //TODO
-                if (this.shaking) {
-                    this.makeObjectFall();
-                    /* this.reachedShaker = true;
-                    this.lobbyController.sendToDisplays('rachedShaker', true);
-                    console.log("--------- reachedShaker sentToDisplay") */
-                }
-                if (this.makeFall) {
-                    console.log("makeFall true. do sth now.")
-                   }
-
-                //if fallingObject === container
-                    //this.reachedShaker = true;
-                    //this.lobbyController.sendToDisplays('rachedShaker', true);
-                    // console.log("-------------------------------------------------------- BODY A setUpEvent: this.reachedShaker = true")
-                //    this.reachedShaker = false;
-            
-
-                //if (shakingObjectIngredient === )
-                /* if (this.changeObject) {
-                    console.log("changeObject")
-                } */
-            }
+            }  
         });
+
+         //TODO
+        if (this.shaking) {
+            console.log(" shaking true.")
+            this.makeObjectFall();
+        }
+        if (this.makeFall) {
+            console.log(" makeFall true. do sth now.")
+        }
 
         this.sendLevelInfoToDisplay();
     }
@@ -398,8 +384,7 @@ export class ShakerProgram implements Program {
 
             this.lobbyController.sendToDisplays('updateHammer', [this.hammer.position.x, this.hammer.position.y, this.mole.position.x, this.mole.position.y, this.hit, this.score]);
             this.lobbyController.sendToDisplays('updateShaking', [this.shaking]);
-            //this.lobbyController.sendToDisplays('reachedShaker', [this.reachedShaker]);
-            
+            this.lobbyController.sendToDisplays('reachedShaker', this.reachedShaker);            
         }, 1000 / fps);
     }
 
