@@ -173,26 +173,25 @@ export class ShakerProgram implements Program {
     }
 
 
-    private startShaking(): void {
-        this.shaking = true;
-        console.log('startShaking. shaking = '+this.shaking);
-        this.makeObjectFall();
-        //setTimeout(() => {this.shaking = false;}, 300);
-    }
-
     // private startShaking(): void {
-        // TODO NOT WORKING YET
     //     this.shaking = true;
-    //     console.log('startShaking called. shaking = '+this.shaking);
-    //     this.shakeCounter++;
-
-    //     if (this.shakeCounter >= 5) {
-    //         console.log('shakeCounter: '+ this.shakeCounter);
-    //         this.makeObjectFall();
-    //         this.shakeCounter = 0;
-    //     }
+    //     console.log('startShaking. shaking = '+this.shaking);
+    //     this.makeObjectFall();
     //     //setTimeout(() => {this.shaking = false;}, 300);
     // }
+
+    private startShaking(): void {
+        this.shaking = true;
+        console.log('startShaking() called -> shaking = '+this.shaking);
+        this.shakeCounter++;
+
+        if (this.shakeCounter >= 5) {
+            console.log('shakeCounter: '+ this.shakeCounter);
+            this.makeObjectFall();
+            this.shakeCounter = 0;
+        }
+        //setTimeout(() => {this.shaking = false;}, 300);
+    }
 
     private stopShaking(): void {
         this.shaking = false;
@@ -207,7 +206,7 @@ export class ShakerProgram implements Program {
         // Baumwechsel auslösen
         this.reachedShaker = true;
         // zurücksetzen auf false  
-        setTimeout(() => {this.makeFall = false;}, 300);
+        setTimeout(() => {this.makeFall = false;}, 50);
         // reachedShaker zurücksetzen auf false
         setTimeout(() => {this.reachedShaker = false;}, 50);
     }
@@ -381,13 +380,13 @@ export class ShakerProgram implements Program {
         });
 
         // TODO delete? (nearly?) never called.
-        if (this.shaking) {
-            console.log("shaking true. in setupgame.")
-            this.makeObjectFall();
-        }
-        if (this.makeFall) {
-            console.log("makeFall true. in setupgame.")
-        }
+        // if (this.shaking) {
+        //     console.log("shaking true. in setupgame.")
+        //     this.makeObjectFall();
+        // }
+        // if (this.makeFall) {
+        //     console.log("makeFall true. in setupgame.")
+        // }
 
         this.sendLevelInfoToDisplay();
     }
@@ -408,7 +407,7 @@ export class ShakerProgram implements Program {
             this.lobbyController.sendToDisplays('updateShaking', [this.shaking]);
             this.lobbyController.sendToDisplays('reachedShaker', this.reachedShaker); 
             // TODO NOT WORKING YET
-            //this.lobbyController.sendToDisplays('updateFall', [this.makeFall]);
+            this.lobbyController.sendToDisplays('updateFall', [this.makeFall]);
             // this.lobbyController.sendToDisplays('updateScore', [this.score]);          
         }, 1000 / fps);
     }
