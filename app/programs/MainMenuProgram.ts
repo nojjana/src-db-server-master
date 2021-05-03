@@ -3,7 +3,7 @@ import { LobbyController } from "../LobbyController";
 import { SrcSocket } from "../SrcSocket";
 
 export class MainMenuProgramm implements Program {
-    private games: string[] = ["Labyrinth", "Spaceship", "Whack-a-mole", "Shaker"];
+    private games: string[] = ["Labyrinth", "Spaceship", "Whack-a-mole", "Säftlimacher"];
     private lobbyController: LobbyController;
     private selectedGame = 0;
     private mainControllerSocketId: string = "";
