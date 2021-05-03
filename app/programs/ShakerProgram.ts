@@ -100,6 +100,12 @@ export class ShakerProgram implements Program {
 
         for(let controller of this.controllers){
             controller.addSocketOnce('endedTutorial', this.controllerEndedTutorial.bind(this));
+           
+            // TODO tutorial (skip waiting): wieder rückgängig machen 
+            // (2 Zeilen mit setup und sendtocontrollers löschen - kommen erst wenn all controllerendedtutorial)
+            // Tutorial überspringen für Debugging
+            this.setUpGame();
+            this.lobbyController.sendToControllers('startSendingData', null);
         }
     }
 
