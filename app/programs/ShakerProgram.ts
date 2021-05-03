@@ -10,9 +10,6 @@ export class ShakerProgram implements Program {
     private readyControllers = 0;
     private gameLoop: any;
     private hit = false;
-    private shaking = false;
-    private makeFall = false;
-    private reachedShaker = false;
     private engine?: Matter.Engine;
     private numberOfTilesWidth = 5;
     private numberOfTilesHeight = 4;
@@ -29,17 +26,24 @@ export class ShakerProgram implements Program {
     private gravityY: number = 0;
     private moleRadius = this.holeRadius;
     private mole?: Matter.Body;
-    // TODO
-    private fallingObject?: Matter.Body;
     private moleTimerId?: NodeJS.Timeout;
     private gameTimerId?: NodeJS.Timeout;
     private score: number = 0;
     private scoreInc : number = 50;
-    private moveController?: SrcSocket;
-    private hitController?: SrcSocket;
-    private controllers?: SrcSocket[];
     private endedTutorial = 0;
     private countdownInterval: any;
+
+    // TODO
+    private shaking = false;
+    private makeFall = false;
+    private shakeCounter: number = 0;
+    private reachedShaker = false;
+    private shakerContainer?: Matter.Body;
+    private fallingObject?: Matter.Body;
+    private controller1?: SrcSocket;
+    private controller2?: SrcSocket;
+    private controllers?: SrcSocket[];
+
 
     constructor(lobbyController: LobbyController){
         this.lobbyController = lobbyController;
@@ -87,16 +91,16 @@ export class ShakerProgram implements Program {
         // let v = Math.round(Math.random());
         // this.moveController = controllers[v];
         // this.hitController = controllers[(v + 1) % 2];
-        this.hitController = this.controllers[0];
-        this.moveController = this.controllers[1];
+        this.controller1 = this.controllers[0];
+        this.controller2 = this.controllers[1];
         this.controllers.forEach(controller => {
-            // TODO initialize
+            // TODO initialize ?
         });
 
-        // fasle is hit controller
-        this.moveController.emit('controllerResponsibility', false);
+        this.controller1.emit('controllerResponsibility', false);
+        this.controller2.emit('controllerResponsibility', false);
+        // true is move controller
         // this.moveController.emit('controllerResponsibility', true);
-        this.hitController.emit('controllerResponsibility', false);
 
         for(let controller of this.controllers){
             controller.addSocketOnce('endedTutorial', this.controllerEndedTutorial.bind(this));
@@ -121,23 +125,23 @@ export class ShakerProgram implements Program {
     }
 
     private setControllerDataListeners(): void {
-        if(this.moveController && this.hitController) {
+        if(this.controller1 && this.controller2) {
             // this.moveController.addSocketListener('controllerData', this.setGravity.bind(this));
-            this.moveController.addSocketListener('controllerData', this.hammerHit.bind(this));  // controllerData kommt an -> hammerHit wird ausgeführt (hit = true)
-            this.hitController.addSocketListener('controllerData', this.hammerHit.bind(this));
+            this.controller1.addSocketListener('controllerData', this.hammerHit.bind(this));  // controllerData kommt an -> hammerHit wird ausgeführt (hit = true)
+            this.controller2.addSocketListener('controllerData', this.hammerHit.bind(this));
             // TODO
-            this.hitController.addSocketListener('controllerData', this.startShaking.bind(this));
+            this.controller2.addSocketListener('controllerData', this.startShaking.bind(this));
             // this.hitController.addSocketListener('controllerData', this.stopShaking.bind(this));
-            this.moveController.addSocketListener('controllerData', this.startShaking.bind(this));
+            this.controller1.addSocketListener('controllerData', this.startShaking.bind(this));
             // this.moveController.addSocketListener('controllerData', this.stopShaking.bind(this));
         }
     }
 
     private doCountdown(): void {
-        if(this.moveController == null || this.hitController == null) return;
+        if(this.controller1 == null || this.controller2 == null) return;
 
-        this.moveController.removeSocketListener('controllerData');
-        this.hitController.removeSocketListener('controllerData');
+        this.controller1.removeSocketListener('controllerData');
+        this.controller2.removeSocketListener('controllerData');
 
         this.gravityX = 0;
         this.gravityY = 0;
@@ -168,12 +172,27 @@ export class ShakerProgram implements Program {
         setTimeout(() => {this.hit = false;}, 300);
     }
 
+
     private startShaking(): void {
         this.shaking = true;
         console.log('startShaking. shaking = '+this.shaking);
         this.makeObjectFall();
         //setTimeout(() => {this.shaking = false;}, 300);
     }
+
+    // private startShaking(): void {
+        // TODO NOT WORKING YET
+    //     this.shaking = true;
+    //     console.log('startShaking called. shaking = '+this.shaking);
+    //     this.shakeCounter++;
+
+    //     if (this.shakeCounter >= 5) {
+    //         console.log('shakeCounter: '+ this.shakeCounter);
+    //         this.makeObjectFall();
+    //         this.shakeCounter = 0;
+    //     }
+    //     //setTimeout(() => {this.shaking = false;}, 300);
+    // }
 
     private stopShaking(): void {
         this.shaking = false;
@@ -182,7 +201,8 @@ export class ShakerProgram implements Program {
 
     private makeObjectFall(): void {
         // TODO wird noch nicht gebraucht (?) da in collisionActive block
-        // fall auslösen
+        // fall auslösen - oder doch nicht?...
+        console.log('makeObjectFall called!');
         this.makeFall = true;
         // Baumwechsel auslösen
         this.reachedShaker = true;
@@ -360,13 +380,13 @@ export class ShakerProgram implements Program {
             }  
         });
 
-         //TODO
+        // TODO delete? (nearly?) never called.
         if (this.shaking) {
-            console.log(" shaking true.")
+            console.log("shaking true. in setupgame.")
             this.makeObjectFall();
         }
         if (this.makeFall) {
-            console.log(" makeFall true. do sth now.")
+            console.log("makeFall true. in setupgame.")
         }
 
         this.sendLevelInfoToDisplay();
@@ -386,7 +406,10 @@ export class ShakerProgram implements Program {
 
             this.lobbyController.sendToDisplays('updateHammer', [this.hammer.position.x, this.hammer.position.y, this.mole.position.x, this.mole.position.y, this.hit, this.score]);
             this.lobbyController.sendToDisplays('updateShaking', [this.shaking]);
-            this.lobbyController.sendToDisplays('reachedShaker', this.reachedShaker);            
+            this.lobbyController.sendToDisplays('reachedShaker', this.reachedShaker); 
+            // TODO NOT WORKING YET
+            //this.lobbyController.sendToDisplays('updateFall', [this.makeFall]);
+            // this.lobbyController.sendToDisplays('updateScore', [this.score]);          
         }, 1000 / fps);
     }
 
