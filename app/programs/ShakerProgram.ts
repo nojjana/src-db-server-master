@@ -37,7 +37,7 @@ export class ShakerProgram implements Program {
     private shaking = false;
     private makeFall = false;
     private shakeCounter: number = 0;
-    private reachedShaker = false;
+    private changeShakeObject = false;
     private shakerContainer?: Matter.Body;
     private fallingObject?: Matter.Body;
     private controller1?: SrcSocket;
@@ -87,7 +87,7 @@ export class ShakerProgram implements Program {
 
         this.controllers = this.lobbyController.getControllers();
 
-        // we wont no random distribution, controller 1 shall be the leader.
+        // we want no random distribution
         // let v = Math.round(Math.random());
         // this.moveController = controllers[v];
         // this.hitController = controllers[(v + 1) % 2];
@@ -105,9 +105,9 @@ export class ShakerProgram implements Program {
         for(let controller of this.controllers){
             controller.addSocketOnce('endedTutorial', this.controllerEndedTutorial.bind(this));
            
-            // TODO tutorial (skip waiting): wieder rückgängig machen 
-            // (2 Zeilen mit setup und sendtocontrollers löschen - kommen erst wenn all controllerendedtutorial)
             // Tutorial überspringen für Debugging
+            // TODO tutorial (skip waiting): wieder rückgängig machen!
+            // (2 Zeilen mit setup und sendtocontrollers löschen - kommen erst wenn all controllerendedtutorial)
             this.setUpGame();
             this.lobbyController.sendToControllers('startSendingData', null);
         }
@@ -129,10 +129,11 @@ export class ShakerProgram implements Program {
             // this.moveController.addSocketListener('controllerData', this.setGravity.bind(this));
             this.controller1.addSocketListener('controllerData', this.hammerHit.bind(this));  // controllerData kommt an -> hammerHit wird ausgeführt (hit = true)
             this.controller2.addSocketListener('controllerData', this.hammerHit.bind(this));
-            // TODO
-            this.controller2.addSocketListener('controllerData', this.startShaking.bind(this));
+            
+            this.controller2.addSocketListener('controllerData', this.shakeMovement.bind(this));
+            this.controller1.addSocketListener('controllerData', this.shakeMovement.bind(this));
+            // stop not necessary and not working properly
             // this.hitController.addSocketListener('controllerData', this.stopShaking.bind(this));
-            this.controller1.addSocketListener('controllerData', this.startShaking.bind(this));
             // this.moveController.addSocketListener('controllerData', this.stopShaking.bind(this));
         }
     }
@@ -166,49 +167,40 @@ export class ShakerProgram implements Program {
     }
 
     private hammerHit(): void {
-        // TODO shaking = true;
         this.hit = true;
         console.log('hammerHit. hit = '+this.hit);
         setTimeout(() => {this.hit = false;}, 300);
     }
 
 
-    // private startShaking(): void {
-    //     this.shaking = true;
-    //     console.log('startShaking. shaking = '+this.shaking);
-    //     this.makeObjectFall();
-    //     //setTimeout(() => {this.shaking = false;}, 300);
-    // }
-
-    private startShaking(): void {
+    private shakeMovement(): void {
         this.shaking = true;
-        console.log('startShaking() called -> shaking = '+this.shaking);
+        console.log('shakeMovement() called -> shaking = '+this.shaking);
         this.shakeCounter++;
-
         if (this.shakeCounter >= 5) {
             console.log('shakeCounter: '+ this.shakeCounter);
             this.makeObjectFall();
             this.shakeCounter = 0;
         }
-        //setTimeout(() => {this.shaking = false;}, 300);
+       setTimeout(() => { this.shaking = false;}, 30);
     }
 
-    private stopShaking(): void {
-        this.shaking = false;
-        console.log('stopShaking. shaking = '+this.shaking);
-    }
+    // private stopShaking(): void {
+    //     this.shaking = false;
+    //     console.log('stopShaking. shaking = '+this.shaking);
+    // }
 
     private makeObjectFall(): void {
-        // TODO wird noch nicht gebraucht (?) da in collisionActive block
-        // fall auslösen - oder doch nicht?...
         console.log('makeObjectFall called!');
         this.makeFall = true;
+        this.lobbyController.sendToDisplays('updateFall', this.makeFall);
         // Baumwechsel auslösen
-        this.reachedShaker = true;
+        this.changeShakeObject = true;
+        this.lobbyController.sendToDisplays('changeShakeObject', this.changeShakeObject); 
         // zurücksetzen auf false  
         setTimeout(() => {this.makeFall = false;}, 50);
         // reachedShaker zurücksetzen auf false
-        setTimeout(() => {this.reachedShaker = false;}, 50);
+       // setTimeout(() => {this.reachedShaker = false;}, 50);
     }
 
     private setDisplayShakerBuildListener(): void {
@@ -404,10 +396,7 @@ export class ShakerProgram implements Program {
             Matter.Engine.update(this.engine, 1000 / fps);
 
             this.lobbyController.sendToDisplays('updateHammer', [this.hammer.position.x, this.hammer.position.y, this.mole.position.x, this.mole.position.y, this.hit, this.score]);
-            this.lobbyController.sendToDisplays('updateShaking', [this.shaking]);
-            this.lobbyController.sendToDisplays('reachedShaker', this.reachedShaker); 
-            // TODO NOT WORKING YET
-            this.lobbyController.sendToDisplays('updateFall', [this.makeFall]);
+            this.lobbyController.sendToDisplays('updateShaking', this.shaking);
             // this.lobbyController.sendToDisplays('updateScore', [this.score]);          
         }, 1000 / fps);
     }
