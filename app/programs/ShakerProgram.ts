@@ -43,7 +43,7 @@ export class ShakerProgram implements Program {
   private makeFall = false;
   private shakeCounter: number = 0;
   private changeShakeObject = false;
-  private shakeObjectTimerId?: NodeJS.Timeout;
+  private shakeObjectChangeTimerId?: NodeJS.Timeout;
 
   // TODO set correct position
   private shakerContainer?: Matter.Body;
@@ -218,6 +218,14 @@ export class ShakerProgram implements Program {
     this.changeShakeObject = true;
     this.lobbyController.sendToDisplays('changeShakeObject', this.changeShakeObject);
     setTimeout(() => { this.changeShakeObject = false; }, 50);
+
+    if (this.shakeObjectChangeTimerId != null) {
+      this.shakeObjectChangeTimerId.refresh();
+    }
+
+    // new plant -> shake effect back to 0
+    this.shakeCounter = 0;
+
   }
 
   private setDisplayShakerBuildListener(): void {
@@ -439,7 +447,7 @@ export class ShakerProgram implements Program {
     this.gameTimerId = setTimeout(() => this.gameOver(), 60 * 1000);
 
     // change shakeObject after X seconds
-    this.shakeObjectTimerId = setTimeout(() => this.triggerChangeShakeObject(), 12 * 1000);
+    this.shakeObjectChangeTimerId = setTimeout(() => this.triggerChangeShakeObject(), 7 * 1000);
 
     let fps = 60;
 
@@ -459,6 +467,8 @@ export class ShakerProgram implements Program {
   private cleanUp(): void {
     if (this.moleTimerId != null) clearInterval(this.moleTimerId);
     if (this.gameTimerId != null) clearTimeout(this.gameTimerId);
+    if (this.shakeObjectChangeTimerId != null) clearTimeout(this.shakeObjectChangeTimerId);
+
     clearInterval(this.gameLoop);
     clearInterval(this.countdownInterval);
 
