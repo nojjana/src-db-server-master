@@ -42,8 +42,10 @@ export class ShakerProgram implements Program {
   private shaking = false;
   private makeFall = false;
   private shakeCounter: number = 0;
+  private shakePointsNeededForFalling: number = 30;
   private changeShakeObject = false;
   private shakeObjectChangeTimerId?: NodeJS.Timeout;
+  private shakeObjectChangeAfterSeconds: number = 15;
 
   // TODO set correct position
   private shakerContainer?: Matter.Body;
@@ -179,17 +181,17 @@ export class ShakerProgram implements Program {
 
   private hammerHit(): void {
     this.hit = true;
-    console.log('hammerHit. hit = ' + this.hit);
+   // console.log('hammerHit. hit = ' + this.hit);
     setTimeout(() => { this.hit = false; }, 300);
   }
 
 
   private shakeMovement(): void {
     this.shaking = true;
-    console.log('shakeMovement() called -> shaking = ' + this.shaking);
     this.shakeCounter++;
-    if (this.shakeCounter >= 5) {
-      console.log('shakeCounter: ' + this.shakeCounter);
+    console.log('Controllers are shaking. Counter: ' + this.shakeCounter);
+    if (this.shakeCounter >= this.shakePointsNeededForFalling) {
+      // console.log('shakeCounter: ' + this.shakeCounter);
       this.makeObjectFall();
       this.shakeCounter = 0;
     }
@@ -202,7 +204,7 @@ export class ShakerProgram implements Program {
   // }
 
   private makeObjectFall(): void {
-    console.log('makeObjectFall called!');
+    console.log('Ingredient, you have to fall now.');
     this.makeFall = true;
     this.lobbyController.sendToDisplays('updateFall', this.makeFall);
     // Wechsel von ShakeObject (Baum) auslösen
@@ -210,12 +212,19 @@ export class ShakerProgram implements Program {
 
     // zurücksetzen auf false  
     setTimeout(() => { this.makeFall = false; }, 50);
+    // after some seconds (test!) the fruit reached shaker -> give points 
+    // TODO: solve with collision!! not with estimating seconds for falling...
+    setTimeout(() => { this.score += this.scoreInc; }, 1000);
+    //console.log('TODO: is ingredient on list? remove! (if not: descrease score)');
+
+
     // reachedShaker zurücksetzen auf false
     // setTimeout(() => {this.reachedShaker = false;}, 50);
   }
 
   private triggerChangeShakeObject(): void {
     this.changeShakeObject = true;
+    console.log('Time for a new plant!');
     this.lobbyController.sendToDisplays('changeShakeObject', this.changeShakeObject);
     setTimeout(() => { this.changeShakeObject = false; }, 50);
 
@@ -410,14 +419,15 @@ export class ShakerProgram implements Program {
       for (; i != j; ++i) {
         const pair = pairs[i];
 
+        // TODO collision detection and score inc
         if (pair.bodyA.label === 'Ingredient' || pair.bodyB.label === 'Ingredient') {
           if (pair.bodyA.label === 'Shaker') {
-            console.log('Collision 1!')
+            // console.log('Collision 1!')
             // TODO
-            this.score += this.scoreInc;
+            // this.score += this.scoreInc;
           } else if (pair.bodyB.label === 'Shaker') {
-            console.log('Collision 2!')
-            this.score += this.scoreInc;
+            // console.log('Collision 2!')
+            // this.score += this.scoreInc;
           }
         }
 
@@ -447,7 +457,7 @@ export class ShakerProgram implements Program {
     this.gameTimerId = setTimeout(() => this.gameOver(), 60 * 1000);
 
     // change shakeObject after X seconds
-    this.shakeObjectChangeTimerId = setTimeout(() => this.triggerChangeShakeObject(), 7 * 1000);
+    this.shakeObjectChangeTimerId = setTimeout(() => this.triggerChangeShakeObject(), this.shakeObjectChangeAfterSeconds * 1000);
 
     let fps = 60;
 
