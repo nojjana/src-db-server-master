@@ -18,8 +18,13 @@ export class ShakerProgram implements Program {
   private height = this.tileSize * this.numberOfTilesHeight;
   private halfTileSize = this.tileSize / 2;
   private holeRadius = 50;
-  private hammerPosX = this.halfTileSize;
-  private hammerPosY = this.halfTileSize;
+  // private hammerPosX = this.halfTileSize;
+  // private hammerPosX = (this.width/2) * 0.8;
+  private hammerPosX = 1100;
+  // private hammerPosY = this.halfTileSize;
+  // private hammerPosY = (this.height/2) * 0.3;
+  private hammerPosY = 300;
+
   private hammer?: Matter.Body;
   private hammerRadius = this.holeRadius;
   private gravityX: number = 0;
@@ -121,8 +126,8 @@ export class ShakerProgram implements Program {
       // Tutorial überspringen für Debugging
       // TODO tutorial (skip waiting): wieder rückgängig machen!
       // (2 Zeilen mit setup und sendtocontrollers löschen - kommen erst wenn all controllerendedtutorial)
-      this.setUpGame();
-      this.lobbyController.sendToControllers('startSendingData', null);
+      // this.setUpGame();
+      // this.lobbyController.sendToControllers('startSendingData', null);
     }
   }
 
