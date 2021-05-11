@@ -5,6 +5,7 @@ import Matter, { Bodies } from "matter-js";
 import { SrcSocket } from "../SrcSocket";
 
 export class ShakerProgram implements Program {
+
   private lobbyController: LobbyController;
   private readyDisplays = 0;
   private readyControllers = 0;
@@ -33,7 +34,7 @@ export class ShakerProgram implements Program {
   private mole?: Matter.Body;
   private moleTimerId?: NodeJS.Timeout;
   private gameTimerId?: NodeJS.Timeout;
-  
+
   private score: number = 0;
   private scoreInc: number = 50;
   private endedTutorial = 0;
@@ -43,11 +44,11 @@ export class ShakerProgram implements Program {
   private controller1?: SrcSocket;
   private controller2?: SrcSocket;
   private controllers?: SrcSocket[];
-  
+
   private shaking = false;
   private makeFall = false;
   private shakeCounter: number = 0;
-  private shakePointsNeededForFalling: number = 70;
+  private shakePointsNeededForFalling: number = 2;
   private changeShakeObject = false;
   private shakeObjectChangeTimerId?: NodeJS.Timeout;
   private shakeObjectChangeAfterSeconds: number = 15;
@@ -67,6 +68,9 @@ export class ShakerProgram implements Program {
     this.lobbyController = lobbyController;
     this.setControllerReadyListener();
     this.setDisplayReadyListener();
+
+    // TODO only for testing classes
+    this.testClasses();
   }
 
   private setControllerReadyListener(): void {
@@ -186,7 +190,7 @@ export class ShakerProgram implements Program {
 
   private hammerHit(): void {
     this.hit = true;
-   // console.log('hammerHit. hit = ' + this.hit);
+    // console.log('hammerHit. hit = ' + this.hit);
     setTimeout(() => { this.hit = false; }, 300);
   }
 
@@ -527,4 +531,151 @@ export class ShakerProgram implements Program {
     socket.emit('gameRunning', null);
     return false;
   }
+
+
+
+
+  // TEST. CLASSES.
+
+  testClasses() {
+    console.log("------------ test of classes ------------");
+
+    const firstPlant = new AppleTree();
+    console.log("firstPlant: "+firstPlant.getName());
+
+    const firstIngredient = new Apple();
+    console.log("firstIngredient: "+firstIngredient.getName());
+    console.log("firstIngredient is edible: "+firstIngredient.isEdible());
+    
+    firstPlant.addIngredient(firstIngredient);
+    firstPlant.getIngredients().forEach(i => console.log(i.getName()));
+
+    let listOfItems: Ingredient[] = [new Apple(), new Banana(), new Berry()];
+    console.log("items on list: ");
+    listOfItems.forEach(item => {
+      console.log(item.getName());
+    });
+
+    console.log("firstIngredient '"+firstIngredient.getName()+"' is on list: "+ this.isOnList(firstIngredient, listOfItems));
+
+  }
+
+  isOnList(firstIngredient: Ingredient, listOfItems: Ingredient[]) {
+    return listOfItems.map(i => i.getType).includes(firstIngredient.getType);
+  }
+
 }
+
+enum IngredientType {
+  APPLE,
+  BANANA,
+  BERRY,
+  HONEY,
+  BEE
+}
+class ShakeObject {
+
+  private name: string;
+  private edible = true;
+  private ingredients: Ingredient[] = new Array();
+
+
+  constructor(name: string, edible?: boolean) {
+    this.name = name;
+    if (edible !== undefined) {
+      this.edible = edible;
+    }
+  }
+
+  getName() {
+    return this.name;
+  }
+
+  isEdible() {
+    return this.edible;
+  }
+
+  getIngredients() {
+    return this.ingredients;
+  }
+
+  addIngredients(ingredients: Ingredient[]) {
+    ingredients.forEach(i => {
+      this.addIngredient(i);
+    });
+  }
+
+  addIngredient(ingredient: Ingredient) {
+    this.ingredients.push(ingredient);
+  }
+
+}
+
+class AppleTree extends ShakeObject {
+
+  constructor() {
+    super("Apfelbaum");
+  }
+
+}
+
+class Ingredient {
+  private name: string;
+  private type: IngredientType;
+  private edible = true;
+
+  constructor(name: string, ingredientType: IngredientType, edible?: boolean) {
+    this.name = name;
+    this.type = ingredientType;
+    
+    if (edible !== undefined) {
+      this.edible = edible;
+    }
+  }
+
+  getName() {
+    return this.name;
+  }
+
+  isEdible() {
+    return this.edible;
+  }
+
+  getType(): IngredientType {
+    return this.type;
+  }
+
+}
+
+class Apple extends Ingredient {
+  constructor() {
+    super("Apfel", IngredientType.APPLE);
+  }
+}
+
+class Banana extends Ingredient {
+  constructor() {
+    super("Banane", IngredientType.BANANA);
+  }
+}
+
+class Berry extends Ingredient {
+  constructor() {
+    super("Himbeere", IngredientType.BERRY);
+  }
+}
+
+class Honey extends Ingredient {
+  constructor() {
+    super("Honig", IngredientType.HONEY);
+  }
+}
+
+class Bee extends Ingredient {
+  constructor() {
+    super("Biene", IngredientType.BEE, false);
+  }
+}
+
+
+
