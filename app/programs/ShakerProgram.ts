@@ -48,10 +48,10 @@ export class ShakerProgram implements Program {
   private shaking = false;
   private makeFall = false;
   private shakeCounter: number = 0;
-  private shakePointsNeededForFalling: number = 2;
+  private shakePointsNeededForFalling: number = 6;
   private changeShakeObject = false;
   private shakeObjectChangeTimerId?: NodeJS.Timeout;
-  private shakeObjectChangeAfterSeconds: number = 15;
+  private shakeObjectChangeAfterSeconds: number = 10;
 
   // TODO set correct position
   private shakerContainer?: Matter.Body;
@@ -62,6 +62,8 @@ export class ShakerProgram implements Program {
   private ingredientPosX = this.halfTileSize;
   private ingredientPosY = this.halfTileSize;
   private ingredientRadius = this.holeRadius;
+
+  private secondsOfPlayTime: number = 30;
 
 
   constructor(lobbyController: LobbyController) {
@@ -463,7 +465,7 @@ export class ShakerProgram implements Program {
   }
 
   private startGame(): void {
-    this.gameTimerId = setTimeout(() => this.gameOver(), 60 * 1000);
+    this.gameTimerId = setTimeout(() => this.gameOver(), this.secondsOfPlayTime * 1000);
 
     // change shakeObject after X seconds
     this.shakeObjectChangeTimerId = setTimeout(() => this.triggerChangeShakeObject(), this.shakeObjectChangeAfterSeconds * 1000);
