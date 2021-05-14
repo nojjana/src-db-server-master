@@ -52,6 +52,9 @@ export class ShakerProgram implements Program {
   private changeShakeObject = false;
   private shakeObjectChangeTimerId?: NodeJS.Timeout;
   private shakeObjectChangeAfterSeconds: number = 10;
+  private maxAmountOfFallingObjects = 3;
+  private currentRandomShakingObjectNumber = this.getRandomInt(this.maxAmountOfFallingObjects);
+  private oldShakeObjectNumber = this.getRandomInt(this.maxAmountOfFallingObjects);
 
   // TODO set correct position
   private shakerContainer?: Matter.Body;
@@ -262,7 +265,15 @@ export class ShakerProgram implements Program {
   private triggerChangeShakeObject(): void {
     this.changeShakeObject = true;
     console.log('Time for a new plant!');
-    this.lobbyController.sendToDisplays('changeShakeObject', this.changeShakeObject);
+
+    this.oldShakeObjectNumber = this.currentRandomShakingObjectNumber;
+    this.currentRandomShakingObjectNumber = this.getRandomInt(this.maxAmountOfFallingObjects);
+    while (this.oldShakeObjectNumber == this.currentRandomShakingObjectNumber) {
+      // avoid changing to the same shakeObject (i.e. 2x apple tree)
+      this.currentRandomShakingObjectNumber = this.getRandomInt(this.maxAmountOfFallingObjects);
+    }
+
+    this.lobbyController.sendToDisplays('changeShakeObject', this.currentRandomShakingObjectNumber);
     setTimeout(() => { this.changeShakeObject = false; }, 50);
 
     if (this.shakeObjectChangeTimerId != null) {
