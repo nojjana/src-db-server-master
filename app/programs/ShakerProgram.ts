@@ -172,6 +172,23 @@ export class ShakerProgram implements Program {
     }
   }
 
+  
+  private doGameOverCountdown(): void {
+    if (this.controller1 == null || this.controller2 == null) return;
+
+    let i = 10;
+
+    this.lobbyController.sendToDisplays('gameOverCountdown', i);
+
+    this.countdownInterval = setInterval(() => {
+      i--;
+      this.lobbyController.sendToDisplays('gameOverCountdown', i);
+      if (i == 0) {
+        clearInterval(this.countdownInterval);
+      }
+    }, 1000);
+  }
+
   private doCountdown(): void {
     if (this.controller1 == null || this.controller2 == null) return;
 
@@ -474,7 +491,9 @@ export class ShakerProgram implements Program {
   }
 
   private startGame(): void {
+    this.gameTimerId = setTimeout(() => this.doGameOverCountdown(), (this.secondsOfPlayTime * 1000) - (10 * 1000));
     this.gameTimerId = setTimeout(() => this.gameOver(), this.secondsOfPlayTime * 1000);
+
     this.playing = true;
     this.lobbyController.sendToDisplays('playing', this.playing);
 
