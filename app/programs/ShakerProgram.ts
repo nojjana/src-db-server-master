@@ -64,6 +64,7 @@ export class ShakerProgram implements Program {
   private ingredientRadius = this.holeRadius;
 
   private secondsOfPlayTime: number = 30;
+  private playing: boolean = false;
 
 
   constructor(lobbyController: LobbyController) {
@@ -162,11 +163,19 @@ export class ShakerProgram implements Program {
     }
   }
 
+  
+  private removeControllerDataListeners(): void {
+    if (this.controller1 && this.controller2) {
+      // this.moveController.addSocketListener('controllerData', this.setGravity.bind(this));
+      this.controller1.removeSocketListener('controllerData');
+      this.controller2.removeSocketListener('controllerData');
+    }
+  }
+
   private doCountdown(): void {
     if (this.controller1 == null || this.controller2 == null) return;
 
-    this.controller1.removeSocketListener('controllerData');
-    this.controller2.removeSocketListener('controllerData');
+    this.removeControllerDataListeners();
 
     this.gravityX = 0;
     this.gravityY = 0;
@@ -466,6 +475,9 @@ export class ShakerProgram implements Program {
 
   private startGame(): void {
     this.gameTimerId = setTimeout(() => this.gameOver(), this.secondsOfPlayTime * 1000);
+    this.playing = true;
+    this.lobbyController.sendToDisplays('playing', this.playing);
+
 
     // change shakeObject after X seconds
     this.shakeObjectChangeTimerId = setTimeout(() => this.triggerChangeShakeObject(), this.shakeObjectChangeAfterSeconds * 1000);
@@ -502,6 +514,8 @@ export class ShakerProgram implements Program {
   private gameOver() {
     this.cleanUp();
 
+    this.playing = false;
+    this.lobbyController.sendToDisplays('playing', this.playing);
     this.lobbyController.sendToDisplays('gameOver', true);
 
     this.lobbyController.getControllers()[0].emit('stopSendingData', true);
