@@ -46,15 +46,13 @@ export class ShakerProgram implements Program {
   private controllers?: SrcSocket[];
 
   private shaking = false;
-  private makeFall = false;
   private shakeCounter: number = 0;
   private shakePointsNeededForFalling: number = 3;
-  private changeShakeObject = false;
   private shakeObjectChangeTimerId?: NodeJS.Timeout;
   private shakeObjectChangeAfterSeconds: number = 10;
   private maxAmountOfFallingObjects = 3;
-  private currentRandomShakingObjectNumber = this.getRandomInt(this.maxAmountOfFallingObjects);
-  private oldShakeObjectNumber = this.getRandomInt(this.maxAmountOfFallingObjects);
+  private currentRandomShakingObjectNumber = 0;
+  private oldShakeObjectNumber = -1;
 
   // TODO set correct position
   private shakerContainer?: Matter.Body;
@@ -68,6 +66,8 @@ export class ShakerProgram implements Program {
 
   private secondsOfPlayTime: number = 30;
   private playing: boolean = false;
+
+  private allIngredientNumbersOnList: number[] = new Array();
 
 
   constructor(lobbyController: LobbyController) {
@@ -232,7 +232,7 @@ export class ShakerProgram implements Program {
     console.log('Controllers are shaking. Counter: ' + this.shakeCounter);
     if (this.shakeCounter >= this.shakePointsNeededForFalling) {
       // console.log('shakeCounter: ' + this.shakeCounter);
-      this.makeObjectFall();
+      this.triggerFallOfIngredient(this.currentRandomShakingObjectNumber);
       this.shakeCounter = 0;
     }
     setTimeout(() => { this.shaking = false; }, 30);
@@ -243,27 +243,32 @@ export class ShakerProgram implements Program {
   //     console.log('stopShaking. shaking = '+this.shaking);
   // }
 
-  private makeObjectFall(): void {
-    console.log('Ingredient, you have to fall now.');
-    this.makeFall = true;
-    this.lobbyController.sendToDisplays('updateFall', this.makeFall);
-    // Wechsel von ShakeObject (Baum) auslösen
-    // this.triggerChangeShakeObject();
+  private triggerFallOfIngredient(ingredientNumber: number): void {
+    console.log("Ingredient shall fall, number: "+ingredientNumber);
+    // TODO: send number
+    this.lobbyController.sendToDisplays('updateFall', true);
 
-    // zurücksetzen auf false  
-    setTimeout(() => { this.makeFall = false; }, 50);
     // after some seconds (test!) the fruit reached shaker -> give points 
     // TODO: solve with collision!! not with estimating seconds for falling...
-    setTimeout(() => { this.score += this.scoreInc; }, 1000);
-    //console.log('TODO: is ingredient on list? remove! (if not: descrease score)');
+    
+    if (this.allIngredientNumbersOnList.includes(ingredientNumber)) {
 
+      setTimeout(() => { 
+        this.lobbyController.sendToDisplays('checkIngredientOnList', ingredientNumber); 
+      }, 1300);
 
-    // reachedShaker zurücksetzen auf false
-    // setTimeout(() => {this.reachedShaker = false;}, 50);
+      setTimeout(() => { this.score += this.scoreInc; }, 1300);
+
+   } else {
+    // TODO: wrong ingredient! descrease score? display message?
+    console.log('catched a wrong ingredient, NOT on list!!!');
+      // this.lobbyController.sendToDisplays('wrongIngredientFell', ingredientNumber); 
+
+  }
+    
   }
 
   private triggerChangeShakeObject(): void {
-    this.changeShakeObject = true;
     console.log('Time for a new plant!');
 
     this.oldShakeObjectNumber = this.currentRandomShakingObjectNumber;
@@ -274,7 +279,6 @@ export class ShakerProgram implements Program {
     }
 
     this.lobbyController.sendToDisplays('changeShakeObject', this.currentRandomShakingObjectNumber);
-    setTimeout(() => { this.changeShakeObject = false; }, 50);
 
     if (this.shakeObjectChangeTimerId != null) {
       this.shakeObjectChangeTimerId.refresh();
@@ -459,7 +463,7 @@ export class ShakerProgram implements Program {
     this.initMole();
     this.initShakerContainer();
     this.initIngredient();
-
+    
     Matter.Events.on(this.engine, 'collisionActive', (event) => {
       const pairs = event.pairs;
 
@@ -501,6 +505,21 @@ export class ShakerProgram implements Program {
     this.sendLevelInfoToDisplay();
   }
 
+  generateIngredientListNumbers() {
+    let lastRandomInt = -1;
+    for (let index = 0; index < 2; index++) {      
+      let thisRandomInt = this.getRandomInt(3);
+      while (lastRandomInt == thisRandomInt) {
+        thisRandomInt = this.getRandomInt(3);
+      }
+      this.allIngredientNumbersOnList.push(thisRandomInt);
+      lastRandomInt = thisRandomInt;
+    }
+    this.allIngredientNumbersOnList.forEach(n => {
+      console.log("number on list: "+n);
+    });
+  }
+
   private startGame(): void {
     this.gameTimerId = setTimeout(() => this.doGameOverCountdown(), (this.secondsOfPlayTime * 1000) - (10 * 1000));
     this.gameTimerId = setTimeout(() => this.gameOver(), this.secondsOfPlayTime * 1000);
@@ -508,6 +527,8 @@ export class ShakerProgram implements Program {
     this.playing = true;
     this.lobbyController.sendToDisplays('playing', this.playing);
 
+    this.generateIngredientListNumbers();
+    this.lobbyController.sendToDisplays('allIngredientNumbersOnList', this.allIngredientNumbersOnList);
 
     // change shakeObject after X seconds
     this.shakeObjectChangeTimerId = setTimeout(() => this.triggerChangeShakeObject(), this.shakeObjectChangeAfterSeconds * 1000);
@@ -523,7 +544,7 @@ export class ShakerProgram implements Program {
 
       this.lobbyController.sendToDisplays('updateHammer', [this.hammer.position.x, this.hammer.position.y, this.mole.position.x, this.mole.position.y, this.hit, this.score]);
       this.lobbyController.sendToDisplays('updateShaking', this.shaking);
-      // this.lobbyController.sendToDisplays('updateScore', [this.score]);          
+      this.lobbyController.sendToDisplays('updateScore', this.score);          
     }, 1000 / fps);
   }
 
@@ -616,8 +637,8 @@ enum IngredientType {
   APPLE,
   BANANA,
   BERRY,
-  HONEY,
-  BEE
+  // HONEY,
+  // BEE
 }
 class ShakeObject {
 
@@ -711,17 +732,17 @@ class Berry extends Ingredient {
   }
 }
 
-class Honey extends Ingredient {
-  constructor() {
-    super("Honig", IngredientType.HONEY);
-  }
-}
+// class Honey extends Ingredient {
+//   constructor() {
+//     super("Honig", IngredientType.HONEY);
+//   }
+// }
 
-class Bee extends Ingredient {
-  constructor() {
-    super("Biene", IngredientType.BEE, false);
-  }
-}
+// class Bee extends Ingredient {
+//   constructor() {
+//     super("Biene", IngredientType.BEE, false);
+//   }
+// }
 
 
 
