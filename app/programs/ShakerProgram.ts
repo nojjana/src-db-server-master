@@ -47,9 +47,9 @@ export class ShakerProgram implements Program {
 
   private shaking = false;
   private shakeCounter: number = 0;
-  private shakePointsNeededForFalling: number = 3;
+  private shakePointsNeededForFalling: number = 5;
   private shakeObjectChangeTimerId?: NodeJS.Timeout;
-  private shakeObjectChangeAfterSeconds: number = 10;
+  private shakeObjectChangeAfterSeconds: number = 5;
   private maxAmountOfFallingObjects = 3;
   private currentRandomShakingObjectNumber = 0;
   private oldShakeObjectNumber = -1;
@@ -261,7 +261,12 @@ export class ShakerProgram implements Program {
 
    } else {
     // TODO: wrong ingredient! descrease score? display message?
-    console.log('catched a wrong ingredient, NOT on list!!!');
+    setTimeout(() => { 
+      console.log('catched a wrong ingredient, NOT on list!!! -50 Punkte.');
+      this.score -= this.scoreInc; 
+    }, 1300);
+
+
       // this.lobbyController.sendToDisplays('wrongIngredientFell', ingredientNumber); 
 
   }
@@ -349,6 +354,10 @@ export class ShakerProgram implements Program {
     // Mole Start Position
     data.push(this.mole.position.x);
     data.push(this.mole.position.y);
+
+    this.generateIngredientListNumbers();
+    data.push(this.allIngredientNumbersOnList);
+    // this.lobbyController.sendToDisplays('allIngredientNumbersOnList', this.allIngredientNumbersOnList);
 
     this.setDisplayShakerBuildListener();
     this.lobbyController.sendToDisplays('shakerData', data);
@@ -523,12 +532,9 @@ export class ShakerProgram implements Program {
   private startGame(): void {
     this.gameTimerId = setTimeout(() => this.doGameOverCountdown(), (this.secondsOfPlayTime * 1000) - (10 * 1000));
     this.gameTimerId = setTimeout(() => this.gameOver(), this.secondsOfPlayTime * 1000);
-
+    
     this.playing = true;
     this.lobbyController.sendToDisplays('playing', this.playing);
-
-    this.generateIngredientListNumbers();
-    this.lobbyController.sendToDisplays('allIngredientNumbersOnList', this.allIngredientNumbersOnList);
 
     // change shakeObject after X seconds
     this.shakeObjectChangeTimerId = setTimeout(() => this.triggerChangeShakeObject(), this.shakeObjectChangeAfterSeconds * 1000);
