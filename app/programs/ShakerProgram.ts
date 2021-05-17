@@ -254,20 +254,18 @@ export class ShakerProgram implements Program {
     if (this.allIngredientNumbersOnList.includes(ingredientNumber)) {
 
       setTimeout(() => { 
-        this.lobbyController.sendToDisplays('checkIngredientOnList', ingredientNumber); 
+        this.score += this.scoreInc;
+        this.lobbyController.sendToDisplays('checkIngredientOnList', ingredientNumber);
+        this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient', [this.scoreInc, ingredientNumber]); 
       }, 1300);
-
-      setTimeout(() => { this.score += this.scoreInc; }, 1300);
 
    } else {
     // TODO: wrong ingredient! descrease score? display message?
     setTimeout(() => { 
       console.log('catched a wrong ingredient, NOT on list!!! -50 Punkte.');
-      this.score -= this.scoreInc; 
+      this.score -= this.scoreInc;
+      this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient', [-this.scoreInc, ingredientNumber]); 
     }, 1300);
-
-
-      // this.lobbyController.sendToDisplays('wrongIngredientFell', ingredientNumber); 
 
   }
     
