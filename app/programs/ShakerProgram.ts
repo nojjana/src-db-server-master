@@ -47,7 +47,7 @@ export class ShakerProgram implements Program {
 
   private shaking = false;
   private shakeCounter: number = 0;
-  private shakePointsNeededForFalling: number = 5;
+  private shakePointsNeededForFalling: number = 10;
   private shakeObjectChangeTimerId?: NodeJS.Timeout;
   private shakeObjectChangeAfterSeconds: number = 5;
   private maxAmountOfFallingObjects = 3;
@@ -68,6 +68,7 @@ export class ShakerProgram implements Program {
   private playing: boolean = false;
 
   private allIngredientNumbersOnList: number[] = new Array();
+  secondsForFalling = 1.8;
 
 
   constructor(lobbyController: LobbyController) {
@@ -233,9 +234,10 @@ export class ShakerProgram implements Program {
     if (this.shakeCounter >= this.shakePointsNeededForFalling) {
       // console.log('shakeCounter: ' + this.shakeCounter);
       this.triggerFallOfIngredient(this.currentRandomShakingObjectNumber);
-      this.shakeCounter = 0;
+      setTimeout(() => { this.shakeCounter = 0; }, 50);
+      // this.shakeCounter = 0;
     }
-    setTimeout(() => { this.shaking = false; }, 30);
+    setTimeout(() => { this.shaking = false; }, 50);
   }
 
   // private stopShaking(): void {
@@ -257,7 +259,7 @@ export class ShakerProgram implements Program {
         this.score += this.scoreInc;
         this.lobbyController.sendToDisplays('checkIngredientOnList', ingredientNumber);
         this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient', [this.scoreInc, ingredientNumber]); 
-      }, 1300);
+      }, this.secondsForFalling * 1000);
 
    } else {
     // TODO: wrong ingredient! descrease score? display message?
@@ -265,7 +267,7 @@ export class ShakerProgram implements Program {
       console.log('catched a wrong ingredient, NOT on list!!! -50 Punkte.');
       this.score -= this.scoreInc;
       this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient', [-this.scoreInc, ingredientNumber]); 
-    }, 1300);
+    }, this.secondsForFalling * 1000);
 
   }
     
@@ -356,6 +358,7 @@ export class ShakerProgram implements Program {
     this.generateIngredientListNumbers();
     data.push(this.allIngredientNumbersOnList);
     // this.lobbyController.sendToDisplays('allIngredientNumbersOnList', this.allIngredientNumbersOnList);
+    data.push(this.shakePointsNeededForFalling);
 
     this.setDisplayShakerBuildListener();
     this.lobbyController.sendToDisplays('shakerData', data);
@@ -548,7 +551,9 @@ export class ShakerProgram implements Program {
 
       this.lobbyController.sendToDisplays('updateHammer', [this.hammer.position.x, this.hammer.position.y, this.mole.position.x, this.mole.position.y, this.hit, this.score]);
       this.lobbyController.sendToDisplays('updateShaking', this.shaking);
-      this.lobbyController.sendToDisplays('updateScore', this.score);          
+      this.lobbyController.sendToDisplays('updateScore', this.score);  
+      this.lobbyController.sendToDisplays('updateShakeCounter', this.shakeCounter);          
+        
     }, 1000 / fps);
   }
 
