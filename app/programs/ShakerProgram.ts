@@ -47,7 +47,9 @@ export class ShakerProgram implements Program {
 
   private shaking = false;
   private shakeCounter: number = 0;
-  private shakePointsNeededForFalling: number = 10;
+  // private shakePointsNeededForFalling: number = 35;   // 2 Personen am Handy
+  private shakePointsNeededForFalling: number = 4;
+
   private shakeObjectChangeTimerId?: NodeJS.Timeout;
   private shakeObjectChangeAfterSeconds: number = 5;
   private maxAmountOfFallingObjects = 3;
@@ -68,7 +70,9 @@ export class ShakerProgram implements Program {
   private playing: boolean = false;
 
   private allIngredientNumbersOnList: number[] = new Array();
-  secondsForFalling = 1.8;
+  // secondsForFalling = 1.8;   // je nach Bildschrim. TODO: fix.
+  secondsForFalling = 0.8;
+
 
 
   constructor(lobbyController: LobbyController) {
@@ -229,13 +233,17 @@ export class ShakerProgram implements Program {
 
   private shakeMovement(): void {
     this.shaking = true;
-    this.shakeCounter++;
     console.log('Controllers are shaking. Counter: ' + this.shakeCounter);
-    if (this.shakeCounter >= this.shakePointsNeededForFalling) {
+    if (this.shakeCounter < this.shakePointsNeededForFalling) {
+      this.shakeCounter++;
+    } else if (this.shakeCounter >= this.shakePointsNeededForFalling) {
       // console.log('shakeCounter: ' + this.shakeCounter);
-      this.triggerFallOfIngredient(this.currentRandomShakingObjectNumber);
-      setTimeout(() => { this.shakeCounter = 0; }, 50);
-      // this.shakeCounter = 0;
+      this.shakeCounter = this.shakePointsNeededForFalling
+      setTimeout(() => { 
+        this.triggerFallOfIngredient(this.currentRandomShakingObjectNumber);
+        // setTimeout(() => { this.shakeCounter = 0; }, 50);
+        this.shakeCounter = this.shakeCounter * 0.6;
+      }, 100);
     }
     setTimeout(() => { this.shaking = false; }, 50);
   }
@@ -553,7 +561,10 @@ export class ShakerProgram implements Program {
       this.lobbyController.sendToDisplays('updateShaking', this.shaking);
       this.lobbyController.sendToDisplays('updateScore', this.score);  
       this.lobbyController.sendToDisplays('updateShakeCounter', this.shakeCounter);  
-      this.shakeCounter = this.shakeCounter - 0.01;
+      
+      // if nobody shakes, shakecounter decreases (progressbar empties)
+      // this.shakeCounter = this.shakeCounter - 0.01;
+      this.shakeCounter = this.shakeCounter - 0.1;
       if (this.shakeCounter < 0) {
         this.shakeCounter = 0;
       }
@@ -586,10 +597,22 @@ export class ShakerProgram implements Program {
     this.lobbyController.getControllers()[1].emit('stopSendingData', false);
 
     this.lobbyController.getControllers()[0].addSocketOnce('goToMainMenu', this.goToMainMenu.bind(this));
+
+    this.lobbyController.getControllers()[0].addSocketOnce('quitGame', this.quitGame.bind(this));
+    this.lobbyController.getControllers()[1].addSocketOnce('quitGame', this.quitGame.bind(this));
+
+
   }
 
   private goToMainMenu() {
     this.lobbyController.changeProgram(ProgramName.MAIN_MENU);
+  }
+
+  private quitGame() {
+    // TODO: game abbrechen option
+    console.log("quitGame() called");
+    this.shutDownGame();
+    // this.lobbyController.changeProgram(ProgramName.MAIN_MENU);
   }
 
   private shutDownGame(): void {
