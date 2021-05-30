@@ -48,7 +48,7 @@ export class ShakerProgram implements Program {
   private shaking = false;
   private shakeCounter: number = 0;
   // private shakePointsNeededForFalling: number = 35;   // 2 Personen am Handy
-  private shakePointsNeededForFalling: number = 4;
+  private shakePointsNeededForFalling: number = 4;  // testing
 
   private shakeObjectChangeTimerId?: NodeJS.Timeout;
   private shakeObjectChangeAfterSeconds: number = 5;
@@ -66,7 +66,7 @@ export class ShakerProgram implements Program {
   private ingredientPosY = this.halfTileSize;
   private ingredientRadius = this.holeRadius;
 
-  private secondsOfPlayTime: number = 30;
+  private secondsOfPlayTime: number = 45;
   private playing: boolean = false;
 
   private allIngredientNumbersOnList: number[] = new Array();
