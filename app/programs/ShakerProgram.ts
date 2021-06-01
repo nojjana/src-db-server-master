@@ -48,7 +48,7 @@ export class ShakerProgram implements Program {
   private shaking = false;
   private shakeCounter: number = 0;
   // private shakePointsNeededForFalling: number = 35;   // 2 Personen am Handy
-  private shakePointsNeededForFalling: number = 4;
+  private shakePointsNeededForFalling: number = 4;   // testing
 
   private shakeObjectChangeTimerId?: NodeJS.Timeout;
   private shakeObjectChangeAfterSeconds: number = 5;
