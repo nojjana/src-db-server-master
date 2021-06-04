@@ -314,6 +314,9 @@ export class ShakerProgram implements Program {
     if (this.readyDisplays === this.lobbyController.getDisplays().length) {
       this.doCountdown();
     }
+    /*Allows user to exit the game when ever liked.*/
+    this.lobbyController.getControllers()[0].addSocketOnce('quitGame', this.shutDownGame.bind(this));
+    this.lobbyController.getControllers()[1].addSocketOnce('quitGame', this.shutDownGame.bind(this));
   }
 
   socketLeft(socketId: string): void {
@@ -570,8 +573,6 @@ export class ShakerProgram implements Program {
         
     }, 1000 / fps);
 
-    this.lobbyController.getControllers()[0].addSocketOnce('quitGame', this.shutDownGame.bind(this));
-    this.lobbyController.getControllers()[1].addSocketOnce('quitGame', this.shutDownGame.bind(this));
   }
 
   private cleanUp(): void {
