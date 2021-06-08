@@ -4,6 +4,7 @@ import { LabyrinthProgram } from "./programs/LabyrinthProgram";
 import { SpaceshipProgram } from "./programs/SpaceshipProgram";
 import { WhackAMoleProgram } from "./programs/WhackAMoleProgram";
 import { ShakerProgram } from "./programs/ShakerProgram";
+import { CatcherProgram } from "./programs/CatcherProgram";
 import { SrcSocket } from "./SrcSocket";
 import { VarianzTest } from "./programs/VarianzTestProgram";
 import { LastTest } from "./programs/LastTestProgram";
@@ -56,6 +57,10 @@ export class LobbyController {
             }
             case ProgramName.SHAKER: {
                 newProgram = new ShakerProgram(this);
+                break;
+            }
+            case ProgramName.CATCHER: {
+                newProgram = new CatcherProgram(this);
                 break;
             }
             case ProgramName.MAIN_MENU: {
