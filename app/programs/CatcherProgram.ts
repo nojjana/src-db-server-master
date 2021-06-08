@@ -44,7 +44,8 @@ export class CatcherProgram implements Program {
 
   // säftlimacher game variables
   private allIngredientNumbersOnList: number[] = new Array();
-  private currentZAxis = 0;
+  private currentX = 0;
+  private gravityX: number = 0;
 
 
   constructor(lobbyController: LobbyController) {
@@ -106,7 +107,7 @@ export class CatcherProgram implements Program {
 
     if (this.endedTutorial == this.controllers?.length) {
       this.setUpGame();
-      this.lobbyController.sendToControllers('startSendingData', null);
+      // this.lobbyController.sendToControllers('startSendingData', null);
     }
   }
 
@@ -179,16 +180,26 @@ export class CatcherProgram implements Program {
 
 
   private setControllerData(controllerData: number[]): void {
-    // console.log("controllerData arrived: ");
-    if (controllerData != undefined && controllerData != null && controllerData.length > 0) {
-      this.calculatePosition(controllerData[0]);
-    }
+
+    console.log("controllerData arrived:", controllerData[0]);
+    // if (controllerData != undefined && controllerData != null && controllerData.length > 0) {
+    this.gravityX = controllerData[0];  
+    // this.setShakerPos(controllerData[0]);
+    // }
   }
-  private calculatePosition(zAxisChange: number) {
-    this.currentZAxis += zAxisChange;
-    // this.shakerContainer?.position.x
-    // Matter.Body.applyForce(this.shakerContainer?, position, force)
-    // Matter.Body.setPosition(this.shakerContainer?, vector)
+  private setShakerPos(valX: number) {
+    if (this.shakerContainer != undefined && this.shakerContainer != null) {
+      this.currentX = valX;
+      console.log("current controller valX", this.currentX);
+      let posVector = this.shakerContainer.position;
+      // console.log("position vector", posVector.x, posVector.x);
+        // Matter.Body.setPosition(this.shakerContainer, vector)
+      if (valX > 0) {
+        // Matter.Body.applyForce(this.shakerContainer, position, force)
+      } else {
+        // Matter.Body.applyForce(this.shakerContainer, position, force)
+      }
+    }
   }
 
   
@@ -208,22 +219,42 @@ export class CatcherProgram implements Program {
 
     Matter.World.add(this.engine.world, [
       // Top
-      Matter.Bodies.rectangle(this.width / 2, 0, this.width, 1, {
+      Matter.Bodies.rectangle(0, 0, this.width, 1, {
         isStatic: true
       }),
       // Left
-      Matter.Bodies.rectangle(0, this.height / 2, 1, this.height, {
+      Matter.Bodies.rectangle(0, 0, 1, this.height, {
         isStatic: true
       }),
       // Bottom
-      Matter.Bodies.rectangle(this.width / 2, this.height, this.width, 1, {
+      Matter.Bodies.rectangle(0, this.height, this.width, 1, {
         isStatic: true
       }),
       // Right
-      Matter.Bodies.rectangle(this.width, this.height / 2, 1, this.height, {
+      Matter.Bodies.rectangle(this.width, 0, 1, this.height, {
         isStatic: true
       })
     ])
+
+    
+    // Matter.World.add(this.engine.world, [
+    //   // Top
+    //   Matter.Bodies.rectangle(this.width / 2, 0, this.width, 1, {
+    //     isStatic: true
+    //   }),
+    //   // Left
+    //   Matter.Bodies.rectangle(0, this.height / 2, 1, this.height, {
+    //     isStatic: true
+    //   }),
+    //   // Bottom
+    //   Matter.Bodies.rectangle(this.width / 2, this.height, this.width, 1, {
+    //     isStatic: true
+    //   }),
+    //   // Right
+    //   Matter.Bodies.rectangle(this.width, this.height / 2, 1, this.height, {
+    //     isStatic: true
+    //   })
+    // ])
   }
 
 
@@ -237,7 +268,7 @@ export class CatcherProgram implements Program {
       this.shakerContainerRadius,
       {
         label: 'Shaker',
-        isSensor: true,
+        // isSensor: true,
       });
     Matter.World.add(this.engine.world, this.shakerContainer);
   }
@@ -311,15 +342,18 @@ export class CatcherProgram implements Program {
     this.gameTimerId = setTimeout(() => this.doGameOverCountdown(), (this.secondsOfPlayTime * 1000) - (10 * 1000));
     this.gameTimerId = setTimeout(() => this.gameOver(), this.secondsOfPlayTime * 1000);
     
+    this.lobbyController.sendToControllers('startSendingData', null);
     this.playing = true;
     this.lobbyController.sendToDisplays('playing', this.playing);
+    
     let fps = 60;
-
     this.gameLoop = setInterval(() => {
-      if (this.engine == null) return;
+      if (this.engine == null || this.shakerContainer == null) return;
+      this.engine.world.gravity.x = this.gravityX;
+      this.engine.world.gravity.y = 0;
       Matter.Engine.update(this.engine, 1000 / fps);
 
-      this.lobbyController.sendToDisplays('updateShakerPosition', [this.shakerContainer?.position.x, this.shakerContainer?.position.y]);      
+      this.lobbyController.sendToDisplays('updateShakerPosition', [this.shakerContainer.position.x, this.shakerContainer.position.y]);      
       this.lobbyController.sendToDisplays('updateScore', this.score);
 
     }, 1000 / fps);
