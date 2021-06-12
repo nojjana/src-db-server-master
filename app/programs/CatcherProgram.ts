@@ -217,44 +217,43 @@ export class CatcherProgram implements Program {
   private createWorldBounds(): void {
     if (this.engine == null) return;
 
-    Matter.World.add(this.engine.world, [
-      // Top
-      Matter.Bodies.rectangle(0, 0, this.width, 1, {
-        isStatic: true
-      }),
-      // Left
-      Matter.Bodies.rectangle(0, 0, 1, this.height, {
-        isStatic: true
-      }),
-      // Bottom
-      Matter.Bodies.rectangle(0, this.height, this.width, 1, {
-        isStatic: true
-      }),
-      // Right
-      Matter.Bodies.rectangle(this.width, 0, 1, this.height, {
-        isStatic: true
-      })
-    ])
-
-    
     // Matter.World.add(this.engine.world, [
     //   // Top
-    //   Matter.Bodies.rectangle(this.width / 2, 0, this.width, 1, {
+    //   Matter.Bodies.rectangle(0, 0, this.width, 1, {
     //     isStatic: true
     //   }),
     //   // Left
-    //   Matter.Bodies.rectangle(0, this.height / 2, 1, this.height, {
+    //   Matter.Bodies.rectangle(0, 0, 1, this.height, {
     //     isStatic: true
     //   }),
     //   // Bottom
-    //   Matter.Bodies.rectangle(this.width / 2, this.height, this.width, 1, {
+    //   Matter.Bodies.rectangle(0, this.height, this.width, 1, {
     //     isStatic: true
     //   }),
     //   // Right
-    //   Matter.Bodies.rectangle(this.width, this.height / 2, 1, this.height, {
+    //   Matter.Bodies.rectangle(this.width, 0, 1, this.height, {
     //     isStatic: true
     //   })
     // ])
+    
+    Matter.World.add(this.engine.world, [
+      // Top
+      Matter.Bodies.rectangle(this.width / 2, 0, this.width, 1, {
+        isStatic: true
+      }),
+      // Left
+      Matter.Bodies.rectangle(0, this.height / 2, 1, this.height, {
+        isStatic: true
+      }),
+      // Bottom
+      Matter.Bodies.rectangle(this.width / 2, this.height, this.width, 1, {
+        isStatic: true
+      }),
+      // Right
+      Matter.Bodies.rectangle(this.width, this.height / 2, 1, this.height, {
+        isStatic: true
+      })
+    ])
   }
 
 
