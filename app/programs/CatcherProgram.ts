@@ -29,9 +29,8 @@ export class CatcherProgram implements Program {
 
   // säftlimacher world dimensions
   private tileSize = 128;
-  private halfTileSize = this.tileSize / 2;
-  private numberOfTilesWidth = 5;
-  private numberOfTilesHeight = 4;
+  private numberOfTilesWidth = 20;
+  private numberOfTilesHeight = 12;
   private width = this.tileSize * this.numberOfTilesWidth;
   private height = this.tileSize * this.numberOfTilesHeight;
   private radius = 50;
@@ -238,21 +237,40 @@ export class CatcherProgram implements Program {
     //   })
     // ])
     
+    // Matter.World.add(this.engine.world, [
+    //   // Top
+    //   Matter.Bodies.rectangle(this.width / 2, 0, this.width, 1, {
+    //     isStatic: true
+    //   }),
+    //   // Left
+    //   Matter.Bodies.rectangle(0, this.height / 2, 1, this.height, {
+    //     isStatic: true
+    //   }),
+    //   // Bottom
+    //   Matter.Bodies.rectangle(this.width / 2, this.height, this.width, 1, {
+    //     isStatic: true
+    //   }),
+    //   // Right
+    //   Matter.Bodies.rectangle(this.width, this.height / 2, 1, this.height, {
+    //     isStatic: true
+    //   })
+    // ])
+
     Matter.World.add(this.engine.world, [
       // Top
-      Matter.Bodies.rectangle(this.width / 2, 0, this.width, 1, {
+      Matter.Bodies.rectangle(5, 5, this.width, 1, {
         isStatic: true
       }),
       // Left
-      Matter.Bodies.rectangle(0, this.height / 2, 1, this.height, {
+      Matter.Bodies.rectangle(5, this.height-5, 1, this.height, {
         isStatic: true
       }),
       // Bottom
-      Matter.Bodies.rectangle(this.width / 2, this.height, this.width, 1, {
+      Matter.Bodies.rectangle(5, this.height-5, this.width, 1, {
         isStatic: true
       }),
       // Right
-      Matter.Bodies.rectangle(this.width, this.height / 2, 1, this.height, {
+      Matter.Bodies.rectangle(this.width-5, this.height-5, 1, this.height, {
         isStatic: true
       })
     ])
