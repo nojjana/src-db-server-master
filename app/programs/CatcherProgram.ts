@@ -180,12 +180,14 @@ export class CatcherProgram implements Program {
 
 
   private setControllerData(controllerData: number[]): void {
-
     console.log("controllerData arrived:", controllerData[0]);
-    // if (controllerData != undefined && controllerData != null && controllerData.length > 0) {
-    this.gravityX = controllerData[0];  
-    // this.setShakerPos(controllerData[0]);
-    // }
+
+    if (controllerData[0] != null) {
+      // if (controllerData != undefined && controllerData != null && controllerData.length > 0) {
+      this.gravityX = controllerData[0];  
+      // this.setShakerPos(controllerData[0]);
+      // }
+    }
   }
   private setShakerPos(valX: number) {
     if (this.shakerContainer != undefined && this.shakerContainer != null) {
