@@ -28,9 +28,15 @@ export class CatcherProgram implements Program {
   private scoreInc: number = 50;
 
   // säftlimacher world dimensions
-  //1440 2560
-  private height = 1440;
   private width = 2560;
+  private height = 1440;
+  /// ingredient list is in margin area (no shakerContainer or falling ingredients there)
+  private worldSideMargin = 600;
+  // field: left, center, right
+  private xDiffToNextField = 340;
+  private xLeftField = 940;      // 600 + 340
+  private xCenterField = 1280;   // 600 + 340 + 340
+  private xRightField = 1620;    // 600 + 340 + 340 + 340
   private radius = 50;
 
   // säftlimacher visible objects
@@ -41,7 +47,6 @@ export class CatcherProgram implements Program {
 
   // säftlimacher game variables
   private allIngredientNumbersOnList: number[] = new Array();
-  private currentX = 0;
   private gravityX: number = 0;
 
 
@@ -153,8 +158,8 @@ export class CatcherProgram implements Program {
       }
     }, 1000);
   }
- 
-    
+
+
   /* -------------------- BASIC GAME METHODS WITH INDIVIDUAL IMPLEMENTATION --------------------*/
 
   private setControllerDataListeners(): void {
@@ -164,7 +169,7 @@ export class CatcherProgram implements Program {
     }
   }
 
-  
+
   private removeControllerDataListeners(): void {
     if (this.controller1 && this.controller2) {
       this.controller1.removeSocketListener('controllerData');
@@ -172,7 +177,7 @@ export class CatcherProgram implements Program {
     }
   }
 
-  
+
   /* -------------------- SÄFTLIMACHER GAME METHODS WITH INDIVIDUAL IMPLEMENTATION --------------------*/
 
 
@@ -180,19 +185,33 @@ export class CatcherProgram implements Program {
     console.log("controllerData arrived:", controllerData[0]);
 
     if (controllerData[0] != null) {
-      // if (controllerData != undefined && controllerData != null && controllerData.length > 0) {
-      this.gravityX = controllerData[0];  
-      // this.setShakerPos(controllerData[0]);
-      // }
+      // this.gravityX = controllerData[0];  
+      this.setShakerPos(controllerData[0]);
     }
   }
   private setShakerPos(valX: number) {
     if (this.shakerContainer != undefined && this.shakerContainer != null) {
-      this.currentX = valX;
-      console.log("current controller valX", this.currentX);
-      let posVector = this.shakerContainer.position;
-      // console.log("position vector", posVector.x, posVector.x);
-        // Matter.Body.setPosition(this.shakerContainer, vector)
+      switch (valX) {
+        case 1:
+          // right
+          // Matter.Body.applyForce(this.shakerContainer, {x: this.shakerContainer.position.x, y: this.shakerContainer.position.y}, {x: 0.05, y: 0});
+          // Matter.Body.translate(this.shakerContainer, {x: this.xRightField, y:  0});
+          Matter.Body.setPosition(this.shakerContainer, {x: this.xRightField, y:  this.shakerContainer.position.y});
+          break;
+        case -1:
+          // left
+          // Matter.Body.applyForce(this.shakerContainer, {x: this.shakerContainer.position.x, y: this.shakerContainer.position.y}, {x: -0.05, y: 0});
+          // Matter.Body.translate(this.shakerContainer, {x: this.xLeftField, y:  0});
+          Matter.Body.setPosition(this.shakerContainer, {x: this.xLeftField, y:  this.shakerContainer.position.y});
+          break;
+        case 0:
+          // center
+          // Matter.Body.translate(this.shakerContainer, {x: this.xCenterField, y:  0});
+          Matter.Body.setPosition(this.shakerContainer, {x: this.xCenterField, y:  this.shakerContainer.position.y});
+          break;
+        default:
+          break;
+      }
       if (valX > 0) {
         // Matter.Body.applyForce(this.shakerContainer, position, force)
       } else {
@@ -201,7 +220,7 @@ export class CatcherProgram implements Program {
     }
   }
 
-  
+
   private sendLevelInfoToDisplay(): void {
     let data: any[] = [];
     this.generateIngredientListNumbers();
@@ -216,59 +235,21 @@ export class CatcherProgram implements Program {
   private createWorldBounds(): void {
     if (this.engine == null) return;
 
-    // Matter.World.add(this.engine.world, [
-    //   // Top
-    //   Matter.Bodies.rectangle(0, 0, this.width, 1, {
-    //     isStatic: true
-    //   }),
-    //   // Left
-    //   Matter.Bodies.rectangle(0, 0, 1, this.height, {
-    //     isStatic: true
-    //   }),
-    //   // Bottom
-    //   Matter.Bodies.rectangle(0, this.height, this.width, 1, {
-    //     isStatic: true
-    //   }),
-    //   // Right
-    //   Matter.Bodies.rectangle(this.width, 0, 1, this.height, {
-    //     isStatic: true
-    //   })
-    // ])
-    
-    // Matter.World.add(this.engine.world, [
-    //   // Top
-    //   Matter.Bodies.rectangle(this.width / 2, 0, this.width, 1, {
-    //     isStatic: true
-    //   }),
-    //   // Left
-    //   Matter.Bodies.rectangle(0, this.height / 2, 1, this.height, {
-    //     isStatic: true
-    //   }),
-    //   // Bottom
-    //   Matter.Bodies.rectangle(this.width / 2, this.height, this.width, 1, {
-    //     isStatic: true
-    //   }),
-    //   // Right
-    //   Matter.Bodies.rectangle(this.width, this.height / 2, 1, this.height, {
-    //     isStatic: true
-    //   })
-    // ])
-
     Matter.World.add(this.engine.world, [
       // Top
       Matter.Bodies.rectangle(10, 10, this.width, 1, {
         isStatic: true
       }),
       // Left
-      Matter.Bodies.rectangle(100, this.height-10, 1, this.height, {
+      Matter.Bodies.rectangle(this.worldSideMargin, this.height - 10, 1, this.height, {
         isStatic: true
       }),
       // Bottom
-      Matter.Bodies.rectangle(10, this.height-10, this.width, 1, {
+      Matter.Bodies.rectangle(10, this.height - 10, this.width, 1, {
         isStatic: true
       }),
       // Right
-      Matter.Bodies.rectangle(this.width-100, this.height-10, 1, this.height, {
+      Matter.Bodies.rectangle(this.width - this.worldSideMargin, this.height - 10, 1, this.height, {
         isStatic: true
       })
     ])
@@ -288,6 +269,7 @@ export class CatcherProgram implements Program {
         // isSensor: true,
       });
     Matter.World.add(this.engine.world, this.shakerContainer);
+    // console.log("shakerContainer: "+this.shakerContainer);
   }
 
   private initIngredient(): void {
@@ -338,7 +320,7 @@ export class CatcherProgram implements Program {
 
   generateIngredientListNumbers() {
     let lastRandomInt = -1;
-    for (let index = 0; index < 2; index++) {      
+    for (let index = 0; index < 2; index++) {
       let currentRandomInt = this.getRandomInt(3);
       while (lastRandomInt == currentRandomInt) {
         currentRandomInt = this.getRandomInt(3);
@@ -347,22 +329,22 @@ export class CatcherProgram implements Program {
       lastRandomInt = currentRandomInt;
     }
     this.allIngredientNumbersOnList.forEach(n => {
-      console.log("number on list: "+n);
+      console.log("number on list: " + n);
     });
     return this.allIngredientNumbersOnList;
   }
 
-  
+
   /* -------------------- BASIC GAME METHODS WITH INDIVIDUAL IMPLEMENTATION --------------------*/
 
   private startGame(): void {
     this.gameTimerId = setTimeout(() => this.doGameOverCountdown(), (this.secondsOfPlayTime * 1000) - (10 * 1000));
     this.gameTimerId = setTimeout(() => this.gameOver(), this.secondsOfPlayTime * 1000);
-    
+
     this.lobbyController.sendToControllers('startSendingData', null);
     this.playing = true;
     this.lobbyController.sendToDisplays('playing', this.playing);
-    
+
     let fps = 60;
     this.gameLoop = setInterval(() => {
       if (this.engine == null || this.shakerContainer == null) return;
@@ -370,7 +352,7 @@ export class CatcherProgram implements Program {
       this.engine.world.gravity.y = 0;
       Matter.Engine.update(this.engine, 1000 / fps);
 
-      this.lobbyController.sendToDisplays('updateShakerPosition', [this.shakerContainer.position.x, this.shakerContainer.position.y]);      
+      this.lobbyController.sendToDisplays('updateShakerPosition', [this.shakerContainer.position.x, this.shakerContainer.position.y]);
       this.lobbyController.sendToDisplays('updateScore', this.score);
 
     }, 1000 / fps);
@@ -425,7 +407,7 @@ export class CatcherProgram implements Program {
     this.lobbyController.changeProgram(ProgramName.MAIN_MENU);
   }
 
-  
+
   /* -------------------- BASIC PROGRAM METHODS --------------------*/
 
   controllerJoin(socket: SrcSocket): boolean {
@@ -492,12 +474,12 @@ export class CatcherProgram implements Program {
     console.log("------------ test of classes ------------");
 
     const firstPlant = new AppleTree();
-    console.log("firstPlant: "+firstPlant.getName());
+    console.log("firstPlant: " + firstPlant.getName());
 
     const firstIngredient = new Apple();
-    console.log("firstIngredient: "+firstIngredient.getName());
-    console.log("firstIngredient is edible: "+firstIngredient.isEdible());
-    
+    console.log("firstIngredient: " + firstIngredient.getName());
+    console.log("firstIngredient is edible: " + firstIngredient.isEdible());
+
     firstPlant.addIngredient(firstIngredient);
     firstPlant.getIngredients().forEach(i => console.log(i.getName()));
 
@@ -507,7 +489,7 @@ export class CatcherProgram implements Program {
       console.log(item.getName());
     });
 
-    console.log("firstIngredient '"+firstIngredient.getName()+"' is on list: "+ this.isOnList(firstIngredient, listOfItems));
+    console.log("firstIngredient '" + firstIngredient.getName() + "' is on list: " + this.isOnList(firstIngredient, listOfItems));
 
   }
 
@@ -578,7 +560,7 @@ class Ingredient {
   constructor(name: string, ingredientType: IngredientType, edible?: boolean) {
     this.name = name;
     this.type = ingredientType;
-    
+
     if (edible !== undefined) {
       this.edible = edible;
     }
