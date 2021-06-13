@@ -190,24 +190,29 @@ export class CatcherProgram implements Program {
     }
   }
   private setShakerPos(valX: number) {
+    // TODO animate movement to position instead of setting directly
+    // like for example here: https://github.com/liabru/matter-js/issues/733
     if (this.shakerContainer != undefined && this.shakerContainer != null) {
       switch (valX) {
         case 1:
           // right
           // Matter.Body.applyForce(this.shakerContainer, {x: this.shakerContainer.position.x, y: this.shakerContainer.position.y}, {x: 0.05, y: 0});
           // Matter.Body.translate(this.shakerContainer, {x: this.xRightField, y:  0});
-          Matter.Body.setPosition(this.shakerContainer, {x: this.xRightField, y:  this.shakerContainer.position.y});
+          // Matter.Body.setPosition(this.shakerContainer, {x: this.xRightField, y:  this.shakerContainer.position.y});
+          this.forceMove(this.shakerContainer,  this.xRightField, this.shakerContainer.position.y);
           break;
         case -1:
           // left
           // Matter.Body.applyForce(this.shakerContainer, {x: this.shakerContainer.position.x, y: this.shakerContainer.position.y}, {x: -0.05, y: 0});
           // Matter.Body.translate(this.shakerContainer, {x: this.xLeftField, y:  0});
-          Matter.Body.setPosition(this.shakerContainer, {x: this.xLeftField, y:  this.shakerContainer.position.y});
+          // Matter.Body.setPosition(this.shakerContainer, {x: this.xLeftField, y:  this.shakerContainer.position.y});
+          this.forceMove(this.shakerContainer,  this.xLeftField, this.shakerContainer.position.y);
           break;
         case 0:
           // center
           // Matter.Body.translate(this.shakerContainer, {x: this.xCenterField, y:  0});
-          Matter.Body.setPosition(this.shakerContainer, {x: this.xCenterField, y:  this.shakerContainer.position.y});
+          // Matter.Body.setPosition(this.shakerContainer, {x: this.xCenterField, y:  this.shakerContainer.position.y});
+          this.forceMove(this.shakerContainer,  this.xCenterField, this.shakerContainer.position.y);
           break;
         default:
           break;
@@ -219,6 +224,31 @@ export class CatcherProgram implements Program {
       }
     }
   }
+
+  private forceMove(body: Matter.Body, endX: number, endY: number) {
+    // dx is the total distance to move in the X direction
+    let dx = endX - body.position.x;
+
+    // dy is the total distance to move in the Y direction
+    let dy = endY - body.position.y;
+
+    // use dx & dy to calculate where the current [x,y] is at a given pct
+
+    let newX = body.position.x
+    if (dx > 0) {
+      // a little bit to the right
+      newX = body.position.x + 20;
+    } else if (dx < 0 ) {
+      // a little bit to the left
+      newX = body.position.x - 20;
+    }
+    let newY = body.position.y;
+
+    Matter.Body.setPosition(body, {
+      x: newX,
+      y: newY
+     });
+    }
 
 
   private sendLevelInfoToDisplay(): void {
