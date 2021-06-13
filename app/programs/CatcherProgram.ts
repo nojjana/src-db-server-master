@@ -28,11 +28,9 @@ export class CatcherProgram implements Program {
   private scoreInc: number = 50;
 
   // säftlimacher world dimensions
-  private tileSize = 128;
-  private numberOfTilesWidth = 20;
-  private numberOfTilesHeight = 12;
-  private width = this.tileSize * this.numberOfTilesWidth;
-  private height = this.tileSize * this.numberOfTilesHeight;
+  //1440 2560
+  private height = 1440;
+  private width = 2560;
   private radius = 50;
 
   // säftlimacher visible objects
@@ -258,19 +256,19 @@ export class CatcherProgram implements Program {
 
     Matter.World.add(this.engine.world, [
       // Top
-      Matter.Bodies.rectangle(5, 5, this.width, 1, {
+      Matter.Bodies.rectangle(10, 10, this.width, 1, {
         isStatic: true
       }),
       // Left
-      Matter.Bodies.rectangle(5, this.height-5, 1, this.height, {
+      Matter.Bodies.rectangle(100, this.height-10, 1, this.height, {
         isStatic: true
       }),
       // Bottom
-      Matter.Bodies.rectangle(5, this.height-5, this.width, 1, {
+      Matter.Bodies.rectangle(10, this.height-10, this.width, 1, {
         isStatic: true
       }),
       // Right
-      Matter.Bodies.rectangle(this.width-5, this.height-5, 1, this.height, {
+      Matter.Bodies.rectangle(this.width-100, this.height-10, 1, this.height, {
         isStatic: true
       })
     ])
