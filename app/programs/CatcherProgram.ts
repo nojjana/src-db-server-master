@@ -37,6 +37,8 @@ export class CatcherProgram implements Program {
   private xLeftField = 940;      // 600 + 340
   private xCenterField = 1280;   // 600 + 340 + 340
   private xRightField = 1620;    // 600 + 340 + 340 + 340
+  // TODO 3 ebene für shaker/netze berechnen und speichern
+  private yShakerFieldBottom = this.height * 0.8
   private radius = 50;
 
   // säftlimacher visible objects
@@ -182,7 +184,7 @@ export class CatcherProgram implements Program {
 
 
   private setControllerData(controllerData: number[]): void {
-    console.log("controllerData arrived:", controllerData[0]);
+    // console.log("controllerData arrived:", controllerData[0]);
 
     if (controllerData[0] != null) {
       // this.gravityX = controllerData[0];  
@@ -199,20 +201,20 @@ export class CatcherProgram implements Program {
           // Matter.Body.applyForce(this.shakerContainer, {x: this.shakerContainer.position.x, y: this.shakerContainer.position.y}, {x: 0.05, y: 0});
           // Matter.Body.translate(this.shakerContainer, {x: this.xRightField, y:  0});
           // Matter.Body.setPosition(this.shakerContainer, {x: this.xRightField, y:  this.shakerContainer.position.y});
-          this.forceMove(this.shakerContainer,  this.xRightField, this.shakerContainer.position.y);
+          this.forceMove(this.shakerContainer, this.xRightField, this.shakerContainer.position.y, 20);
           break;
         case -1:
           // left
           // Matter.Body.applyForce(this.shakerContainer, {x: this.shakerContainer.position.x, y: this.shakerContainer.position.y}, {x: -0.05, y: 0});
           // Matter.Body.translate(this.shakerContainer, {x: this.xLeftField, y:  0});
           // Matter.Body.setPosition(this.shakerContainer, {x: this.xLeftField, y:  this.shakerContainer.position.y});
-          this.forceMove(this.shakerContainer,  this.xLeftField, this.shakerContainer.position.y);
+          this.forceMove(this.shakerContainer, this.xLeftField, this.shakerContainer.position.y, 20);
           break;
         case 0:
           // center
           // Matter.Body.translate(this.shakerContainer, {x: this.xCenterField, y:  0});
           // Matter.Body.setPosition(this.shakerContainer, {x: this.xCenterField, y:  this.shakerContainer.position.y});
-          this.forceMove(this.shakerContainer,  this.xCenterField, this.shakerContainer.position.y);
+          this.forceMove(this.shakerContainer, this.xCenterField, this.shakerContainer.position.y, 20);
           break;
         default:
           break;
@@ -225,7 +227,7 @@ export class CatcherProgram implements Program {
     }
   }
 
-  private forceMove(body: Matter.Body, endX: number, endY: number) {
+  private forceMove(body: Matter.Body, endX: number, endY: number, pixelSteps: number) {
     // dx is the total distance to move in the X direction
     let dx = endX - body.position.x;
 
@@ -237,19 +239,39 @@ export class CatcherProgram implements Program {
     let newX = body.position.x
     if (dx > 0) {
       // a little bit to the right
-      newX = body.position.x + 20;
-    } else if (dx < 0 ) {
+      newX = body.position.x + pixelSteps;
+    } else if (dx < 0) {
       // a little bit to the left
-      newX = body.position.x - 20;
+      newX = body.position.x - pixelSteps;
     }
-    let newY = body.position.y;
 
+    let newY = body.position.y;
+    if (dy > 0) {
+      // a little bit down
+      newY = body.position.y + pixelSteps;
+    } else if (dy < 0) {
+      // a little bit up
+      newY = body.position.y - pixelSteps;
+    }
+    // console.log("body.position.y, endY, dy, newY: ", body.position.y, endY, dy, newY);
     Matter.Body.setPosition(body, {
       x: newX,
       y: newY
-     });
-    }
+    });
+  }
 
+  private ingredientRain() {
+    if (this.ingredient != null) {
+      // console.log(this.ingredient);
+      // console.log("BEFORE this.ingredient.position.y: ", this.ingredient.position.y)
+      if (this.ingredient.position.y > this.height) {
+        console.log("ingredientPosY: ",this.ingredient.position.y);
+        this.respawnIngredient(this.ingredient);   
+       }
+      this.forceMove(this.ingredient, this.xCenterField, this.height, 20);
+      // console.log("AFTER this.ingredient.position.y: ", this.ingredient.position.y)
+    }
+  }
 
   private sendLevelInfoToDisplay(): void {
     let data: any[] = [];
@@ -267,17 +289,17 @@ export class CatcherProgram implements Program {
 
     Matter.World.add(this.engine.world, [
       // Top
-      Matter.Bodies.rectangle(10, 10, this.width, 1, {
-        isStatic: true
-      }),
+      // Matter.Bodies.rectangle(10, 10, this.width, 1, {
+      //   isStatic: true
+      // }),
       // Left
       Matter.Bodies.rectangle(this.worldSideMargin, this.height - 10, 1, this.height, {
         isStatic: true
       }),
       // Bottom
-      Matter.Bodies.rectangle(10, this.height - 10, this.width, 1, {
-        isStatic: true
-      }),
+      // Matter.Bodies.rectangle(10, this.height - 10, this.width, 1, {
+      //   isStatic: true
+      // }),
       // Right
       Matter.Bodies.rectangle(this.width - this.worldSideMargin, this.height - 10, 1, this.height, {
         isStatic: true
@@ -291,22 +313,21 @@ export class CatcherProgram implements Program {
     if (this.engine == null) return;
 
     this.shakerContainer = Matter.Bodies.circle(
-      this.width / 2,
-      this.height * 0.8,
+      this.xCenterField,
+      this.yShakerFieldBottom,
       this.shakerContainerRadius,
       {
         label: 'Shaker',
-        // isSensor: true,
+        isSensor: true,
       });
     Matter.World.add(this.engine.world, this.shakerContainer);
-    // console.log("shakerContainer: "+this.shakerContainer);
   }
 
   private initIngredient(): void {
     if (this.engine == null) return;
 
     this.ingredient = Matter.Bodies.circle(
-      this.width / 2,
+      this.xCenterField,
       0,
       this.ingredientRadius,
       {
@@ -336,11 +357,11 @@ export class CatcherProgram implements Program {
         // TODO collision detection and score inc
         if (pair.bodyA.label === 'Ingredient' || pair.bodyB.label === 'Ingredient') {
           if (pair.bodyA.label === 'Shaker') {
-            // console.log('Collision 1!')
+            console.log('Collision 1!')
             // TODO
             // this.score += this.scoreInc;
           } else if (pair.bodyB.label === 'Shaker') {
-            // console.log('Collision 2!')
+            console.log('Collision 2!')
             // this.score += this.scoreInc;
           }
         }
@@ -364,6 +385,14 @@ export class CatcherProgram implements Program {
     return this.allIngredientNumbersOnList;
   }
 
+  private respawnIngredient(body: Matter.Body) {
+    console.log("respawnIngredient");
+    Matter.Body.setPosition(body, {
+      x: this.xCenterField,
+      y: 0
+    });  
+  }
+
 
   /* -------------------- BASIC GAME METHODS WITH INDIVIDUAL IMPLEMENTATION --------------------*/
 
@@ -376,6 +405,8 @@ export class CatcherProgram implements Program {
     this.lobbyController.sendToDisplays('playing', this.playing);
 
     let fps = 60;
+
+
     this.gameLoop = setInterval(() => {
       if (this.engine == null || this.shakerContainer == null) return;
       this.engine.world.gravity.x = this.gravityX;
@@ -385,8 +416,17 @@ export class CatcherProgram implements Program {
       this.lobbyController.sendToDisplays('updateShakerPosition', [this.shakerContainer.position.x, this.shakerContainer.position.y]);
       this.lobbyController.sendToDisplays('updateScore', this.score);
 
+      if (this.ingredient != null) {
+        this.ingredientRain();
+        this.lobbyController.sendToDisplays('updateIngredientPosition', [this.ingredient.position.x, this.ingredient.position.y]);
+        // TODO handle ingredient fall...
+      }
     }, 1000 / fps);
+
+    // TODO handle ingredient fall...
+    // setTimeout(() => this.generateNewIngredient(), 4 * 1000);
   }
+
 
   /* -------------------- BASIC GAME METHODS --------------------*/
 
