@@ -202,10 +202,10 @@ export class CatcherProgram implements Program {
           if (this.catcherNet1 != undefined) {
             this.setShakerPos(moveToValX, this.catcherNet1);
           }
-        // case 2:
-        //   if (this.catcherNet2 != undefined) {
-        //     this.setShakerPos(moveToValX, this.catcherNet2);
-        //   }
+        case 2:
+          if (this.catcherNet2 != undefined) {
+            this.setShakerPos(moveToValX, this.catcherNet2);
+          }
         // case 3:
         //   if (this.catcherNet3 != undefined) {
         //     this.setShakerPos(moveToValX, this.catcherNet3);
