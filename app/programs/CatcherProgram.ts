@@ -48,9 +48,10 @@ export class CatcherProgram implements Program {
   // säftlimacher game variables
   private ingredientRadius = 50;
   private shakerContainerRadius = 5;
+  private availableIngredientTypes = 3;
   private allIngredientNumbersOnList: number[] = new Array();
-  // private allIngredientsFalling: number[] = new Array();
-  private allIngrFalling: Ingredient[] = new Array();
+  private allIngredientsFalling: number[] = new Array();
+  // private allIngrFalling: Ingredient[] = new Array();
   private gravityX: number = 0;
   private gravityY: number = 0.5;
 
@@ -461,10 +462,20 @@ export class CatcherProgram implements Program {
 
             console.log("shaker: ", shakerBody.label, shakerNr);
             console.log("ingr: ", ingredientBody.label, ingredientTypeNr);
-            if (ingredientTypeNr == 0) {
+            
+            if (this.allIngredientNumbersOnList.includes(ingredientTypeNr)) {
+              // good catch
+              console.log('catched a good ingredient, +50 points!!');
               this.score += this.scoreInc;
-              this.respawnIngredient(ingredientBody);
+              this.lobbyController.sendToDisplays('checkIngredientOnList', ingredientTypeNr);
+              this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient', [this.scoreInc, ingredientTypeNr]); 
+            } else {
+              // bad catch
+              console.log('catched a wrong ingredient, NOT on list!!! -50 points.');
+              this.score -= this.scoreInc;
+              this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient', [-this.scoreInc, ingredientTypeNr]); 
             }
+            this.respawnIngredient(ingredientBody);
 
 
             // irgendwie bild an shaer hängen? (apfel soll in shaker bleiben)
@@ -528,7 +539,7 @@ export class CatcherProgram implements Program {
 
   private respawnIngredient(body: Matter.Body) {
     console.log("respawnIngredient: ");
-    let newNumber = 1;
+    let newNumber = this.getRandomInt(this.availableIngredientTypes);;
     let newlabel = "Ingredient"+newNumber;
 
     body.label = newlabel;
