@@ -43,6 +43,7 @@ export class CatcherProgram implements Program {
   private ingredientCenter?: Matter.Body;
   private ingredientRight?: Matter.Body;
   private shakerContainer?: Matter.Body;
+  private catcherNet1?: Matter.Body;
   
   // säftlimacher game variables
   private ingredientRadius = 50;
@@ -557,7 +558,7 @@ export class CatcherProgram implements Program {
       this.engine.world.gravity.y = this.gravityY;
       Matter.Engine.update(this.engine, 1000 / fps);
 
-      this.lobbyController.sendToDisplays('updateShakerPosition', [this.shakerContainer.position.x, this.shakerContainer.position.y]);
+      this.lobbyController.sendToDisplays('catcherNet1Position', [this.shakerContainer.position.x, this.shakerContainer.position.y]);
       this.lobbyController.sendToDisplays('updateScore', this.score);
 
       // if (this.ingredient != null) {
