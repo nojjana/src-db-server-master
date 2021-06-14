@@ -36,14 +36,16 @@ export class CatcherProgram implements Program {
   private xCenterField = 1280;
   private xRightField = 1820;
   // TODO 3 ebene für shaker/netze berechnen und speichern
-  private yShakerFieldBottom = this.height * 0.8
+  private yCatcherFieldBottom1 = this.height * 0.8
+  private yCatcherFieldMiddle2 = this.height * 0.6
+
 
   // säftlimacher visible objects
   private ingredientLeft?: Matter.Body;
   private ingredientCenter?: Matter.Body;
   private ingredientRight?: Matter.Body;
-  private shakerContainer?: Matter.Body;
   private catcherNet1?: Matter.Body;
+  private catcherNet2?: Matter.Body;
   
   // säftlimacher game variables
   private movePixelSteps = 30;  // möglichst in 10er Schritten, testen
@@ -188,24 +190,28 @@ export class CatcherProgram implements Program {
 
 
   private setControllerData(controllerData: number[]): void {
-    // console.log("controllerData arrived:", controllerData[0]);
-
-    if (controllerData[0] != null) {
+    let moveToValX = controllerData[0];
+    let controllerId = controllerData[1];
+    console.log("controllerData arrived:", moveToValX, controllerId);
+    
+    if (moveToValX != null && controllerId != null) {
       // TODO
-      
-      this.setShakerPos(controllerData[0], this.getNetByController(controllerData[1]));
+      // check which controller is sending
+      switch (controllerId) {
+        case 1:
+          if (this.catcherNet1 != undefined) {
+            this.setShakerPos(moveToValX, this.catcherNet1);
+          }
+        // case 2:
+        //   if (this.catcherNet2 != undefined) {
+        //     this.setShakerPos(moveToValX, this.catcherNet2);
+        //   }
+        // case 3:
+        //   if (this.catcherNet3 != undefined) {
+        //     this.setShakerPos(moveToValX, this.catcherNet3);
+        //   }
+      }
     }
-  }
-
-  private getNetByController(controllerId: number): Matter.Body {
-    switch(controllerId) {
-      case 1:
-        if (this.catcherNet1 !== undefined){
-          return this.catcherNet1!;
-        }
-      //case 2:
-        //return this.catcherNet2;
-    } 
   }
 
 
@@ -293,9 +299,14 @@ export class CatcherProgram implements Program {
   private sendLevelInfoToDisplay(): void {
     let data: any[] = [];
     this.generateIngredientListNumbers();
+    // 0
     data.push(this.allIngredientNumbersOnList);
-    data.push(this.shakerContainer?.position.x);
-    data.push(this.shakerContainer?.position.y);
+    // 1 2
+    data.push(this.catcherNet1?.position.x);
+    data.push(this.catcherNet1?.position.y);
+    // 3 4
+    data.push(this.catcherNet2?.position.x);
+    data.push(this.catcherNet2?.position.y);
 
     this.setDisplayGameViewBuildListener();
     this.lobbyController.sendToDisplays('levelData', data);
@@ -329,19 +340,32 @@ export class CatcherProgram implements Program {
 
 
 
-  private initShakerContainer(): void {
+  private initCatcherNets(): void {
     if (this.engine == null) return;
 
-    this.shakerContainer = Matter.Bodies.circle(
+    // net1
+    this.catcherNet1 = Matter.Bodies.circle(
       this.xCenterField,
-      this.yShakerFieldBottom,
+      this.yCatcherFieldBottom1,
       this.shakerContainerRadius,
       {
-        label: 'Shaker0',
+        label: 'Catcher1',
         isSensor: true,
         isStatic: true
       });
-    Matter.World.add(this.engine.world, this.shakerContainer);
+    Matter.World.add(this.engine.world, this.catcherNet1);
+
+    // net2
+    this.catcherNet2 = Matter.Bodies.circle(
+      this.xCenterField,
+      this.yCatcherFieldMiddle2,
+      this.shakerContainerRadius,
+      {
+        label: 'Catcher2',
+        isSensor: true,
+        isStatic: true
+      });
+    Matter.World.add(this.engine.world, this.catcherNet2);
   }
 
   private initIngredients(): void {
@@ -379,7 +403,7 @@ export class CatcherProgram implements Program {
   private setUpGame() {
     this.engine = Matter.Engine.create();
     this.createWorldBounds();
-    this.initShakerContainer();
+    this.initCatcherNets();
     this.initIngredients();
     this.initMatterEventCollision();
     this.sendLevelInfoToDisplay();
@@ -395,7 +419,7 @@ export class CatcherProgram implements Program {
         const pair = pairs[i];
 
         // TODO
-        if (pair.bodyA.label.includes('Shaker') && pair.bodyB.label.includes('Ingredient') || pair.bodyB.label.includes('Shaker') && pair.bodyA.label.includes('Ingredient')) {
+        if (pair.bodyA.label.includes('Catcher') && pair.bodyB.label.includes('Ingredient') || pair.bodyB.label.includes('Catcher') && pair.bodyA.label.includes('Ingredient')) {
           // ingredient catched
           let shakerBody = pair.bodyA;
           let ingredientBody = pair.bodyB;
@@ -492,12 +516,14 @@ export class CatcherProgram implements Program {
 
     let fps = 60;
     this.gameLoop = setInterval(() => {
-      if (this.engine == null || this.shakerContainer == null) return;
+      if (this.engine == null || this.catcherNet1 == null || this.catcherNet2 == null) return;
       this.engine.world.gravity.x = this.gravityX;
       this.engine.world.gravity.y = this.gravityY;
       Matter.Engine.update(this.engine, 1000 / fps);
 
-      this.lobbyController.sendToDisplays('catcherNet1Position', [this.shakerContainer.position.x, this.shakerContainer.position.y]);
+      this.lobbyController.sendToDisplays('catcherNet1Position', [this.catcherNet1.position.x, this.catcherNet1.position.y]);
+      this.lobbyController.sendToDisplays('catcherNet2Position', [this.catcherNet2.position.x, this.catcherNet2.position.y]);
+
       this.lobbyController.sendToDisplays('updateScore', this.score);
 
       if (this.ingredientLeft != null) {
