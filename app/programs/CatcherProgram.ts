@@ -54,7 +54,7 @@ export class CatcherProgram implements Program {
   private allIngredientsFalling: number[] = new Array();
   // private allIngrFalling: Ingredient[] = new Array();
   private gravityX: number = 0;
-  private gravityY: number = 0.5;
+  private gravityY: number = 0.4;
 
   constructor(lobbyController: LobbyController) {
     this.lobbyController = lobbyController;
@@ -315,7 +315,7 @@ export class CatcherProgram implements Program {
       }),
       // Bottom
       // not visible, further down. trigger for respawning fruit
-      Matter.Bodies.rectangle(this.width / 2, this.height, this.width+500, 10, {
+      Matter.Bodies.rectangle(this.width / 2, this.height+400, this.width, 10, {
         label: 'Floor',
         isStatic: true,
         isSensor: true
@@ -349,7 +349,7 @@ export class CatcherProgram implements Program {
 
     this.ingredientLeft = Matter.Bodies.circle(
       this.xLeftField,
-      0,
+      -50,
       this.ingredientRadius,
       {
         label: 'Ingredient0'
@@ -358,7 +358,7 @@ export class CatcherProgram implements Program {
 
     this.ingredientRight = Matter.Bodies.circle(
       this.xRightField,
-      0,
+      -600,
       this.ingredientRadius,
       {
         label: 'Ingredient1',
@@ -367,7 +367,7 @@ export class CatcherProgram implements Program {
 
     this.ingredientCenter = Matter.Bodies.circle(
       this.xCenterField,
-      0,
+      -1000,
       this.ingredientRadius,
       {
         label: 'Ingredient2',
@@ -413,13 +413,13 @@ export class CatcherProgram implements Program {
             this.score += this.scoreInc;
             this.lobbyController.sendToDisplays('checkIngredientOnList', ingredientTypeNr);
             this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient',
-              [this.scoreInc, ingredientTypeNr, ingredientBody.position.x + 100, ingredientBody.position.y - 100]);
+              [this.scoreInc, ingredientTypeNr, ingredientBody.position.x, ingredientBody.position.y]);
           } else {
             // bad catch
             console.log('catched a wrong ingredient, NOT on list!!! -50 points.');
             this.score -= this.scoreInc;
             this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient',
-              [-this.scoreInc, ingredientTypeNr, ingredientBody.position.x + 100, ingredientBody.position.y - 100]);
+              [-this.scoreInc, ingredientTypeNr, ingredientBody.position.x, ingredientBody.position.y]);
           }
           this.respawnIngredient(ingredientBody);
         }
@@ -436,7 +436,7 @@ export class CatcherProgram implements Program {
     });
   }
 
-  generateIngredientListNumbers() {
+  private generateIngredientListNumbers() {
     let lastRandomInt = -1;
     for (let index = 0; index < 2; index++) {
       let currentRandomInt = this.getRandomInt(3);
