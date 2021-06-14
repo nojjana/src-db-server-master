@@ -224,29 +224,29 @@ export class CatcherProgram implements Program {
         default:
           break;
       }
-      if (valX > 0) {
-        // Matter.Body.applyForce(this.shakerContainer, position, force)
-      } else {
-        // Matter.Body.applyForce(this.shakerContainer, position, force)
-      }
+      // if (valX > 0) {
+      //   // Matter.Body.applyForce(this.shakerContainer, position, force)
+      // } else {
+      //   // Matter.Body.applyForce(this.shakerContainer, position, force)
+      // }
     }
   }
 
-  private fallDown(body: Matter.Body, endY: number, pixelSteps: number): Matter.Vertices {
-    // moving ingredients down
-    let newY = body.position.y;
-    if (body.position.y < endY) {
-      // fall further down
-      newY = body.position.y + pixelSteps;
-    }
-    // console.log("body.position.y, endY, dy, newY: ", body.position.y, endY, dy, newY);
-    Matter.Body.setPosition(body, {
-      x: body.position.x,
-      y: newY
-    });
+  // private fallDown(body: Matter.Body, endY: number, pixelSteps: number): Matter.Vertices {
+  //   // moving ingredients down
+  //   let newY = body.position.y;
+  //   if (body.position.y < endY) {
+  //     // fall further down
+  //     newY = body.position.y + pixelSteps;
+  //   }
+  //   // console.log("body.position.y, endY, dy, newY: ", body.position.y, endY, dy, newY);
+  //   Matter.Body.setPosition(body, {
+  //     x: body.position.x,
+  //     y: newY
+  //   });
 
-    return {x: body.position.x, y: body.position.y};
-  }
+  //   return {x: body.position.x, y: body.position.y};
+  // }
 
   private forceMove(body: Matter.Body, endX: number, endY: number, pixelSteps: number): Matter.Vertices {
     // moving shaker left and right
@@ -257,8 +257,6 @@ export class CatcherProgram implements Program {
 
     // dy is the total distance to move in the Y direction
     let dy = endY - body.position.y;
-
-    // use dx & dy to calculate where the current [x,y] is at a given pct
 
     let newX = body.position.x
     if (dx > 0) {
@@ -357,7 +355,7 @@ export class CatcherProgram implements Program {
       this.yShakerFieldBottom,
       this.shakerContainerRadius,
       {
-        label: 'Shaker',
+        label: 'Shaker0',
         isSensor: true,
         isStatic: true
       });
@@ -391,7 +389,7 @@ export class CatcherProgram implements Program {
       0,
       this.ingredientRadius,
       {
-        label: 'Ingredient'
+        label: 'Ingredient0'
       });
     Matter.World.add(this.engine.world, this.ingredientLeft);
 
@@ -400,7 +398,7 @@ export class CatcherProgram implements Program {
       0,
       this.ingredientRadius,
       {
-        label: 'Ingredient',
+        label: 'Ingredient1',
       });
     Matter.World.add(this.engine.world, this.ingredientRight);
 
@@ -409,7 +407,7 @@ export class CatcherProgram implements Program {
       0,
       this.ingredientRadius,
       {
-        label: 'Ingredient',
+        label: 'Ingredient2',
       });
     Matter.World.add(this.engine.world, this.ingredientCenter);
 
@@ -451,15 +449,28 @@ export class CatcherProgram implements Program {
         const pair = pairs[i];
 
         // TODO
-        if (pair.bodyA.label === 'Shaker' && pair.bodyB.label === 'Ingredient' || pair.bodyB.label === 'Shaker' && pair.bodyA.label === 'Ingredient' ) {
+        if (pair.bodyA.label.includes('Shaker') && pair.bodyB.label.includes('Ingredient') || pair.bodyB.label.includes('Shaker') && pair.bodyA.label.includes('Ingredient')) {
             console.log('An Ingredient collided with Shaker!')
-            this.score += this.scoreInc;
 
-            if (pair.bodyB.label === 'Ingredient') {
-              this.respawnIngredient(pair.bodyB);
-            } else {
-              this.respawnIngredient(pair.bodyA);
+            let shakerBody = pair.bodyA;
+            let ingredientBody = pair.bodyB;
+            if (pair.bodyA.label.includes('Ingredient')) {
+              shakerBody = pair.bodyB;
+              ingredientBody = pair.bodyA;
             }
+            // let ingredientType = ingredientBody.label.substring(0, ingredientBody.label.length-2);
+            let ingredientTypeNr: number = parseInt(ingredientBody.label.charAt(ingredientBody.label.length -1));
+            let shakerNr: number = parseInt(shakerBody.label.charAt(shakerBody.label.length -1));
+
+            console.log("shaker: ", shakerBody.label, shakerNr);
+            console.log("ingr: ", ingredientBody.label, ingredientTypeNr);
+            if (ingredientTypeNr == 0) {
+              this.score += this.scoreInc;
+              this.respawnIngredient(ingredientBody);
+            }
+
+
+            // irgendwie bild an shaer hängen? (apfel soll in shaker bleiben)
             // Matter.Body.setStatic(pair.bodyB, true);
             // Matter.Composite.add(pair.bodyA, pair.bodyB);
             // if (this.isOnList(...)) { 
@@ -477,9 +488,9 @@ export class CatcherProgram implements Program {
           // }
           
         }
-        if (pair.bodyA.label === 'Floor' && pair.bodyB.label === 'Ingredient' || pair.bodyB.label === 'Floor' && pair.bodyA.type === 'Ingredient' ) {
+        if (pair.bodyA.label === 'Floor' && pair.bodyB.label.includes('Ingredient') || pair.bodyB.label === 'Floor' && pair.bodyB.label.includes('Ingredient') ) {
           console.log('An Ingredient fell on the floor!');
-            if (pair.bodyB.label === 'Ingredient') {
+            if (pair.bodyB.label.includes('Ingredient')) {
               this.respawnIngredient(pair.bodyB);
             } else {
               this.respawnIngredient(pair.bodyA);
@@ -519,14 +530,17 @@ export class CatcherProgram implements Program {
   }
 
   private respawnIngredient(body: Matter.Body) {
-    console.log("respawnIngredient");
-    // let newlabel = "Banana";
-    // body.label = newlabel;
+    console.log("respawnIngredient: ");
+    let newNumber = 1;
+    let newlabel = "Ingredient"+newNumber;
+
+    body.label = newlabel;
     Matter.Body.setPosition(body, {
       x: body.position.x,
       y: -500
     });
-    // console.log("body.label =", body.label);
+    this.lobbyController.sendToDisplays('changeImageIngredientLeft', [newNumber]);
+    console.log("body.label =", body.label);
   }
 
 
