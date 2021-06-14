@@ -101,8 +101,8 @@ export class CatcherProgram implements Program {
     this.controller1 = this.controllers[0];
     this.controller2 = this.controllers[1];
 
-    this.controller1.emit('controllerResponsibility', true);
-    this.controller2.emit('controllerResponsibility', true);
+    this.controller1.emit('controllerResponsibility', {tutorial: true, controllerId: 1});
+    this.controller2.emit('controllerResponsibility', {tutorial: true, controllerId: 2});
 
     for (let controller of this.controllers) {
       controller.addSocketOnce('endedTutorial', this.controllerEndedTutorial.bind(this));
@@ -192,31 +192,45 @@ export class CatcherProgram implements Program {
 
     if (controllerData[0] != null) {
       // TODO
-      this.setShakerPos(controllerData[0]);
+      
+      this.setShakerPos(controllerData[0], this.getNetByController(controllerData[1]));
     }
   }
-  private setShakerPos(valX: number) {
-    if (this.shakerContainer != undefined && this.shakerContainer != null) {
+
+  private getNetByController(controllerId: number): Matter.Body {
+    switch(controllerId) {
+      case 1:
+        if (this.catcherNet1 !== undefined){
+          return this.catcherNet1!;
+        }
+      //case 2:
+        //return this.catcherNet2;
+    } 
+  }
+
+
+  private setShakerPos(valX: number, netBody: Matter.Body) {
+    if (netBody != undefined && netBody != null) {
       switch (valX) {
         case 1:
           // right
           // Matter.Body.applyForce(this.shakerContainer, {x: this.shakerContainer.position.x, y: this.shakerContainer.position.y}, {x: 0.05, y: 0});
           // Matter.Body.translate(this.shakerContainer, {x: this.xRightField, y:  0});
           // Matter.Body.setPosition(this.shakerContainer, {x: this.xRightField, y:  this.shakerContainer.position.y});
-          this.forceMove(this.shakerContainer, this.xRightField, this.shakerContainer.position.y, this.movePixelSteps);
+          this.forceMove(netBody, this.xRightField, netBody.position.y, this.movePixelSteps);
           break;
         case -1:
           // left
           // Matter.Body.applyForce(this.shakerContainer, {x: this.shakerContainer.position.x, y: this.shakerContainer.position.y}, {x: -0.05, y: 0});
           // Matter.Body.translate(this.shakerContainer, {x: this.xLeftField, y:  0});
           // Matter.Body.setPosition(this.shakerContainer, {x: this.xLeftField, y:  this.shakerContainer.position.y});
-          this.forceMove(this.shakerContainer, this.xLeftField, this.shakerContainer.position.y, this.movePixelSteps);
+          this.forceMove(netBody, this.xLeftField, netBody.position.y, this.movePixelSteps);
           break;
         case 0:
           // center
           // Matter.Body.translate(this.shakerContainer, {x: this.xCenterField, y:  0});
           // Matter.Body.setPosition(this.shakerContainer, {x: this.xCenterField, y:  this.shakerContainer.position.y});
-          this.forceMove(this.shakerContainer, this.xCenterField, this.shakerContainer.position.y, this.movePixelSteps);
+          this.forceMove(netBody, this.xCenterField, netBody.position.y, this.movePixelSteps);
           break;
         default:
           break;
