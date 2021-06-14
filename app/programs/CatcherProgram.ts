@@ -46,6 +46,7 @@ export class CatcherProgram implements Program {
   private catcherNet1?: Matter.Body;
   
   // säftlimacher game variables
+  private movePixelSteps = 30;  // möglichst in 10er Schritten, testen
   private ingredientRadius = 50;
   private shakerContainerRadius = 5;
   private availableIngredientTypes = 3;
@@ -204,20 +205,20 @@ export class CatcherProgram implements Program {
           // Matter.Body.applyForce(this.shakerContainer, {x: this.shakerContainer.position.x, y: this.shakerContainer.position.y}, {x: 0.05, y: 0});
           // Matter.Body.translate(this.shakerContainer, {x: this.xRightField, y:  0});
           // Matter.Body.setPosition(this.shakerContainer, {x: this.xRightField, y:  this.shakerContainer.position.y});
-          this.forceMove(this.shakerContainer, this.xRightField, this.shakerContainer.position.y, 20);
+          this.forceMove(this.shakerContainer, this.xRightField, this.shakerContainer.position.y, this.movePixelSteps);
           break;
         case -1:
           // left
           // Matter.Body.applyForce(this.shakerContainer, {x: this.shakerContainer.position.x, y: this.shakerContainer.position.y}, {x: -0.05, y: 0});
           // Matter.Body.translate(this.shakerContainer, {x: this.xLeftField, y:  0});
           // Matter.Body.setPosition(this.shakerContainer, {x: this.xLeftField, y:  this.shakerContainer.position.y});
-          this.forceMove(this.shakerContainer, this.xLeftField, this.shakerContainer.position.y, 20);
+          this.forceMove(this.shakerContainer, this.xLeftField, this.shakerContainer.position.y, this.movePixelSteps);
           break;
         case 0:
           // center
           // Matter.Body.translate(this.shakerContainer, {x: this.xCenterField, y:  0});
           // Matter.Body.setPosition(this.shakerContainer, {x: this.xCenterField, y:  this.shakerContainer.position.y});
-          this.forceMove(this.shakerContainer, this.xCenterField, this.shakerContainer.position.y, 20);
+          this.forceMove(this.shakerContainer, this.xCenterField, this.shakerContainer.position.y, this.movePixelSteps);
           break;
         default:
           break;
@@ -468,13 +469,15 @@ export class CatcherProgram implements Program {
               // good catch
               console.log('catched a good ingredient, +50 points!!');
               this.score += this.scoreInc;
-              this.lobbyController.sendToDisplays('checkIngredientOnList', ingredientTypeNr);  // TODO in browser!
-              this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient', [this.scoreInc, ingredientTypeNr]); 
+              this.lobbyController.sendToDisplays('checkIngredientOnList', ingredientTypeNr);
+              this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient', 
+              [this.scoreInc, ingredientTypeNr, ingredientBody.position.x+100, ingredientBody.position.y-100]); 
             } else {
               // bad catch
               console.log('catched a wrong ingredient, NOT on list!!! -50 points.');
               this.score -= this.scoreInc;
-              this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient', [-this.scoreInc, ingredientTypeNr]); 
+              this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient', 
+              [-this.scoreInc, ingredientTypeNr, ingredientBody.position.x+100, ingredientBody.position.y-100]); 
             }
             this.respawnIngredient(ingredientBody);
 
@@ -549,19 +552,19 @@ export class CatcherProgram implements Program {
       y: -500
     });
     
-     switch (body.position.x) {
-       case this.xLeftField:
+    switch (body.position.x) {
+      case this.xLeftField:
         this.lobbyController.sendToDisplays('changeImageIngredientLeft', [newNumber]);
         break;
-        case this.xCenterField:
-          this.lobbyController.sendToDisplays('changeImageIngredientCenter', [newNumber]);
-          break;
-        case this.xRightField:
-          this.lobbyController.sendToDisplays('changeImageIngredientRight', [newNumber]);
-          break;     
-       default:
-         break;
-     }
+      case this.xCenterField:
+        this.lobbyController.sendToDisplays('changeImageIngredientCenter', [newNumber]);
+        break;
+      case this.xRightField:
+        this.lobbyController.sendToDisplays('changeImageIngredientRight', [newNumber]);
+        break;
+      default:
+        break;
+    }
     console.log("body.label =", body.label);
   }
 
