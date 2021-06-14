@@ -48,9 +48,9 @@ export class CatcherProgram implements Program {
   private ingredientCenter?: Matter.Body;
   private ingredientRight?: Matter.Body;
   private shakerContainer?: Matter.Body;
-  private shakerContainerRadius = this.radius;
-
+  
   // säftlimacher game variables
+  private shakerContainerRadius = 5;
   private allIngredientNumbersOnList: number[] = new Array();
   // private allIngredientsFalling: number[] = new Array();
   private allIngrFalling: Ingredient[] = new Array();
@@ -288,24 +288,24 @@ export class CatcherProgram implements Program {
     return {x: newX, y: newY};
   }
 
-  private fallAndRespawnIngredient(ingredient: Matter.Body) {
-    if (ingredient != null) {
-      // console.log(this.ingredient);
-      // console.log("BEFORE this.ingredient.position.y: ", this.ingredient.position.y)
-      if (ingredient.position.y > this.height-20) {
-        console.log("ingredientPosY: ",ingredient.position.y);
-        this.respawnIngredient(ingredient);   
-       }
-      this.fallDown(ingredient, this.height, 15);
-      // console.log("AFTER this.ingredient.position.y: ", this.ingredient.position.y)
-    }
-  }
+  // private fallAndRespawnIngredient(ingredient: Matter.Body) {
+  //   if (ingredient != null) {
+  //     // console.log(this.ingredient);
+  //     // console.log("BEFORE this.ingredient.position.y: ", this.ingredient.position.y)
+  //     if (ingredient.position.y > this.height-20) {
+  //       console.log("ingredientPosY: ",ingredient.position.y);
+  //       this.respawnIngredient(ingredient);   
+  //      }
+  //     this.fallDown(ingredient, this.height, 15);
+  //     // console.log("AFTER this.ingredient.position.y: ", this.ingredient.position.y)
+  //   }
+  // }
 
-  private checkRespawn(ingr: Matter.Body) {
-    if (ingr.position.y > this.height+200) {
-      this.respawnIngredient(ingr);
-    }
-  }
+  // private checkRespawn(ingr: Matter.Body) {
+  //   if (ingr.position.y > this.height+200) {
+  //     this.respawnIngredient(ingr);
+  //   }
+  // }
 
   private sendLevelInfoToDisplay(): void {
     let data: any[] = [];
@@ -322,22 +322,26 @@ export class CatcherProgram implements Program {
     if (this.engine == null) return;
 
     Matter.World.add(this.engine.world, [
+//TODO rect mode is center not left top!?
+// and make ground thicker....
+
       // Top
-      // Matter.Bodies.rectangle(10, 10, this.width, 1, {
+      // Matter.Bodies.rectangle(this.width / 2, 0, this.width, 10, {
       //   isStatic: true
       // }),
       // Left
-      Matter.Bodies.rectangle(this.worldSideMargin, this.height - 10, 1, this.height, {
+      Matter.Bodies.rectangle(this.worldSideMargin, this.height / 2, 10, this.height, {
         isStatic: true
       }),
       // Bottom
-      Matter.Bodies.rectangle(0, this.height - 30, this.width, 1, {
-        // isStatic: true
+      // not visible, further down. trigger for respawning fruit
+      Matter.Bodies.rectangle(this.width / 2, this.height, this.width+500, 10, {
         label: 'Floor',
+        isStatic: true,
         isSensor: true
       }),
       // Right
-      Matter.Bodies.rectangle(this.width - this.worldSideMargin, this.height - 10, 1, this.height, {
+      Matter.Bodies.rectangle(this.width - this.worldSideMargin, this.height / 2, 10, this.height, {
         isStatic: true
       })
     ])
@@ -387,7 +391,7 @@ export class CatcherProgram implements Program {
       0,
       this.ingredientRadius,
       {
-        label: 'Ingredient',
+        label: 'Ingredient'
       });
     Matter.World.add(this.engine.world, this.ingredientLeft);
 
@@ -447,34 +451,38 @@ export class CatcherProgram implements Program {
         const pair = pairs[i];
 
         // TODO
-        if (pair.bodyA.label === 'Shaker') {
-          if (pair.bodyB.label === 'Apple') {
-            console.log('Apple collided with Shaker!')
+        if (pair.bodyA.label === 'Shaker' && pair.bodyB.label === 'Ingredient' || pair.bodyB.label === 'Shaker' && pair.bodyA.label === 'Ingredient' ) {
+            console.log('An Ingredient collided with Shaker!')
+            this.score += this.scoreInc;
 
-            this.respawnIngredient(pair.bodyB);
+            if (pair.bodyB.label === 'Ingredient') {
+              this.respawnIngredient(pair.bodyB);
+            } else {
+              this.respawnIngredient(pair.bodyA);
+            }
             // Matter.Body.setStatic(pair.bodyB, true);
             // Matter.Composite.add(pair.bodyA, pair.bodyB);
             // if (this.isOnList(...)) { 
               // this.score += this.scoreInc;
             // }
-          } 
-          else if (pair.bodyB.label === 'Banana') {
-            console.log('Banana collided with Shaker!');
-          }
-          else if (pair.bodyB.label === 'Berry') {
-            console.log('Berry collided with Shaker!');
-          } 
-          else if (pair.bodyB.label === 'Ingredient') {
-            console.log('An Ingredient collided with Shaker!');
-            this.score += this.scoreInc;
-          }
+        
+          // else if (pair.bodyB.label === 'Banana') {
+          //   console.log('Banana collided with Shaker!');
+          // }
+          // else if (pair.bodyB.label === 'Berry') {
+          //   console.log('Berry collided with Shaker!');
+          // } 
+          // else if (pair.bodyB.label === 'Apple') {
+          //   console.log('Apple collided with Shaker!');
+          // }
           
-        } 
-        // NOT working TODO:
-          else if (pair.bodyA.label === 'Floor') {
+        }
+        if (pair.bodyA.label === 'Floor' && pair.bodyB.label === 'Ingredient' || pair.bodyB.label === 'Floor' && pair.bodyA.type === 'Ingredient' ) {
+          console.log('An Ingredient fell on the floor!');
             if (pair.bodyB.label === 'Ingredient') {
-              console.log('An Ingredient fell on the floor!');
               this.respawnIngredient(pair.bodyB);
+            } else {
+              this.respawnIngredient(pair.bodyA);
             }
           }
 
@@ -512,10 +520,13 @@ export class CatcherProgram implements Program {
 
   private respawnIngredient(body: Matter.Body) {
     console.log("respawnIngredient");
+    // let newlabel = "Banana";
+    // body.label = newlabel;
     Matter.Body.setPosition(body, {
       x: body.position.x,
-      y: 0
-    });  
+      y: -500
+    });
+    // console.log("body.label =", body.label);
   }
 
 
@@ -547,19 +558,19 @@ export class CatcherProgram implements Program {
       if (this.ingredientLeft != null) {
         // this.fallAndRespawnIngredient(this.ingredientLeft);
         this.lobbyController.sendToDisplays('updateIngredientLeft', [this.ingredientLeft.position.x, this.ingredientLeft.position.y, 0]);
-        this.checkRespawn(this.ingredientLeft);
+        // this.checkRespawn(this.ingredientLeft);
       }
 
       if (this.ingredientRight != null) {
         // Matter.Body.applyForce(this.ingredientRight, {x: this.ingredientRight.position.x, y: this.ingredientRight.position.y}, {x: 0, y: 0.02});
         this.lobbyController.sendToDisplays('updateIngredientRight', [this.ingredientRight.position.x, this.ingredientRight.position.y, 1]);
-        this.checkRespawn(this.ingredientRight);
+        // this.checkRespawn(this.ingredientRight);
       }
 
       if (this.ingredientCenter != null) {
         // this.fallAndRespawnIngredient(this.ingredientCenter);
         this.lobbyController.sendToDisplays('updateIngredientCenter', [this.ingredientCenter.position.x, this.ingredientCenter.position.y, 2]);
-        this.checkRespawn(this.ingredientCenter);
+        // this.checkRespawn(this.ingredientCenter);
       }
 
     //   if (this.allIngrFalling?.length > 0) {
