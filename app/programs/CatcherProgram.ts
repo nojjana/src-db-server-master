@@ -44,13 +44,18 @@ export class CatcherProgram implements Program {
   // säftlimacher visible objects
   private ingredient?: Matter.Body;
   private ingredientRadius = this.radius;
+  private ingredientLeft?: Matter.Body;
+  private ingredientCenter?: Matter.Body;
+  private ingredientRight?: Matter.Body;
   private shakerContainer?: Matter.Body;
   private shakerContainerRadius = this.radius;
 
   // säftlimacher game variables
   private allIngredientNumbersOnList: number[] = new Array();
+  // private allIngredientsFalling: number[] = new Array();
+  private allIngrFalling: Ingredient[] = new Array();
   private gravityX: number = 0;
-
+  private gravityY: number = 0.5;
 
   constructor(lobbyController: LobbyController) {
     this.lobbyController = lobbyController;
@@ -227,7 +232,26 @@ export class CatcherProgram implements Program {
     }
   }
 
-  private forceMove(body: Matter.Body, endX: number, endY: number, pixelSteps: number) {
+  private fallDown(body: Matter.Body, endY: number, pixelSteps: number): Matter.Vertices {
+    // moving ingredients down
+    let newY = body.position.y;
+    if (body.position.y < endY) {
+      // fall further down
+      newY = body.position.y + pixelSteps;
+    }
+    // console.log("body.position.y, endY, dy, newY: ", body.position.y, endY, dy, newY);
+    Matter.Body.setPosition(body, {
+      x: body.position.x,
+      y: newY
+    });
+
+    return {x: body.position.x, y: body.position.y};
+  }
+
+  private forceMove(body: Matter.Body, endX: number, endY: number, pixelSteps: number): Matter.Vertices {
+    // moving shaker left and right
+    // doesnt work properly for ingredients
+
     // dx is the total distance to move in the X direction
     let dx = endX - body.position.x;
 
@@ -238,9 +262,11 @@ export class CatcherProgram implements Program {
 
     let newX = body.position.x
     if (dx > 0) {
+    // if (dx > pixelSteps) {
       // a little bit to the right
       newX = body.position.x + pixelSteps;
     } else if (dx < 0) {
+    // } else if (dx < -pixelSteps) {
       // a little bit to the left
       newX = body.position.x - pixelSteps;
     }
@@ -258,18 +284,26 @@ export class CatcherProgram implements Program {
       x: newX,
       y: newY
     });
+
+    return {x: newX, y: newY};
   }
 
-  private ingredientRain() {
-    if (this.ingredient != null) {
+  private fallAndRespawnIngredient(ingredient: Matter.Body) {
+    if (ingredient != null) {
       // console.log(this.ingredient);
       // console.log("BEFORE this.ingredient.position.y: ", this.ingredient.position.y)
-      if (this.ingredient.position.y > this.height) {
-        console.log("ingredientPosY: ",this.ingredient.position.y);
-        this.respawnIngredient(this.ingredient);   
+      if (ingredient.position.y > this.height-20) {
+        console.log("ingredientPosY: ",ingredient.position.y);
+        this.respawnIngredient(ingredient);   
        }
-      this.forceMove(this.ingredient, this.xCenterField, this.height, 20);
+      this.fallDown(ingredient, this.height, 15);
       // console.log("AFTER this.ingredient.position.y: ", this.ingredient.position.y)
+    }
+  }
+
+  private checkRespawn(ingr: Matter.Body) {
+    if (ingr.position.y > this.height+200) {
+      this.respawnIngredient(ingr);
     }
   }
 
@@ -297,9 +331,11 @@ export class CatcherProgram implements Program {
         isStatic: true
       }),
       // Bottom
-      // Matter.Bodies.rectangle(10, this.height - 10, this.width, 1, {
-      //   isStatic: true
-      // }),
+      Matter.Bodies.rectangle(0, this.height - 30, this.width, 1, {
+        // isStatic: true
+        label: 'Floor',
+        isSensor: true
+      }),
       // Right
       Matter.Bodies.rectangle(this.width - this.worldSideMargin, this.height - 10, 1, this.height, {
         isStatic: true
@@ -319,28 +355,84 @@ export class CatcherProgram implements Program {
       {
         label: 'Shaker',
         isSensor: true,
+        isStatic: true
       });
     Matter.World.add(this.engine.world, this.shakerContainer);
   }
 
-  private initIngredient(): void {
+  private initIngredients(): void {
     if (this.engine == null) return;
 
-    this.ingredient = Matter.Bodies.circle(
+    // this.ingredient = Matter.Bodies.circle(
+    //   this.xCenterField,
+    //   0,
+    //   this.ingredientRadius,
+    //   {
+    //     label: 'Ingredient',
+    //   });
+    // Matter.World.add(this.engine.world, this.ingredient);
+
+
+    
+    // left ingredient
+    // let iLeft = new Banana();
+    // iLeft.setBody(this.xLeftField, 0);
+    // this.ingredientLeft = iLeft.getBody();
+    // Matter.World.add(this.engine.world, this.ingredientLeft);
+    // this.lobbyController.sendToDisplays('newIngredient', [iLeft.getType(), iLeft.getX(), iLeft.getY(), iLeft.getName()]);
+
+    // TODO: wrap and send NR of ingredient enum? iwie iwo
+    this.ingredientLeft = Matter.Bodies.circle(
+      this.xLeftField,
+      0,
+      this.ingredientRadius,
+      {
+        label: 'Ingredient',
+      });
+    Matter.World.add(this.engine.world, this.ingredientLeft);
+
+    this.ingredientRight = Matter.Bodies.circle(
+      this.xRightField,
+      0,
+      this.ingredientRadius,
+      {
+        label: 'Ingredient',
+      });
+    Matter.World.add(this.engine.world, this.ingredientRight);
+
+    this.ingredientCenter = Matter.Bodies.circle(
       this.xCenterField,
       0,
       this.ingredientRadius,
       {
         label: 'Ingredient',
       });
-    Matter.World.add(this.engine.world, this.ingredient);
+    Matter.World.add(this.engine.world, this.ingredientCenter);
+
+    // // right ingredient
+    // let iRight = new Banana();
+    // iRight.setPosition(this.xRightField, 0);
+    // this.ingredientRight = iRight.getBody();
+    // Matter.World.add(this.engine.world, iRight.getBody());
+    // this.allIngrFalling.push(iRight);
+    // this.lobbyController.sendToDisplays('newIngredient', [iRight.getType(), iRight.getBody().position.x, iRight.getBody().position.y, iRight.getName()]);
+    
+    // // center ingredient
+    // let iCenter = new Berry();
+    // iCenter.setPosition(this.xCenterField, 0);
+    // this.ingredientCenter = iCenter.getBody();
+    // Matter.World.add(this.engine.world, iCenter.getBody());
+    // this.allIngrFalling.push(iCenter);
+    // // this.lobbyController.sendToDisplays('newIngredient', [iCenter.getType(), iCenter.getX(), iCenter.getY(), iCenter.getName()]);
+    // this.lobbyController.sendToDisplays('newIngredient', [iCenter.getType(), iCenter.getBody().position.x,  iCenter.getBody().position.y, iCenter.getName()]);
+
   }
 
   private setUpGame() {
     this.engine = Matter.Engine.create();
     this.createWorldBounds();
     this.initShakerContainer();
-    this.initIngredient();
+    this.initIngredients();
     this.initMatterEventCollision();
     this.sendLevelInfoToDisplay();
   }
@@ -354,17 +446,50 @@ export class CatcherProgram implements Program {
       for (; i != j; ++i) {
         const pair = pairs[i];
 
-        // TODO collision detection and score inc
-        if (pair.bodyA.label === 'Ingredient' || pair.bodyB.label === 'Ingredient') {
-          if (pair.bodyA.label === 'Shaker') {
-            console.log('Collision 1!')
-            // TODO
-            // this.score += this.scoreInc;
-          } else if (pair.bodyB.label === 'Shaker') {
-            console.log('Collision 2!')
-            // this.score += this.scoreInc;
+        // TODO
+        if (pair.bodyA.label === 'Shaker') {
+          if (pair.bodyB.label === 'Apple') {
+            console.log('Apple collided with Shaker!')
+
+            this.respawnIngredient(pair.bodyB);
+            // Matter.Body.setStatic(pair.bodyB, true);
+            // Matter.Composite.add(pair.bodyA, pair.bodyB);
+            // if (this.isOnList(...)) { 
+              // this.score += this.scoreInc;
+            // }
+          } 
+          else if (pair.bodyB.label === 'Banana') {
+            console.log('Banana collided with Shaker!');
           }
-        }
+          else if (pair.bodyB.label === 'Berry') {
+            console.log('Berry collided with Shaker!');
+          } 
+          else if (pair.bodyB.label === 'Ingredient') {
+            console.log('An Ingredient collided with Shaker!');
+            this.score += this.scoreInc;
+          }
+          
+        } 
+        // NOT working TODO:
+          else if (pair.bodyA.label === 'Floor') {
+            if (pair.bodyB.label === 'Ingredient') {
+              console.log('An Ingredient fell on the floor!');
+              this.respawnIngredient(pair.bodyB);
+            }
+          }
+
+        // TODO collision detection and score inc
+        // if (pair.bodyA.label === 'Ingredient' || pair.bodyB.label === 'Ingredient') {
+        //   if (pair.bodyA.label === 'Shaker') {
+        //     console.log('Collision 1!')
+        //     // TODO
+        //     // this.score += this.scoreInc;
+        //   } 
+        //   else if (pair.bodyB.label === 'Shaker') {
+        //     console.log('Collision 2!')
+        //     // this.score += this.scoreInc;
+        //   }
+        // }
       }
     });
   }
@@ -388,7 +513,7 @@ export class CatcherProgram implements Program {
   private respawnIngredient(body: Matter.Body) {
     console.log("respawnIngredient");
     Matter.Body.setPosition(body, {
-      x: this.xCenterField,
+      x: body.position.x,
       y: 0
     });  
   }
@@ -405,26 +530,54 @@ export class CatcherProgram implements Program {
     this.lobbyController.sendToDisplays('playing', this.playing);
 
     let fps = 60;
-
-
     this.gameLoop = setInterval(() => {
       if (this.engine == null || this.shakerContainer == null) return;
       this.engine.world.gravity.x = this.gravityX;
-      this.engine.world.gravity.y = 0;
+      this.engine.world.gravity.y = this.gravityY;
       Matter.Engine.update(this.engine, 1000 / fps);
 
       this.lobbyController.sendToDisplays('updateShakerPosition', [this.shakerContainer.position.x, this.shakerContainer.position.y]);
       this.lobbyController.sendToDisplays('updateScore', this.score);
 
-      if (this.ingredient != null) {
-        this.ingredientRain();
-        this.lobbyController.sendToDisplays('updateIngredientPosition', [this.ingredient.position.x, this.ingredient.position.y]);
-        // TODO handle ingredient fall...
+      // if (this.ingredient != null) {
+      //   this.fallAndRespawnIngredient(this.ingredient);
+      //   this.lobbyController.sendToDisplays('updateIngredientPosition', [this.ingredient.position.x, this.ingredient.position.y]);
+      // }
+
+      if (this.ingredientLeft != null) {
+        // this.fallAndRespawnIngredient(this.ingredientLeft);
+        this.lobbyController.sendToDisplays('updateIngredientLeft', [this.ingredientLeft.position.x, this.ingredientLeft.position.y, 0]);
+        this.checkRespawn(this.ingredientLeft);
       }
+
+      if (this.ingredientRight != null) {
+        // Matter.Body.applyForce(this.ingredientRight, {x: this.ingredientRight.position.x, y: this.ingredientRight.position.y}, {x: 0, y: 0.02});
+        this.lobbyController.sendToDisplays('updateIngredientRight', [this.ingredientRight.position.x, this.ingredientRight.position.y, 1]);
+        this.checkRespawn(this.ingredientRight);
+      }
+
+      if (this.ingredientCenter != null) {
+        // this.fallAndRespawnIngredient(this.ingredientCenter);
+        this.lobbyController.sendToDisplays('updateIngredientCenter', [this.ingredientCenter.position.x, this.ingredientCenter.position.y, 2]);
+        this.checkRespawn(this.ingredientCenter);
+      }
+
+    //   if (this.allIngrFalling?.length > 0) {
+    //     this.allIngrFalling.forEach(ingr => {
+    //       // let ingr = this.allIngrFalling[0];
+    //  // console.log("BEFORE: ", ingr.getY());
+    //     // TODO: achtung fixen: methode ändert x und y von body, aber nicht von x und y fields.
+    //     this.fallDown(ingr.getBody(), this.height, 15);
+    //     // console.log("AFTER: ", ingr.getY());
+    //     this.lobbyController.sendToDisplays('newIngredient', [ingr.getType(), ingr.getBody().position.x, ingr.getBody().position.y, ingr.getName()]);
+
+    //     });
+    //   }
+
+
     }, 1000 / fps);
 
-    // TODO handle ingredient fall...
-    // setTimeout(() => this.generateNewIngredient(), 4 * 1000);
+    // this.testClasses();
   }
 
 
@@ -541,6 +694,19 @@ export class CatcherProgram implements Program {
   /* -------------------- TEST OF CLASSES --------------------*/
 
   testClasses() {
+    // console.log("------------ test of falling objects from classes ------------");
+
+    // const fallingIngredientTest = new Banana();
+    // if (this.engine !== undefined) {
+    //   Matter.World.add(this.engine?.world, fallingIngredientTest.getBody());
+    //   console.log("Added banana to world. banana body.");
+    //   // console.log(fallingIngredientTest.getBody());
+    //   fallingIngredientTest.setPosition(1000, 1000);
+    //   this.ingredient = fallingIngredientTest.getBody();
+    // }
+
+
+
     console.log("------------ test of classes ------------");
 
     const firstPlant = new AppleTree();
@@ -617,7 +783,7 @@ class ShakeObject {
 class AppleTree extends ShakeObject {
 
   constructor() {
-    super("Apfelbaum");
+    super("AppleTree");
   }
 
 }
@@ -625,11 +791,42 @@ class AppleTree extends ShakeObject {
 class Ingredient {
   private name: string;
   private type: IngredientType;
+  private body: Matter.Body;
+  private x = 0;
+  private y = 0;
+  private r = 50;
   private edible = true;
 
-  constructor(name: string, ingredientType: IngredientType, edible?: boolean) {
+  constructor(name: string, ingredientType: IngredientType, x?: number, y?: number, r?: number, edible?: boolean) {
     this.name = name;
     this.type = ingredientType;
+
+    if (x !== undefined && y !== undefined && r !== undefined) {
+      this.x = x;
+      this.y = y;
+      this.r = r;
+      this.body = Matter.Bodies.circle(
+        this.x,
+        this.y,
+        this.r,
+        {
+          label: this.name,
+        }
+      );
+    } else {
+      // no values for body passed, setting defaults
+      this.x = 0;
+      this.y = 0;
+      this.r = 50;
+      this.body = Matter.Bodies.circle(
+        this.x,
+        this.y,
+        this.r,
+        {
+          label: this.name,
+        }
+      );
+    }
 
     if (edible !== undefined) {
       this.edible = edible;
@@ -648,37 +845,79 @@ class Ingredient {
     return this.type;
   }
 
+  getBody(): Matter.Body {
+    return this.body;
+  }
+
+  getX(): number {
+    return this.body.position.x;
+  }
+
+  getY(): number {
+    return this.body.position.y;
+  }
+
+  setX(x: number) {
+    this.x = x;
+    Matter.Body.setPosition(this.body, {x: this.x, y: this.y});
+  }
+
+  setY(y: number) {
+    this.y = y;
+    Matter.Body.setPosition(this.body, {x: this.x, y: this.y});
+  }
+
+  setPosition(x: number, y: number) {
+    this.x = x;
+    this.y = y;
+    Matter.Body.setPosition(this.body, {x: this.x, y: this.y});
+  }
+
+  setBody(x: number, y: number, r?: number) {
+    if (r == undefined) { r = 50; }
+    this.body = Matter.Bodies.circle(
+      x,
+      y,
+      r,
+      {
+        label: this.name,
+      }
+    );
+  }
+
 }
 
 class Apple extends Ingredient {
   constructor() {
-    super("Apfel", IngredientType.APPLE);
+    super("Apple", IngredientType.APPLE);
   }
 }
 
 class Banana extends Ingredient {
   constructor() {
-    super("Banane", IngredientType.BANANA);
+    super("Banana", IngredientType.BANANA);
   }
 }
 
 class Berry extends Ingredient {
   constructor() {
-    super("Himbeere", IngredientType.BERRY);
+    super("Berry", IngredientType.BERRY);
   }
 }
 
+
 // class Honey extends Ingredient {
-//   constructor() {
-//     super("Honig", IngredientType.HONEY);
-//   }
-// }
-
-// class Bee extends Ingredient {
-//   constructor() {
-//     super("Biene", IngredientType.BEE, false);
-//   }
-// }
-
+  //   constructor() {
+    //     super("Honey", IngredientType.HONEY);
+    //   }
+    // }
+    
+    // class Bee extends Ingredient {
+      //   constructor() {
+        //     super("Bee", IngredientType.BEE, false);
+        //   }
+        // }
+        
+        
 
 
