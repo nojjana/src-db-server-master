@@ -439,7 +439,8 @@ export class CatcherProgram implements Program {
 
   initMatterEventCollision() {
     // TODO
-    Matter.Events.on(this.engine, 'collisionActive', (event) => {
+    // Matter.Events.on(this.engine, 'collisionActive', (event) => {
+    Matter.Events.on(this.engine, 'collisionStart', (event) => {
       const pairs = event.pairs;
 
       let i = 0, j = pairs.length;
@@ -467,7 +468,7 @@ export class CatcherProgram implements Program {
               // good catch
               console.log('catched a good ingredient, +50 points!!');
               this.score += this.scoreInc;
-              this.lobbyController.sendToDisplays('checkIngredientOnList', ingredientTypeNr);
+              this.lobbyController.sendToDisplays('checkIngredientOnList', ingredientTypeNr);  // TODO in browser!
               this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient', [this.scoreInc, ingredientTypeNr]); 
             } else {
               // bad catch
@@ -547,7 +548,20 @@ export class CatcherProgram implements Program {
       x: body.position.x,
       y: -500
     });
-    this.lobbyController.sendToDisplays('changeImageIngredientLeft', [newNumber]);
+    
+     switch (body.position.x) {
+       case this.xLeftField:
+        this.lobbyController.sendToDisplays('changeImageIngredientLeft', [newNumber]);
+        break;
+        case this.xCenterField:
+          this.lobbyController.sendToDisplays('changeImageIngredientCenter', [newNumber]);
+          break;
+        case this.xRightField:
+          this.lobbyController.sendToDisplays('changeImageIngredientRight', [newNumber]);
+          break;     
+       default:
+         break;
+     }
     console.log("body.label =", body.label);
   }
 
