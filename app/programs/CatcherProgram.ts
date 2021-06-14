@@ -30,26 +30,22 @@ export class CatcherProgram implements Program {
   // säftlimacher world dimensions
   private width = 2560;
   private height = 1440;
-  /// ingredient list is in margin area (no shakerContainer or falling ingredients there)
   private worldSideMargin = 600;
-  // field: left, center, right
-  private xDiffToNextField = 340;
-  private xLeftField = 940;      // 600 + 340
-  private xCenterField = 1280;   // 600 + 340 + 340
-  private xRightField = 1620;    // 600 + 340 + 340 + 340
+  // fields where ingredients fall: left, center, right
+  private xLeftField = 740;
+  private xCenterField = 1280;
+  private xRightField = 1820;
   // TODO 3 ebene für shaker/netze berechnen und speichern
   private yShakerFieldBottom = this.height * 0.8
-  private radius = 50;
 
   // säftlimacher visible objects
-  private ingredient?: Matter.Body;
-  private ingredientRadius = this.radius;
   private ingredientLeft?: Matter.Body;
   private ingredientCenter?: Matter.Body;
   private ingredientRight?: Matter.Body;
   private shakerContainer?: Matter.Body;
   
   // säftlimacher game variables
+  private ingredientRadius = 50;
   private shakerContainerRadius = 5;
   private allIngredientNumbersOnList: number[] = new Array();
   // private allIngredientsFalling: number[] = new Array();
