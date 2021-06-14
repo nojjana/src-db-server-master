@@ -335,7 +335,7 @@ export class CatcherProgram implements Program {
 
     this.ingredientLeft = Matter.Bodies.circle(
       this.xLeftField,
-      0,
+      -50,
       this.ingredientRadius,
       {
         label: 'Ingredient0'
@@ -344,7 +344,7 @@ export class CatcherProgram implements Program {
 
     this.ingredientRight = Matter.Bodies.circle(
       this.xRightField,
-      0,
+      -600,
       this.ingredientRadius,
       {
         label: 'Ingredient1',
@@ -353,7 +353,7 @@ export class CatcherProgram implements Program {
 
     this.ingredientCenter = Matter.Bodies.circle(
       this.xCenterField,
-      0,
+      -1000,
       this.ingredientRadius,
       {
         label: 'Ingredient2',
@@ -422,7 +422,7 @@ export class CatcherProgram implements Program {
     });
   }
 
-  generateIngredientListNumbers() {
+  private generateIngredientListNumbers() {
     let lastRandomInt = -1;
     for (let index = 0; index < 2; index++) {
       let currentRandomInt = this.getRandomInt(3);
