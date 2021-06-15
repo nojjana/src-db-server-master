@@ -173,8 +173,8 @@ export class CatcherProgram implements Program {
 
   private setControllerDataListeners(): void {
     if (this.controller1 && this.controller2) {
-      this.controller1.addSocketListener('controllerData', this.setControllerData.bind(this));
-      this.controller2.addSocketListener('controllerData', this.setControllerData.bind(this));
+      this.controller1.addSocketListener('controllerData', this.setControllerDataPlayer1.bind(this));
+      this.controller2.addSocketListener('controllerData', this.setControllerDataPlayer2.bind(this));
     }
   }
 
@@ -198,28 +198,49 @@ export class CatcherProgram implements Program {
   /* -------------------- SÄFTLIMACHER GAME METHODS WITH INDIVIDUAL IMPLEMENTATION --------------------*/
 
 
-  private setControllerData(controllerData: number[]): void {
+  // private setControllerData(controllerData: number[]): void {
+  //   let moveToValX = controllerData[0];
+  //   let controllerId = controllerData[1];
+  //   console.log("controllerData arrived:", moveToValX, controllerId);
+    
+  //   if (moveToValX != null && controllerId != null) {
+  //     // TODO
+  //     // check which controller is sending
+  //     switch (controllerId) {
+  //       case 1:
+  //         if (this.catcherNet1 != undefined) {
+  //           this.setShakerPos(moveToValX, this.catcherNet1);
+  //         }
+  //       case 2:
+  //         if (this.catcherNet2 != undefined) {
+  //           this.setShakerPos(moveToValX, this.catcherNet2);
+  //         }
+  //       // case 3:
+  //       //   if (this.catcherNet3 != undefined) {
+  //       //     this.setShakerPos(moveToValX, this.catcherNet3);
+  //       //   }
+  //     }
+  //   }
+  // }
+
+  private setControllerDataPlayer1(controllerData: number[]): void {
     let moveToValX = controllerData[0];
     let controllerId = controllerData[1];
-    console.log("controllerData arrived:", moveToValX, controllerId);
+    console.log("controllerData from Player 1 arrived:", moveToValX, controllerId);
     
-    if (moveToValX != null && controllerId != null) {
-      // TODO
-      // check which controller is sending
-      switch (controllerId) {
-        case 1:
-          if (this.catcherNet1 != undefined) {
-            this.setShakerPos(moveToValX, this.catcherNet1);
-          }
-        case 2:
-          if (this.catcherNet2 != undefined) {
-            this.setShakerPos(moveToValX, this.catcherNet2);
-          }
-        // case 3:
-        //   if (this.catcherNet3 != undefined) {
-        //     this.setShakerPos(moveToValX, this.catcherNet3);
-        //   }
-      }
+    if (moveToValX != null && controllerId != null && this.catcherNet1 != undefined) {
+      if (controllerId != 1) return;
+      this.setShakerPos(moveToValX, this.catcherNet1);
+    }
+  }
+
+  private setControllerDataPlayer2(controllerData: number[]): void {
+    let moveToValX = controllerData[0];
+    let controllerId = controllerData[1];
+    console.log("controllerData from Player 2 arrived:", moveToValX, controllerId);
+    if (moveToValX != null && controllerId != null && this.catcherNet2 != undefined) {
+      if (controllerId != 2) return;
+      this.setShakerPos(moveToValX, this.catcherNet2);
     }
   }
 
