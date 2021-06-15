@@ -156,7 +156,7 @@ export class CatcherProgram implements Program {
     if (this.controller1 == null || this.controller2 == null) return;
     this.removeControllerDataListeners();
 
-    let i = 3;
+    let i = 5;
     this.lobbyController.sendToDisplays('countdown', i--);
     this.countdownInterval = setInterval(() => {
       this.lobbyController.sendToDisplays('countdown', i--);
