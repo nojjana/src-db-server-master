@@ -134,6 +134,7 @@ export class CatcherProgram implements Program {
     if (this.readyDisplays === this.lobbyController.getDisplays().length) {
       this.doCountdown();
     }
+    this.setControllerListenerOnExitClicked();
   }
 
   private doGameOverCountdown(): void {
@@ -184,6 +185,14 @@ export class CatcherProgram implements Program {
       this.controller2.removeSocketListener('controllerData');
     }
   }
+
+  /*Allows user to exit the game when ever liked.*/
+  private setControllerListenerOnExitClicked(): void{
+    this.lobbyController.getControllers()[0].addSocketOnce('quitGame', this.shutDownGame.bind(this));
+    this.lobbyController.getControllers()[1].addSocketOnce('quitGame', this.shutDownGame.bind(this));
+  }
+
+    
 
 
   /* -------------------- SÄFTLIMACHER GAME METHODS WITH INDIVIDUAL IMPLEMENTATION --------------------*/
@@ -541,6 +550,7 @@ export class CatcherProgram implements Program {
     }, 1000 / fps);
 
     // this.testClasses();
+
   }
 
 
@@ -558,8 +568,8 @@ export class CatcherProgram implements Program {
 
     this.lobbyController.getControllers()[0].addSocketOnce('goToMainMenu', this.goToMainMenu.bind(this));
 
-    this.lobbyController.getControllers()[0].addSocketOnce('quitGame', this.quitGame.bind(this));
-    this.lobbyController.getControllers()[1].addSocketOnce('quitGame', this.quitGame.bind(this));
+    this.lobbyController.getControllers()[0].addSocketOnce('quitGame', this.shutDownGame.bind(this));
+    this.lobbyController.getControllers()[1].addSocketOnce('quitGame', this.shutDownGame.bind(this));
   }
   private cleanUp(): void {
     if (this.gameTimerId != null) clearTimeout(this.gameTimerId);
@@ -576,14 +586,15 @@ export class CatcherProgram implements Program {
     this.lobbyController.changeProgram(ProgramName.MAIN_MENU);
   }
 
-  private quitGame() {
+  /* private quitGame() {
     // TODO: game abbrechen option
     console.log("quitGame() called");
     this.shutDownGame();
     // this.lobbyController.changeProgram(ProgramName.MAIN_MENU);
-  }
+  } */
 
-  private shutDownGame(): void {
+  private shutDownGame(): void {    
+    console.log("SERVER: shutDownGame() called");
     this.cleanUp();
     if (this.engine != null) {
       Matter.World.clear(this.engine.world, false);
