@@ -451,20 +451,21 @@ export class CatcherProgram implements Program {
         // TODO
         if (pair.bodyA.label.includes('Catcher') && pair.bodyB.label.includes('Ingredient') || pair.bodyB.label.includes('Catcher') && pair.bodyA.label.includes('Ingredient')) {
           // ingredient catched
-          let shakerBody = pair.bodyA;
+          let catcherBody = pair.bodyA;
           let ingredientBody = pair.bodyB;
           if (pair.bodyA.label.includes('Ingredient')) {
-            shakerBody = pair.bodyB;
+            catcherBody = pair.bodyB;
             ingredientBody = pair.bodyA;
           }
           let ingredientTypeNr: number = parseInt(ingredientBody.label.charAt(ingredientBody.label.length - 1));
           // TODO
-          let shakerNr: number = parseInt(shakerBody.label.charAt(shakerBody.label.length - 1));
+          let catcherNr: number = parseInt(catcherBody.label.charAt(catcherBody.label.length - 1));
 
           if (this.allIngredientNumbersOnList.includes(ingredientTypeNr)) {
             // good catch
             console.log('catched a good ingredient, +50 points!!');
             this.score += this.scoreInc;
+            this.lobbyController.sendToControllers('vibrate', [catcherNr]);
             this.lobbyController.sendToDisplays('checkIngredientOnList', ingredientTypeNr);
             this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient',
               [this.scoreInc, ingredientTypeNr, ingredientBody.position.x, ingredientBody.position.y]);
