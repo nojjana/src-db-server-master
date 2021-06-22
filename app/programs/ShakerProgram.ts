@@ -73,6 +73,7 @@ export class ShakerProgram implements Program {
   private allIngredientNumbersOnList: number[] = new Array();
   // secondsForFalling = 1.8;   // je nach Bildschirm. TODO: fix.
   secondsForFalling = 0.8;
+  fallBlocked = false;
 
 
 
@@ -240,11 +241,16 @@ export class ShakerProgram implements Program {
     } else if (this.shakeCounter >= this.shakePointsNeededForFalling) {
       // console.log('shakeCounter: ' + this.shakeCounter);
       this.shakeCounter = this.shakePointsNeededForFalling;
-      // setTimeout(() => { 
-        this.triggerFallOfIngredient(this.currentRandomShakingObjectNumber);
-        this.shakeCounter = this.shakeCounter * 0.6;
+      if (!this.fallBlocked) {
+        this.fallBlocked = true;
+              setTimeout(() => { 
+                this.triggerFallOfIngredient(this.currentRandomShakingObjectNumber);
+                this.shakeCounter = this.shakeCounter * 0.6;
+                this.fallBlocked = false;
+              }, 100);
+         }
         // setTimeout(() => { this.shakeCounter = 0; }, 50);
-      // }, 10);
+
     }
     setTimeout(() => { this.shaking = false; }, 50);
   }
