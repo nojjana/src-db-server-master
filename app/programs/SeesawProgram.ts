@@ -1,8 +1,10 @@
 import { Program, ProgramName } from "./Program";
 import { LobbyController } from "../LobbyController";
 import { Socket } from "socket.io";
-import Matter, { Bodies } from "matter-js";
+import Matter, { Bodies, Render } from "matter-js";
 import { SrcSocket } from "../SrcSocket";
+import { group } from "console";
+
 
 export class SeesawProgram implements Program {
 
@@ -32,18 +34,14 @@ export class SeesawProgram implements Program {
   private height = 1440;
   private worldSideMargin = 600;
   // fields where ingredients fall: left, center, right
-  ////private xLeftField = 740;
+  private xLeftField = this.width * 0.25;
   private xCenterField = this.width * 0.5;
-  ////private xRightField = 1820;
-  //private xLeftField = 200;
-  private xLeftField = this.width * 0.25
-  private xRightField = this.width * 0.75
-  // TODO 3 ebene für shaker/netze berechnen und speichern
-  ////private yCatcherFieldBottom1 = this.height * 0.8
-  ////private yCatcherFieldMiddle2 = this.height * 0.6
+  private xRightField = this.width * 0.75;
 
   // placement of seesaws
   // TODO: 3 teile berrechnen und speichern
+  private xSeesawLeftPosition = 500;
+  private xSeesawRightPosition = 1300;
   private ySeesawPosition = 1100;
 
 
@@ -56,12 +54,7 @@ export class SeesawProgram implements Program {
   private seesawBeam1?: Matter.Body;
   private seesaw2?: Matter.Body;
   private seesawBeam2?: Matter.Body;
-  
-  //todo: delete
-  //private catcherNet1?: Matter.Body;
-  //private catcherNet2?: Matter.Body;
-
-   
+     
   
   // säftlimacher game variables
   private movePixelSteps = 30;  // möglichst in 10er Schritten, testen
@@ -73,6 +66,10 @@ export class SeesawProgram implements Program {
   // private allIngrFalling: Ingredient[] = new Array();
   private gravityX: number = 0;
   private gravityY: number = 0.4;
+  private Constraint = Matter.Constraint;
+  private Vector = Matter.Vector;
+  private Composite = Matter.Composite;
+
 
   constructor(lobbyController: LobbyController) {
     this.lobbyController = lobbyController;
@@ -369,18 +366,24 @@ export class SeesawProgram implements Program {
       // }),
       // Left
       Matter.Bodies.rectangle(this.worldSideMargin, this.height / 2, 10, this.height, {
-        isStatic: true
+        isStatic: true,
+        render: { 
+          visible: true, }
       }),
       // Bottom
       // not visible, further down. trigger for respawning fruit
       Matter.Bodies.rectangle(this.width / 2, this.height+400, this.width, 10, {
         label: 'Floor',
         isStatic: true,
-        isSensor: true
+        isSensor: true,
+        render: { 
+          visible: true, }
       }),
       // Right
       Matter.Bodies.rectangle(this.width - this.worldSideMargin, this.height / 2, 10, this.height, {
-        isStatic: true
+        isStatic: true,
+        render: { 
+          visible: true, }
       })
     ])
   }
@@ -390,61 +393,87 @@ export class SeesawProgram implements Program {
   private initSeesaws(): void {
     if (this.engine == null) return;
 
-    console.log("ySeesawPosition befor seesaw1 called: "+this.ySeesawPosition)
-
     //seesaw1
     this.seesaw1 = Matter.Bodies.rectangle(
-      this.xLeftField,
+      this.xSeesawLeftPosition,
       this.ySeesawPosition,
       600,  
       20,
       {
         label: 'Seesaw1',
-        isSensor: true,
-        isStatic: true
+        isSensor: false,
+        isStatic: false,
       }
     )
-    Matter.World.add(this.engine.world, this.seesaw1); 
+
+    //Matter.World.add(this.engine.world, this.seesaw1); 
+
+    this.seesawBeam1 = Matter.Bodies.rectangle(
+      this.xSeesawLeftPosition + 300,
+      this.ySeesawPosition,
+      50,
+      10,
+      {
+        label: 'SeesawBeam1',
+        isStatic: true,
+      }
+    )
+
+    //Matter.World.add(this.engine.world, this.seesawBeam1); 
+
+  // Create a point constraint that pins the center of the platform to a fixed point in space, so
+  // it can't move
+  //https://itnext.io/modular-game-worlds-in-phaser-3-tilemaps-5-matter-physics-platformer-d14d1f614557
+  const constraintSeesaw1 = this.Constraint.create({
+    pointA: {x: this.seesawBeam1.position.x, y: this.seesawBeam1.position.y},
+    pointB: {x: this.seesaw1.position.x+300, y: this.seesaw1.position.y+25},
+   // stiffness: 1,
+    length: 0
+  })
+
+  Matter.World.add(this.engine.world, constraintSeesaw1);
 
 
-    console.log("ySeesawPosition befor seesaw2 called: "+this.ySeesawPosition)
     //seesaw2
     this.seesaw2 = Matter.Bodies.rectangle(
-      this.xRightField,
+      this.xSeesawRightPosition,
       this.ySeesawPosition,
       600,
       20,
       {
         label: 'Seesaw2',
-        isSensor: true,
+        isSensor: false,
+        isStatic: false,
+      }
+    )
+    //Matter.World.add(this.engine.world, this.seesaw2); 
+
+
+    this.seesawBeam2 = Matter.Bodies.rectangle(
+      this.xSeesawRightPosition + 300,
+      this.ySeesawPosition,
+      50,
+      10,
+      {
+        label: 'SeesawBeam2',
         isStatic: true
       }
     )
-    Matter.World.add(this.engine.world, this.seesaw2); 
+    //Matter.World.add(this.engine.world, this.seesawBeam2);  
 
 
-    // net1
-    /* this.catcherNet1 = Matter.Bodies.circle(
-      this.xCenterField,
-      this.yCatcherFieldBottom1,
-      this.shakerContainerRadius,
-      {
-        label: 'Catcher1',
-        isSensor: true,
-        isStatic: true
-      });
-    Matter.World.add(this.engine.world, this.catcherNet1);
+  // Create a point constraint that pins the center of the platform to a fixed point in space, so
+  // it can't move
+  //https://itnext.io/modular-game-worlds-in-phaser-3-tilemaps-5-matter-physics-platformer-d14d1f614557
+    const constraintSeesaw2 = this.Constraint.create({
+      pointA: {x: this.seesawBeam2.position.x, y: this.seesawBeam2.position.y},
+      pointB: {x: this.seesaw2.position.x+300, y: this.seesaw2.position.y+25},
+    //  stiffness: 1,
+      length: 0
+    })
 
-    // net2
-    this.catcherNet2 = Matter.Bodies.circle(
-      this.xCenterField,
-      this.yCatcherFieldMiddle2,
-      this.shakerContainerRadius,
-      {
-        label: 'Catcher2',
-        isSensor: true,
-        isStatic: true
-      });*/
+    Matter.World.add(this.engine.world, constraintSeesaw2);
+
   }
 
   private initIngredients(): void {
@@ -455,7 +484,8 @@ export class SeesawProgram implements Program {
       -50,
       this.ingredientRadius,
       {
-        label: 'Ingredient0'
+        label: 'Ingredient0',
+        isSensor: false
       });
     Matter.World.add(this.engine.world, this.ingredientLeft);
 
@@ -465,6 +495,7 @@ export class SeesawProgram implements Program {
       this.ingredientRadius,
       {
         label: 'Ingredient1',
+        isSensor: false
       });
     Matter.World.add(this.engine.world, this.ingredientRight);
 
@@ -474,9 +505,9 @@ export class SeesawProgram implements Program {
       this.ingredientRadius,
       {
         label: 'Ingredient2',
+        isSensor: false
       });
     Matter.World.add(this.engine.world, this.ingredientCenter);
-
   }
 
   private setUpGame() {
@@ -488,6 +519,7 @@ export class SeesawProgram implements Program {
     this.sendLevelInfoToDisplay();
   }
 
+  //TODO: instaed of seesaw add a the mixer container and a bucket
   initMatterEventCollision() {
     // Matter.Events.on(this.engine, 'collisionActive', (event) => {
     Matter.Events.on(this.engine, 'collisionStart', (event) => {
@@ -497,18 +529,23 @@ export class SeesawProgram implements Program {
       for (; i != j; ++i) {
         const pair = pairs[i];
 
-        // TODO
         if (pair.bodyA.label.includes('Seesaw') && pair.bodyB.label.includes('Ingredient') || pair.bodyB.label.includes('Seesaw') && pair.bodyA.label.includes('Ingredient')) {
+          // ingredient fallen onto seesaw
+          console.log("Ingredient landet on seesaw");
+
+          }
+        // TODO
+        if (pair.bodyA.label.includes('Container') && pair.bodyB.label.includes('Ingredient') || pair.bodyB.label.includes('Container') && pair.bodyA.label.includes('Ingredient')) {
           // ingredient catched
-          let seesawBody = pair.bodyA;
+          let containerBody = pair.bodyA;
           let ingredientBody = pair.bodyB;
           if (pair.bodyA.label.includes('Ingredient')) {
-            seesawBody = pair.bodyB;
+            containerBody = pair.bodyB;
             ingredientBody = pair.bodyA;
           }
           let ingredientTypeNr: number = parseInt(ingredientBody.label.charAt(ingredientBody.label.length - 1));
           // TODO
-          let seesawNr: number = parseInt(seesawBody.label.charAt(seesawBody.label.length - 1));
+          let seesawNr: number = parseInt(containerBody.label.charAt(containerBody.label.length - 1));
 
           if (this.allIngredientNumbersOnList.includes(ingredientTypeNr)) {
             // good catch
@@ -601,8 +638,10 @@ export class SeesawProgram implements Program {
       this.engine.world.gravity.y = this.gravityY;
       Matter.Engine.update(this.engine, 1000 / fps);
 
-      this.lobbyController.sendToDisplays('seesaw1Position', [this.seesaw1.position.x, this.seesaw1.position.y]);
-      this.lobbyController.sendToDisplays('seesaw2Position', [this.seesaw2.position.x, this.seesaw2.position.y]);
+      this.lobbyController.sendToDisplays('seesaw1Position', [this.seesaw1.position.x, this.seesaw1.position.y, 600, 20]);
+      this.lobbyController.sendToDisplays('seesaw2Position', [this.seesaw2.position.x, this.seesaw2.position.y, 600, 20]);
+      this.lobbyController.sendToDisplays('seesawBeam1Position', [this.seesawBeam1.position.x, this.seesawBeam1.position.y, 10, 50]);
+      this.lobbyController.sendToDisplays('seesawBeam2Position', [this.seesawBeam2.position.x, this.seesawBeam2.position.y, 10, 50]);
 
       this.lobbyController.sendToDisplays('updateScore', this.score);
 
@@ -839,7 +878,7 @@ class Ingredient {
   private body: Matter.Body;
   private x = 0;
   private y = 0;
-  private r = 50;
+  private r = 600;
   private edible = true;
 
   constructor(name: string, ingredientType: IngredientType, x?: number, y?: number, r?: number, edible?: boolean) {
@@ -862,7 +901,7 @@ class Ingredient {
       // no values for body passed, setting defaults
       this.x = 0;
       this.y = 0;
-      this.r = 50;
+      this.r = 600;
       this.body = Matter.Bodies.circle(
         this.x,
         this.y,
