@@ -63,6 +63,10 @@ export class LobbyController {
                 newProgram = new CatcherProgram(this);
                 break;
             }
+            case ProgramName.SEESAW: {
+                newProgram = new CatcherProgram(this);
+                break;
+            }
             case ProgramName.MAIN_MENU: {
                 newProgram = new MainMenuProgramm(this);
                 break;
