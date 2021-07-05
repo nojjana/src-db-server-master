@@ -44,8 +44,14 @@ export class CatcherProgram implements Program {
   private ingredientLeft?: Matter.Body;
   private ingredientCenter?: Matter.Body;
   private ingredientRight?: Matter.Body;
+  private seesaw1?: Matter.Body;
+  private seesawBeam1?: Matter.Body;
+  
+  //todo: delete
   private catcherNet1?: Matter.Body;
   private catcherNet2?: Matter.Body;
+
+   
   
   // säftlimacher game variables
   private movePixelSteps = 30;  // möglichst in 10er Schritten, testen
@@ -332,11 +338,19 @@ export class CatcherProgram implements Program {
     // 0
     data.push(this.allIngredientNumbersOnList);
     // 1 2
-    data.push(this.catcherNet1?.position.x);
-    data.push(this.catcherNet1?.position.y);
+    data.push(this.seesaw1?.position.x);
+    data.push(this.seesaw1?.position.y);
     // 3 4
-    data.push(this.catcherNet2?.position.x);
-    data.push(this.catcherNet2?.position.y);
+    //data.push(this.seesawBeam1?.position.x);
+    //data.push(this.seesawBeam1?.position.y);
+
+    ////data.push(this.catcherNet1?.position.x);
+    ////data.push(this.catcherNet1?.position.y);
+    // 3 4
+    //data.push(this.catcherNet2?.position.x);
+    //data.push(this.catcherNet2?.position.y);
+
+
 
     this.setDisplayGameViewBuildListener();
     this.lobbyController.sendToDisplays('levelData', data);
