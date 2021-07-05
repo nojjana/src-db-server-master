@@ -5,6 +5,7 @@ import { SpaceshipProgram } from "./programs/SpaceshipProgram";
 import { WhackAMoleProgram } from "./programs/WhackAMoleProgram";
 import { ShakerProgram } from "./programs/ShakerProgram";
 import { CatcherProgram } from "./programs/CatcherProgram";
+import { SeesawProgram } from "./programs/SeesawProgram";
 import { SrcSocket } from "./SrcSocket";
 import { VarianzTest } from "./programs/VarianzTestProgram";
 import { LastTest } from "./programs/LastTestProgram";
@@ -64,7 +65,7 @@ export class LobbyController {
                 break;
             }
             case ProgramName.SEESAW: {
-                newProgram = new CatcherProgram(this);
+                newProgram = new SeesawProgram(this);
                 break;
             }
             case ProgramName.MAIN_MENU: {

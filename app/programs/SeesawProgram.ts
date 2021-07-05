@@ -4,7 +4,7 @@ import { Socket } from "socket.io";
 import Matter, { Bodies } from "matter-js";
 import { SrcSocket } from "../SrcSocket";
 
-export class CatcherProgram implements Program {
+export class SeesawProgram implements Program {
 
   // basic program setup
   private lobbyController: LobbyController;
@@ -32,12 +32,20 @@ export class CatcherProgram implements Program {
   private height = 1440;
   private worldSideMargin = 600;
   // fields where ingredients fall: left, center, right
-  private xLeftField = 740;
-  private xCenterField = 1280;
-  private xRightField = 1820;
+  ////private xLeftField = 740;
+  private xCenterField = this.width * 0.5;
+  ////private xRightField = 1820;
+  //private xLeftField = 200;
+  private xLeftField = this.width * 0.25
+  private xRightField = this.width * 0.75
   // TODO 3 ebene für shaker/netze berechnen und speichern
-  private yCatcherFieldBottom1 = this.height * 0.8
-  private yCatcherFieldMiddle2 = this.height * 0.6
+  ////private yCatcherFieldBottom1 = this.height * 0.8
+  ////private yCatcherFieldMiddle2 = this.height * 0.6
+
+  // placement of seesaws
+  // TODO: 3 teile berrechnen und speichern
+  private ySeesawPosition = 1100;
+
 
 
   // säftlimacher visible objects
@@ -46,10 +54,12 @@ export class CatcherProgram implements Program {
   private ingredientRight?: Matter.Body;
   private seesaw1?: Matter.Body;
   private seesawBeam1?: Matter.Body;
+  private seesaw2?: Matter.Body;
+  private seesawBeam2?: Matter.Body;
   
   //todo: delete
-  private catcherNet1?: Matter.Body;
-  private catcherNet2?: Matter.Body;
+  //private catcherNet1?: Matter.Body;
+  //private catcherNet2?: Matter.Body;
 
    
   
@@ -158,6 +168,7 @@ export class CatcherProgram implements Program {
       }
     }, 1000);
   }
+
   private doCountdown(): void {
     if (this.controller1 == null || this.controller2 == null) return;
     this.removeControllerDataListeners();
@@ -234,21 +245,21 @@ export class CatcherProgram implements Program {
     let controllerId = controllerData[1];
     console.log("controllerData from Player 1 arrived:", moveToValX, controllerId);
     
-    if (moveToValX != null && controllerId != null && this.catcherNet1 != undefined) {
+    if (moveToValX != null && controllerId != null && this.seesaw1 != undefined) {
       if (controllerId != 1) return;
-      this.setShakerPos(moveToValX, this.catcherNet1);
+      this.setShakerPos(moveToValX, this.seesaw1);
     }
   }
 
-  private setControllerDataPlayer2(controllerData: number[]): void {
+   private setControllerDataPlayer2(controllerData: number[]): void {
     let moveToValX = controllerData[0];
     let controllerId = controllerData[1];
     console.log("controllerData from Player 2 arrived:", moveToValX, controllerId);
-    if (moveToValX != null && controllerId != null && this.catcherNet2 != undefined) {
+    if (moveToValX != null && controllerId != null && this.seesaw2 != undefined) {
       if (controllerId != 2) return;
-      this.setShakerPos(moveToValX, this.catcherNet2);
+      this.setShakerPos(moveToValX, this.seesaw2);
     }
-  }
+  } 
 
 
   private setShakerPos(valX: number, netBody: Matter.Body) {
@@ -316,7 +327,7 @@ export class CatcherProgram implements Program {
       newX = body.position.x - pixelSteps;
     }
 
-    let newY = body.position.y;
+     let newY = body.position.y;
     if (dy > 0) {
       // a little bit down
       newY = body.position.y + pixelSteps;
@@ -330,7 +341,7 @@ export class CatcherProgram implements Program {
     });
 
     return {x: newX, y: newY};
-  }
+  } 
 
   private sendLevelInfoToDisplay(): void {
     let data: any[] = [];
@@ -341,16 +352,8 @@ export class CatcherProgram implements Program {
     data.push(this.seesaw1?.position.x);
     data.push(this.seesaw1?.position.y);
     // 3 4
-    //data.push(this.seesawBeam1?.position.x);
-    //data.push(this.seesawBeam1?.position.y);
-
-    ////data.push(this.catcherNet1?.position.x);
-    ////data.push(this.catcherNet1?.position.y);
-    // 3 4
-    //data.push(this.catcherNet2?.position.x);
-    //data.push(this.catcherNet2?.position.y);
-
-
+    data.push(this.seesaw2?.position.x);
+    data.push(this.seesaw2?.position.y);
 
     this.setDisplayGameViewBuildListener();
     this.lobbyController.sendToDisplays('levelData', data);
@@ -384,11 +387,44 @@ export class CatcherProgram implements Program {
 
 
 
-  private initCatcherNets(): void {
+  private initSeesaws(): void {
     if (this.engine == null) return;
 
+    console.log("ySeesawPosition befor seesaw1 called: "+this.ySeesawPosition)
+
+    //seesaw1
+    this.seesaw1 = Matter.Bodies.rectangle(
+      this.xLeftField,
+      this.ySeesawPosition,
+      600,  
+      20,
+      {
+        label: 'Seesaw1',
+        isSensor: true,
+        isStatic: true
+      }
+    )
+    Matter.World.add(this.engine.world, this.seesaw1); 
+
+
+    console.log("ySeesawPosition befor seesaw2 called: "+this.ySeesawPosition)
+    //seesaw2
+    this.seesaw2 = Matter.Bodies.rectangle(
+      this.xRightField,
+      this.ySeesawPosition,
+      600,
+      20,
+      {
+        label: 'Seesaw2',
+        isSensor: true,
+        isStatic: true
+      }
+    )
+    Matter.World.add(this.engine.world, this.seesaw2); 
+
+
     // net1
-    this.catcherNet1 = Matter.Bodies.circle(
+    /* this.catcherNet1 = Matter.Bodies.circle(
       this.xCenterField,
       this.yCatcherFieldBottom1,
       this.shakerContainerRadius,
@@ -408,8 +444,7 @@ export class CatcherProgram implements Program {
         label: 'Catcher2',
         isSensor: true,
         isStatic: true
-      });
-    Matter.World.add(this.engine.world, this.catcherNet2);
+      });*/
   }
 
   private initIngredients(): void {
@@ -447,7 +482,7 @@ export class CatcherProgram implements Program {
   private setUpGame() {
     this.engine = Matter.Engine.create();
     this.createWorldBounds();
-    this.initCatcherNets();
+    this.initSeesaws();
     this.initIngredients();
     this.initMatterEventCollision();
     this.sendLevelInfoToDisplay();
@@ -463,23 +498,23 @@ export class CatcherProgram implements Program {
         const pair = pairs[i];
 
         // TODO
-        if (pair.bodyA.label.includes('Catcher') && pair.bodyB.label.includes('Ingredient') || pair.bodyB.label.includes('Catcher') && pair.bodyA.label.includes('Ingredient')) {
+        if (pair.bodyA.label.includes('Seesaw') && pair.bodyB.label.includes('Ingredient') || pair.bodyB.label.includes('Seesaw') && pair.bodyA.label.includes('Ingredient')) {
           // ingredient catched
-          let catcherBody = pair.bodyA;
+          let seesawBody = pair.bodyA;
           let ingredientBody = pair.bodyB;
           if (pair.bodyA.label.includes('Ingredient')) {
-            catcherBody = pair.bodyB;
+            seesawBody = pair.bodyB;
             ingredientBody = pair.bodyA;
           }
           let ingredientTypeNr: number = parseInt(ingredientBody.label.charAt(ingredientBody.label.length - 1));
           // TODO
-          let catcherNr: number = parseInt(catcherBody.label.charAt(catcherBody.label.length - 1));
+          let seesawNr: number = parseInt(seesawBody.label.charAt(seesawBody.label.length - 1));
 
           if (this.allIngredientNumbersOnList.includes(ingredientTypeNr)) {
             // good catch
             console.log('catched a good ingredient, +50 points!!');
             this.score += this.scoreInc;
-            this.lobbyController.sendToControllers('vibrate', [catcherNr]);
+            this.lobbyController.sendToControllers('vibrate', [seesawNr]);
             this.lobbyController.sendToDisplays('checkIngredientOnList', ingredientTypeNr);
             this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient',
               [this.scoreInc, ingredientTypeNr, ingredientBody.position.x, ingredientBody.position.y]);
@@ -561,13 +596,13 @@ export class CatcherProgram implements Program {
 
     let fps = 60;
     this.gameLoop = setInterval(() => {
-      if (this.engine == null || this.catcherNet1 == null || this.catcherNet2 == null) return;
+      if (this.engine == null || this.seesaw1 == null || this.seesaw2 == null) return;
       this.engine.world.gravity.x = this.gravityX;
       this.engine.world.gravity.y = this.gravityY;
       Matter.Engine.update(this.engine, 1000 / fps);
 
-      this.lobbyController.sendToDisplays('catcherNet1Position', [this.catcherNet1.position.x, this.catcherNet1.position.y]);
-      this.lobbyController.sendToDisplays('catcherNet2Position', [this.catcherNet2.position.x, this.catcherNet2.position.y]);
+      this.lobbyController.sendToDisplays('seesaw1Position', [this.seesaw1.position.x, this.seesaw1.position.y]);
+      this.lobbyController.sendToDisplays('seesaw2Position', [this.seesaw2.position.x, this.seesaw2.position.y]);
 
       this.lobbyController.sendToDisplays('updateScore', this.score);
 
