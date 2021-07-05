@@ -46,8 +46,9 @@ export class ShakerProgram implements Program {
 
   private shaking = false;
   private shakeCounter: number = 0;
-  // private shakePointsNeededForFalling: number = 35;   // 2 Personen am Handy
-  private shakePointsNeededForFalling: number = 4;   // testing
+  private shakePointsNeededForFalling: number = 55;   // 2 Personen am Handy
+  // private shakePointsNeededForFalling: number = 10;   // testing mit smartphone sensor
+  // private shakePointsNeededForFalling: number = 4;   // testing mit dev controls
 
   private shakeObjectChangeTimerId?: NodeJS.Timeout;
   private shakeObjectChangeAfterSeconds: number = 5;
@@ -69,8 +70,9 @@ export class ShakerProgram implements Program {
   private playing: boolean = false;
 
   private allIngredientNumbersOnList: number[] = new Array();
-  // secondsForFalling = 1.8;   // je nach Bildschrim. TODO: fix.
+  // secondsForFalling = 1.8;   // je nach Bildschirm. TODO: fix.
   secondsForFalling = 0.8;
+  fallBlocked = false;
 
 
 
@@ -237,12 +239,17 @@ export class ShakerProgram implements Program {
       this.shakeCounter++;
     } else if (this.shakeCounter >= this.shakePointsNeededForFalling) {
       // console.log('shakeCounter: ' + this.shakeCounter);
-      this.shakeCounter = this.shakePointsNeededForFalling
-      setTimeout(() => { 
-        this.triggerFallOfIngredient(this.currentRandomShakingObjectNumber);
+      this.shakeCounter = this.shakePointsNeededForFalling;
+      if (!this.fallBlocked) {
+        this.fallBlocked = true;
+              setTimeout(() => { 
+                this.triggerFallOfIngredient(this.currentRandomShakingObjectNumber);
+                this.shakeCounter = this.shakeCounter * 0.6;
+                this.fallBlocked = false;
+              }, 100);
+         }
         // setTimeout(() => { this.shakeCounter = 0; }, 50);
-        this.shakeCounter = this.shakeCounter * 0.6;
-      }, 100);
+
     }
     setTimeout(() => { this.shaking = false; }, 50);
   }
