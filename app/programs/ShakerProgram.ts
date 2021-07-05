@@ -1,6 +1,5 @@
 import { Program, ProgramName } from "./Program";
 import { LobbyController } from "../LobbyController";
-import { Socket } from "socket.io";
 import Matter, { Bodies } from "matter-js";
 import { SrcSocket } from "../SrcSocket";
 
@@ -233,7 +232,7 @@ export class ShakerProgram implements Program {
 
   private shakeMovement(): void {
     this.shaking = true;
-    console.log('Controllers are shaking. Counter: ' + this.shakeCounter);
+    //console.log('Controllers are shaking. Counter: ' + this.shakeCounter);
     if (this.shakeCounter < this.shakePointsNeededForFalling) {
       this.shakeCounter++;
     } else if (this.shakeCounter >= this.shakePointsNeededForFalling) {
@@ -254,7 +253,7 @@ export class ShakerProgram implements Program {
   // }
 
   private triggerFallOfIngredient(ingredientNumber: number): void {
-    console.log("Ingredient shall fall, number: "+ingredientNumber);
+    //console.log("Ingredient shall fall, number: "+ingredientNumber);
     // TODO: send number
     this.lobbyController.sendToDisplays('updateFall', true);
 
@@ -272,7 +271,7 @@ export class ShakerProgram implements Program {
    } else {
     // TODO: wrong ingredient! descrease score? display message?
     setTimeout(() => { 
-      console.log('catched a wrong ingredient, NOT on list!!! -50 Punkte.');
+      //console.log('catched a wrong ingredient, NOT on list!!! -50 Punkte.');
       this.score -= this.scoreInc;
       this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient', [-this.scoreInc, ingredientNumber]); 
     }, this.secondsForFalling * 1000);
@@ -282,7 +281,7 @@ export class ShakerProgram implements Program {
   }
 
   private triggerChangeShakeObject(): void {
-    console.log('Time for a new plant!');
+    //console.log('Time for a new plant!');
 
     this.oldShakeObjectNumber = this.currentRandomShakingObjectNumber;
     this.currentRandomShakingObjectNumber = this.getRandomInt(this.maxAmountOfFallingObjects);
@@ -315,6 +314,9 @@ export class ShakerProgram implements Program {
     if (this.readyDisplays === this.lobbyController.getDisplays().length) {
       this.doCountdown();
     }
+    /*Allows user to exit the game when ever liked.*/
+    this.lobbyController.getControllers()[0].addSocketOnce('quitGame', this.shutDownGame.bind(this));
+    this.lobbyController.getControllers()[1].addSocketOnce('quitGame', this.shutDownGame.bind(this));
   }
 
   socketLeft(socketId: string): void {
@@ -534,7 +536,7 @@ export class ShakerProgram implements Program {
       lastRandomInt = thisRandomInt;
     }
     this.allIngredientNumbersOnList.forEach(n => {
-      console.log("number on list: "+n);
+      //console.log("number on list: "+n);
     });
   }
 
@@ -570,6 +572,7 @@ export class ShakerProgram implements Program {
       }
         
     }, 1000 / fps);
+
   }
 
   private cleanUp(): void {
@@ -587,6 +590,8 @@ export class ShakerProgram implements Program {
   }
 
   private gameOver() {
+    console.log("SERVER: gameOver() called");
+
     this.cleanUp();
 
     this.playing = false;
@@ -597,25 +602,16 @@ export class ShakerProgram implements Program {
     this.lobbyController.getControllers()[1].emit('stopSendingData', false);
 
     this.lobbyController.getControllers()[0].addSocketOnce('goToMainMenu', this.goToMainMenu.bind(this));
-
-    this.lobbyController.getControllers()[0].addSocketOnce('quitGame', this.quitGame.bind(this));
-    this.lobbyController.getControllers()[1].addSocketOnce('quitGame', this.quitGame.bind(this));
-
-
   }
 
   private goToMainMenu() {
+    console.log("server goToMainMenu() called");
+
     this.lobbyController.changeProgram(ProgramName.MAIN_MENU);
   }
 
-  private quitGame() {
-    // TODO: game abbrechen option
-    console.log("quitGame() called");
-    this.shutDownGame();
-    // this.lobbyController.changeProgram(ProgramName.MAIN_MENU);
-  }
-
   private shutDownGame(): void {
+    console.log("SERVER: shutDownGame() called");
     this.cleanUp();
     if (this.engine != null) {
       Matter.World.clear(this.engine.world, false);
@@ -641,25 +637,25 @@ export class ShakerProgram implements Program {
   // TEST. CLASSES.
 
   testClasses() {
-    console.log("------------ test of classes ------------");
+    //console.log("------------ test of classes ------------");
 
     const firstPlant = new AppleTree();
-    console.log("firstPlant: "+firstPlant.getName());
+    //console.log("firstPlant: "+firstPlant.getName());
 
     const firstIngredient = new Apple();
-    console.log("firstIngredient: "+firstIngredient.getName());
-    console.log("firstIngredient is edible: "+firstIngredient.isEdible());
+    //console.log("firstIngredient: "+firstIngredient.getName());
+    //console.log("firstIngredient is edible: "+firstIngredient.isEdible());
     
     firstPlant.addIngredient(firstIngredient);
     firstPlant.getIngredients().forEach(i => console.log(i.getName()));
 
     let listOfItems: Ingredient[] = [new Apple(), new Banana(), new Berry()];
-    console.log("items on list: ");
+    //console.log("items on list: ");
     listOfItems.forEach(item => {
-      console.log(item.getName());
+      //console.log(item.getName());
     });
 
-    console.log("firstIngredient '"+firstIngredient.getName()+"' is on list: "+ this.isOnList(firstIngredient, listOfItems));
+    //console.log("firstIngredient '"+firstIngredient.getName()+"' is on list: "+ this.isOnList(firstIngredient, listOfItems));
 
   }
 
