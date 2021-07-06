@@ -125,11 +125,12 @@ io.on('connection', (socket: Socket) => {
 
 /* Recursivly creates a unique lobby code between 10'000 - 99'999 */
 function createLobbyCode() : number {
-    let tmp = Math.floor(Math.random() * (99999 - 10000) + 10000);
+    /* let tmp = Math.floor(Math.random() * (99999 - 10000) + 10000);
 
     if(Array.from(lobbies.keys()).includes(tmp)) {
         return createLobbyCode();
     }
 
-    return tmp;
+    return tmp; */
+    return 1;
 }
