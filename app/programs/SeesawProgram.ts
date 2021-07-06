@@ -657,10 +657,6 @@ export class SeesawProgram implements Program {
       this.lobbyController.sendToDisplays('seesaw2Position', [this.seesaw2.position.x, this.seesaw2.position.y, this.seesawLength, this.seesawHeight]);
       this.lobbyController.sendToDisplays('seesawBeam1Position', [this.seesawBeam1.position.x, this.seesawBeam1.position.y, this.seesawBeamLenght, this.seesawBeamHeight]);
       this.lobbyController.sendToDisplays('seesawBeam2Position', [this.seesawBeam2.position.x, this.seesawBeam2.position.y, this.seesawBeamLenght, this.seesawBeamHeight]);
-      this.lobbyController.sendToDisplays('ingredient1CirclePosition', [this.ingredientLeft.position.x, this.ingredientLeft.position.y]);
-      this.lobbyController.sendToDisplays('ingredient2CirclePosition', [this.ingredientCenter.position.x, this.ingredientCenter.position.y]);
-      this.lobbyController.sendToDisplays('ingredient3CirclePosition', [this.ingredientRight.position.x, this.ingredientRight.position.y]);
-
 
       this.lobbyController.sendToDisplays('updateScore', this.score);
 
