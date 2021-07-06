@@ -40,9 +40,13 @@ export class SeesawProgram implements Program {
 
   // placement of seesaws
   // TODO: 3 teile berrechnen und speichern
-  private xSeesawLeftPosition = 500;
-  private xSeesawRightPosition = 1300;
+  private xSeesawLeftPosition = 0;
+  private xSeesawRightPosition = 1280;
   private ySeesawPosition = 1100;
+  private seesawLength = 1100;
+  private seesawHeight = 20;
+  private seesawBeamLenght = 20;
+  private seesawBeamHeight = 100;
 
 
 
@@ -393,54 +397,58 @@ export class SeesawProgram implements Program {
   private initSeesaws(): void {
     if (this.engine == null) return;
 
+    
+    console.log("seesaw left position x: "+this.xSeesawLeftPosition)
+    console.log("seesaw right position x: "+this.xSeesawRightPosition)
+
     //seesaw1
     this.seesaw1 = Matter.Bodies.rectangle(
       this.xSeesawLeftPosition,
       this.ySeesawPosition,
-      600,  
-      20,
+      this.seesawHeight,  
+      this.seesawLength,
       {
         label: 'Seesaw1',
-        isSensor: true,
-        isStatic: false,
+        isSensor: false,
+        isStatic: true,
       }
     )
 
-    //Matter.World.add(this.engine.world, this.seesaw1); 
+    Matter.World.add(this.engine.world, this.seesaw1); 
 
     this.seesawBeam1 = Matter.Bodies.rectangle(
-      this.xSeesawLeftPosition + 300,
+      this.xSeesawLeftPosition,
       this.ySeesawPosition,
-      50,
-      10,
+      this.seesawBeamLenght,
+      this.seesawBeamHeight,
       {
         label: 'SeesawBeam1',
-        isStatic: true,
-        isSensor: false
+        isSensor: false,
+        isStatic: true
       }
     )
 
-    //Matter.World.add(this.engine.world, this.seesawBeam1); 
+    Matter.World.add(this.engine.world, this.seesawBeam1); 
 
   // Create a point constraint that pins the center of the platform to a fixed point in space, so
   // it can't move
   //https://itnext.io/modular-game-worlds-in-phaser-3-tilemaps-5-matter-physics-platformer-d14d1f614557
-  const constraintSeesaw1 = this.Constraint.create({
+  /* const constraintSeesaw1 = this.Constraint.create({
     pointA: {x: this.seesawBeam1.position.x, y: this.seesawBeam1.position.y},
-    pointB: {x: this.seesaw1.position.x+300, y: this.seesaw1.position.y+25},
+    pointB: {x: this.seesaw1.position.x+300, y: this.seesaw1.position.y},
    // stiffness: 1,
-    length: 0
+    //length: 0
   })
 
-  Matter.World.add(this.engine.world, constraintSeesaw1);
+  Matter.World.add(this.engine.world, constraintSeesaw1); */
 
 
     //seesaw2
     this.seesaw2 = Matter.Bodies.rectangle(
       this.xSeesawRightPosition,
       this.ySeesawPosition,
-      600,
-      20,
+      this.seesawLength,
+      this.seesawHeight,
       {
         label: 'Seesaw2',
         isSensor: false,
@@ -451,10 +459,10 @@ export class SeesawProgram implements Program {
 
 
     this.seesawBeam2 = Matter.Bodies.rectangle(
-      this.xSeesawRightPosition + 300,
+      this.xSeesawRightPosition,
       this.ySeesawPosition,
-      50,
-      10,
+      this.seesawBeamLenght,
+      this.seesawBeamHeight,
       {
         label: 'SeesawBeam2',
         isSensor: false,
@@ -467,14 +475,16 @@ export class SeesawProgram implements Program {
   // Create a point constraint that pins the center of the platform to a fixed point in space, so
   // it can't move
   //https://itnext.io/modular-game-worlds-in-phaser-3-tilemaps-5-matter-physics-platformer-d14d1f614557
-     const constraintSeesaw2 = this.Constraint.create({
+     /* const constraintSeesaw2 = this.Constraint.create({
+      //bodyA: this.seesaw2, 
+      //pointB: this.Vector.clone(this.seesaw2.position),
       pointA: {x: this.seesawBeam2.position.x, y: this.seesawBeam2.position.y},
-      pointB: {x: this.seesaw2.position.x+300, y: this.seesaw2.position.y+25},
-    //  stiffness: 1,
-      length: 0,
+      pointB: {x: this.seesaw2.position.x+300, y: this.seesaw2.position.y},
+      stiffness: 1,
+      //length: 0,
     })
 
-    Matter.World.add(this.engine.world, constraintSeesaw2); 
+   Matter.World.add(this.engine.world, constraintSeesaw2);  */
   } 
 
   private initIngredients(): void {
@@ -487,6 +497,10 @@ export class SeesawProgram implements Program {
       {
         label: 'Ingredient0',
         isSensor: false,
+        render: {
+          visible: true,
+          opacity: 1          
+        },
       });
     Matter.World.add(this.engine.world, this.ingredientLeft);
 
@@ -496,7 +510,7 @@ export class SeesawProgram implements Program {
       this.ingredientRadius,
       {
         label: 'Ingredient1',
-        isSensor: false
+        isSensor: false,
       });
     Matter.World.add(this.engine.world, this.ingredientRight);
 
@@ -506,7 +520,7 @@ export class SeesawProgram implements Program {
       this.ingredientRadius,
       {
         label: 'Ingredient2',
-        isSensor: false
+        isSensor: false,
       });
     Matter.World.add(this.engine.world, this.ingredientCenter);
   }
@@ -639,10 +653,14 @@ export class SeesawProgram implements Program {
       this.engine.world.gravity.y = this.gravityY;
       Matter.Engine.update(this.engine, 1000 / fps);
 
-      this.lobbyController.sendToDisplays('seesaw1Position', [this.seesaw1.position.x, this.seesaw1.position.y, 600, 20]);
-      this.lobbyController.sendToDisplays('seesaw2Position', [this.seesaw2.position.x, this.seesaw2.position.y, 600, 20]);
-      this.lobbyController.sendToDisplays('seesawBeam1Position', [this.seesawBeam1.position.x, this.seesawBeam1.position.y, 10, 50]);
-      this.lobbyController.sendToDisplays('seesawBeam2Position', [this.seesawBeam2.position.x, this.seesawBeam2.position.y, 10, 50]);
+      this.lobbyController.sendToDisplays('seesaw1Position', [this.seesaw1.position.x, this.seesaw1.position.y, this.seesawLength, this.seesawHeight]);
+      this.lobbyController.sendToDisplays('seesaw2Position', [this.seesaw2.position.x, this.seesaw2.position.y, this.seesawLength, this.seesawHeight]);
+      this.lobbyController.sendToDisplays('seesawBeam1Position', [this.seesawBeam1.position.x, this.seesawBeam1.position.y, this.seesawBeamLenght, this.seesawBeamHeight]);
+      this.lobbyController.sendToDisplays('seesawBeam2Position', [this.seesawBeam2.position.x, this.seesawBeam2.position.y, this.seesawBeamLenght, this.seesawBeamHeight]);
+      this.lobbyController.sendToDisplays('ingredient1CirclePosition', [this.ingredientLeft.position.x, this.ingredientLeft.position.y]);
+      this.lobbyController.sendToDisplays('ingredient2CirclePosition', [this.ingredientCenter.position.x, this.ingredientCenter.position.y]);
+      this.lobbyController.sendToDisplays('ingredient3CirclePosition', [this.ingredientRight.position.x, this.ingredientRight.position.y]);
+
 
       this.lobbyController.sendToDisplays('updateScore', this.score);
 
@@ -879,7 +897,7 @@ class Ingredient {
   private body: Matter.Body;
   private x = 0;
   private y = 0;
-  private r = 600;
+  private r = 50;
   private edible = true;
 
   constructor(name: string, ingredientType: IngredientType, x?: number, y?: number, r?: number, edible?: boolean) {
@@ -966,6 +984,10 @@ class Ingredient {
       r,
       {
         label: this.name,
+        render: {
+          visible: true,
+          opacity: 1          
+        },
       }
     );
   }
