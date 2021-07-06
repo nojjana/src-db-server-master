@@ -32,21 +32,32 @@ export class SeesawProgram implements Program {
   // säftlimacher world dimensions
   private width = 2560;
   private height = 1440;
-  private worldSideMargin = 600;
+  //private worldSideMargin = 600;
   // fields where ingredients fall: left, center, right
-  private xLeftField = this.width * 0.25;
-  private xCenterField = this.width * 0.5;
-  private xRightField = this.width * 0.75;
+  //private xLeftField = this.width * 0.25;
+  //private xCenterField = this.width * 0.5;
+  //private xRightField = this.width * 0.75;
+  private xLeftField = 1650-200;
+  private xCenterField = 2400-200;
+  private xRightField = 2500-200;
 
   // placement of seesaws
   // TODO: 3 teile berrechnen und speichern
-  private xSeesawLeftPosition = 0;
-  private xSeesawRightPosition = 1280;
-  private ySeesawPosition = 1100;
-  private seesawLength = 1100;
-  private seesawHeight = 20;
-  private seesawBeamLenght = 20;
-  private seesawBeamHeight = 100;
+  private xSeesawLeftPosition = 1200;
+  private xSeesawRightPosition = 2000;
+  private ySeesawPosition = 1000;
+  private seesawLength = 500;
+  private seesawHeight = 40;
+  private seesawBeamLenght = 500;
+  private seesawBeamHeight = 20;
+  private ySeesawBeamPosition = 1000;
+
+  //bei lenght: 500 / left: 1200 und right: 2000 / lenght500 und -400 auf browser seite 
+  // die resultate: 1000 - 1400 und 1800 - 2200
+
+  //ingredients -400 / left: 1200 / right: 2000 / length500 und weiterhin -400 auf browser seite
+  // resultate: (1400-400)-(1800-400)    (2200-400) - (2600-400)
+  // browser seite: -200 sollte geben: 1200 - 1600   / 2000 - 2400
 
 
 
@@ -55,9 +66,9 @@ export class SeesawProgram implements Program {
   private ingredientCenter?: Matter.Body;
   private ingredientRight?: Matter.Body;
   private seesaw1?: Matter.Body;
-  private seesawBeam1?: Matter.Body;
+  //--private seesawBeam1?: Matter.Body;
   private seesaw2?: Matter.Body;
-  private seesawBeam2?: Matter.Body;
+  //--private seesawBeam2?: Matter.Body;
      
   
   // säftlimacher game variables
@@ -192,7 +203,7 @@ export class SeesawProgram implements Program {
   private setControllerDataListeners(): void {
     if (this.controller1 && this.controller2) {
       this.controller1.addSocketListener('controllerData', this.setControllerDataPlayer1.bind(this));
-      this.controller2.addSocketListener('controllerData', this.setControllerDataPlayer2.bind(this));
+ //--     this.controller2.addSocketListener('controllerData', this.setControllerDataPlayer2.bind(this));
     }
   }
 
@@ -252,7 +263,7 @@ export class SeesawProgram implements Program {
     }
   }
 
-   private setControllerDataPlayer2(controllerData: number[]): void {
+  private setControllerDataPlayer2(controllerData: number[]): void {
     let moveToValX = controllerData[0];
     let controllerId = controllerData[1];
     console.log("controllerData from Player 2 arrived:", moveToValX, controllerId);
@@ -260,7 +271,7 @@ export class SeesawProgram implements Program {
       if (controllerId != 2) return;
       this.setShakerPos(moveToValX, this.seesaw2);
     }
-  } 
+  }  
 
 
   private setShakerPos(valX: number, netBody: Matter.Body) {
@@ -369,7 +380,8 @@ export class SeesawProgram implements Program {
       //   isStatic: true
       // }),
       // Left
-      Matter.Bodies.rectangle(this.worldSideMargin, this.height / 2, 10, this.height, {
+      //Matter.Bodies.rectangle(this.worldSideMargin, this.height / 2, 10, this.height, {
+      Matter.Bodies.rectangle(0, this.height / 2, 10, this.height, {
         isStatic: true,
         render: { 
           visible: true, }
@@ -384,7 +396,9 @@ export class SeesawProgram implements Program {
           visible: true, }
       }),
       // Right
-      Matter.Bodies.rectangle(this.width - this.worldSideMargin, this.height / 2, 10, this.height, {
+      Matter.Bodies.rectangle(this.width, this.height / 2, 10, this.height, {
+
+      //Matter.Bodies.rectangle(this.width - this.worldSideMargin, this.height / 2, 10, this.height, {
         isStatic: true,
         render: { 
           visible: true, }
@@ -405,20 +419,19 @@ export class SeesawProgram implements Program {
     this.seesaw1 = Matter.Bodies.rectangle(
       this.xSeesawLeftPosition,
       this.ySeesawPosition,
-      this.seesawHeight,  
-      this.seesawLength,
+      this.seesawLength,  
+      this.seesawHeight,
       {
         label: 'Seesaw1',
         isSensor: false,
         isStatic: true,
       }
     )
-
     Matter.World.add(this.engine.world, this.seesaw1); 
 
-    this.seesawBeam1 = Matter.Bodies.rectangle(
-      this.xSeesawLeftPosition,
-      this.ySeesawPosition,
+    /*-- this.seesawBeam1 = Matter.Bodies.rectangle(
+      this.xSeesawLeftPosition+this.seesawLength,
+      this.ySeesawBeamPosition,
       this.seesawBeamLenght,
       this.seesawBeamHeight,
       {
@@ -442,7 +455,7 @@ export class SeesawProgram implements Program {
 
   Matter.World.add(this.engine.world, constraintSeesaw1); */
 
-
+ 
     //seesaw2
     this.seesaw2 = Matter.Bodies.rectangle(
       this.xSeesawRightPosition,
@@ -456,11 +469,12 @@ export class SeesawProgram implements Program {
       }
     )
     Matter.World.add(this.engine.world, this.seesaw2); 
+    
 
-
+      /*
     this.seesawBeam2 = Matter.Bodies.rectangle(
-      this.xSeesawRightPosition,
-      this.ySeesawPosition,
+      this.xSeesawRightPosition+this.seesawLength,
+      this.ySeesawBeamPosition,
       this.seesawBeamLenght,
       this.seesawBeamHeight,
       {
@@ -469,7 +483,7 @@ export class SeesawProgram implements Program {
         isStatic: true
       }
     )
-    Matter.World.add(this.engine.world, this.seesawBeam2);  
+    Matter.World.add(this.engine.world, this.seesawBeam2);  */
 
 
   // Create a point constraint that pins the center of the platform to a fixed point in space, so
@@ -485,7 +499,7 @@ export class SeesawProgram implements Program {
     })
 
    Matter.World.add(this.engine.world, constraintSeesaw2);  */
-  } 
+  }  
 
   private initIngredients(): void {
     if (this.engine == null) return;
@@ -497,32 +511,29 @@ export class SeesawProgram implements Program {
       {
         label: 'Ingredient0',
         isSensor: false,
-        render: {
-          visible: true,
-          opacity: 1          
-        },
       });
     Matter.World.add(this.engine.world, this.ingredientLeft);
-
-    this.ingredientRight = Matter.Bodies.circle(
-      this.xRightField,
-      -600,
-      this.ingredientRadius,
-      {
-        label: 'Ingredient1',
-        isSensor: false,
-      });
-    Matter.World.add(this.engine.world, this.ingredientRight);
 
     this.ingredientCenter = Matter.Bodies.circle(
       this.xCenterField,
       -1000,
       this.ingredientRadius,
       {
-        label: 'Ingredient2',
+        label: 'Ingredient1',
         isSensor: false,
       });
     Matter.World.add(this.engine.world, this.ingredientCenter);
+
+    this.ingredientRight = Matter.Bodies.circle(
+      this.xRightField,
+      -600,
+      this.ingredientRadius,
+      {
+        label: 'Ingredient2',
+        isSensor: false,
+      });
+    Matter.World.add(this.engine.world, this.ingredientRight);
+    
   }
 
   private setUpGame() {
@@ -648,28 +659,33 @@ export class SeesawProgram implements Program {
 
     let fps = 60;
     this.gameLoop = setInterval(() => {
-      if (this.engine == null || this.seesaw1 == null || this.seesaw2 == null) return;
+    if (this.engine == null || this.seesaw1 == null || this.seesaw2 == null) return;
       this.engine.world.gravity.x = this.gravityX;
       this.engine.world.gravity.y = this.gravityY;
       Matter.Engine.update(this.engine, 1000 / fps);
 
+      console.log("seesaw1Position BEFORE SENDING x: "+this.seesaw1.position.x+" seesaw1Position BEFORE SENDING y: "+this.seesaw1.position.y+" Lenght: "+this.seesawLength);
       this.lobbyController.sendToDisplays('seesaw1Position', [this.seesaw1.position.x, this.seesaw1.position.y, this.seesawLength, this.seesawHeight]);
+      console.log("seesaw2Position BEFORE SENDING x: "+this.seesaw2.position.x+" seesaw2Position BEFORE SENDING y: "+this.seesaw2.position.y+" Lenght: "+this.seesawLength);
       this.lobbyController.sendToDisplays('seesaw2Position', [this.seesaw2.position.x, this.seesaw2.position.y, this.seesawLength, this.seesawHeight]);
-      this.lobbyController.sendToDisplays('seesawBeam1Position', [this.seesawBeam1.position.x, this.seesawBeam1.position.y, this.seesawBeamLenght, this.seesawBeamHeight]);
-      this.lobbyController.sendToDisplays('seesawBeam2Position', [this.seesawBeam2.position.x, this.seesawBeam2.position.y, this.seesawBeamLenght, this.seesawBeamHeight]);
+    //  this.lobbyController.sendToDisplays('seesawBeam1Position', [this.seesawBeam1.position.x, this.seesawBeam1.position.y, this.seesawBeamLenght, this.seesawBeamHeight]);
+    //  this.lobbyController.sendToDisplays('seesawBeam2Position', [this.seesawBeam2.position.x, this.seesawBeam2.position.y, this.seesawBeamLenght, this.seesawBeamHeight]);
 
       this.lobbyController.sendToDisplays('updateScore', this.score);
 
       if (this.ingredientLeft != null) {
+        console.log("IngredientLeft X before sending: "+this.ingredientLeft.position.x+" and Y"+ this.ingredientLeft.position.y)
         this.lobbyController.sendToDisplays('updateIngredientLeft', [this.ingredientLeft.position.x, this.ingredientLeft.position.y, 0]);
       }
 
-      if (this.ingredientRight != null) {
-        this.lobbyController.sendToDisplays('updateIngredientRight', [this.ingredientRight.position.x, this.ingredientRight.position.y, 1]);
+      if (this.ingredientCenter != null) {
+        console.log("IngredientCenter X before sending: "+this.ingredientCenter.position.x+" and Y"+ this.ingredientCenter.position.y)
+        this.lobbyController.sendToDisplays('updateIngredientCenter', [this.ingredientCenter.position.x, this.ingredientCenter.position.y, 2]);
       }
 
-      if (this.ingredientCenter != null) {
-        this.lobbyController.sendToDisplays('updateIngredientCenter', [this.ingredientCenter.position.x, this.ingredientCenter.position.y, 2]);
+      if (this.ingredientRight != null) {
+        console.log("IngredientRight X before sending: "+this.ingredientRight.position.x+" and Y"+ this.ingredientRight.position.y)
+        this.lobbyController.sendToDisplays('updateIngredientRight', [this.ingredientRight.position.x, this.ingredientRight.position.y, 1]);
       }
 
     }, 1000 / fps);
