@@ -401,7 +401,7 @@ export class SeesawProgram implements Program {
       20,
       {
         label: 'Seesaw1',
-        isSensor: false,
+        isSensor: true,
         isStatic: false,
       }
     )
@@ -416,6 +416,7 @@ export class SeesawProgram implements Program {
       {
         label: 'SeesawBeam1',
         isStatic: true,
+        isSensor: false
       }
     )
 
@@ -443,10 +444,10 @@ export class SeesawProgram implements Program {
       {
         label: 'Seesaw2',
         isSensor: false,
-        isStatic: false,
+        isStatic: true,
       }
     )
-    //Matter.World.add(this.engine.world, this.seesaw2); 
+    Matter.World.add(this.engine.world, this.seesaw2); 
 
 
     this.seesawBeam2 = Matter.Bodies.rectangle(
@@ -456,25 +457,25 @@ export class SeesawProgram implements Program {
       10,
       {
         label: 'SeesawBeam2',
+        isSensor: false,
         isStatic: true
       }
     )
-    //Matter.World.add(this.engine.world, this.seesawBeam2);  
+    Matter.World.add(this.engine.world, this.seesawBeam2);  
 
 
   // Create a point constraint that pins the center of the platform to a fixed point in space, so
   // it can't move
   //https://itnext.io/modular-game-worlds-in-phaser-3-tilemaps-5-matter-physics-platformer-d14d1f614557
-    const constraintSeesaw2 = this.Constraint.create({
+     const constraintSeesaw2 = this.Constraint.create({
       pointA: {x: this.seesawBeam2.position.x, y: this.seesawBeam2.position.y},
       pointB: {x: this.seesaw2.position.x+300, y: this.seesaw2.position.y+25},
     //  stiffness: 1,
-      length: 0
+      length: 0,
     })
 
-    Matter.World.add(this.engine.world, constraintSeesaw2);
-
-  }
+    Matter.World.add(this.engine.world, constraintSeesaw2); 
+  } 
 
   private initIngredients(): void {
     if (this.engine == null) return;
@@ -485,7 +486,7 @@ export class SeesawProgram implements Program {
       this.ingredientRadius,
       {
         label: 'Ingredient0',
-        isSensor: false
+        isSensor: false,
       });
     Matter.World.add(this.engine.world, this.ingredientLeft);
 
