@@ -52,12 +52,12 @@ export class SeesawProgram implements Program {
   private seesawBeamHeight = 20;
   private ySeesawBeamPosition = 1000;
 
-  //bei lenght: 500 / left: 1200 und right: 2000 / lenght500 und -400 auf browser seite 
+  //bei lenght: 500 / left: 1200 und right: 2000 / lenght500 und -400 auf browser seite (zeile 372 und 390) 
   // die resultate: 1000 - 1400 und 1800 - 2200
 
   //ingredients -400 / left: 1200 / right: 2000 / length500 und weiterhin -400 auf browser seite
-  // resultate: (1400-400)-(1800-400)    (2200-400) - (2600-400)
-  // browser seite: -200 sollte geben: 1200 - 1600   / 2000 - 2400
+  // resultate: (1400-400)-(1800-400)    (2200-400)-(2600-400)
+  // browser seite (zeile 372 und 390) angepasst auf: -200 -> gibt: 1200-200 - 1600-200   / 2000-200 - 2400-200
 
 
 
