@@ -37,14 +37,14 @@ export class SeesawProgram implements Program {
   //private xLeftField = this.width * 0.25;
   //private xCenterField = this.width * 0.5;
   //private xRightField = this.width * 0.75;
-  private xLeftField = 1650-200;
-  private xCenterField = 2400-200;
-  private xRightField = 2500-200;
+  private xLeftField = 950-200;
+  private xCenterField = 1340-200;
+  private xRightField = 2240-200;
 
   // placement of seesaws
   // TODO: 3 teile berrechnen und speichern
-  private xSeesawLeftPosition = 1200;
-  private xSeesawRightPosition = 2000;
+  private xSeesawLeftPosition = 900;
+  private xSeesawRightPosition = 1800;
   private ySeesawPosition = 1000;
   private seesawLength = 500;
   private seesawHeight = 40;
@@ -59,6 +59,9 @@ export class SeesawProgram implements Program {
   // resultate: (1400-400)-(1800-400)    (2200-400)-(2600-400)
   // browser seite (zeile 372 und 390) angepasst auf: -200 -> gibt: 1200-200 - 1600-200   / 2000-200 - 2400-200
 
+  //seesawLeft: 900 / right: 1800
+  //left field: 900-200 bis 1300-200   //right: 1800-200 bis 2200-200
+  // ingredients placement: 50 for radius -> f.e. 950 or 1850
 
 
   // säftlimacher visible objects
@@ -664,9 +667,9 @@ export class SeesawProgram implements Program {
       this.engine.world.gravity.y = this.gravityY;
       Matter.Engine.update(this.engine, 1000 / fps);
 
-      console.log("seesaw1Position BEFORE SENDING x: "+this.seesaw1.position.x+" seesaw1Position BEFORE SENDING y: "+this.seesaw1.position.y+" Lenght: "+this.seesawLength);
+    //  console.log("seesaw1Position BEFORE SENDING x: "+this.seesaw1.position.x+" seesaw1Position BEFORE SENDING y: "+this.seesaw1.position.y+" Lenght: "+this.seesawLength);
       this.lobbyController.sendToDisplays('seesaw1Position', [this.seesaw1.position.x, this.seesaw1.position.y, this.seesawLength, this.seesawHeight]);
-      console.log("seesaw2Position BEFORE SENDING x: "+this.seesaw2.position.x+" seesaw2Position BEFORE SENDING y: "+this.seesaw2.position.y+" Lenght: "+this.seesawLength);
+    //  console.log("seesaw2Position BEFORE SENDING x: "+this.seesaw2.position.x+" seesaw2Position BEFORE SENDING y: "+this.seesaw2.position.y+" Lenght: "+this.seesawLength);
       this.lobbyController.sendToDisplays('seesaw2Position', [this.seesaw2.position.x, this.seesaw2.position.y, this.seesawLength, this.seesawHeight]);
     //  this.lobbyController.sendToDisplays('seesawBeam1Position', [this.seesawBeam1.position.x, this.seesawBeam1.position.y, this.seesawBeamLenght, this.seesawBeamHeight]);
     //  this.lobbyController.sendToDisplays('seesawBeam2Position', [this.seesawBeam2.position.x, this.seesawBeam2.position.y, this.seesawBeamLenght, this.seesawBeamHeight]);
@@ -674,17 +677,17 @@ export class SeesawProgram implements Program {
       this.lobbyController.sendToDisplays('updateScore', this.score);
 
       if (this.ingredientLeft != null) {
-        console.log("IngredientLeft X before sending: "+this.ingredientLeft.position.x+" and Y"+ this.ingredientLeft.position.y)
+    //    console.log("IngredientLeft X before sending: "+this.ingredientLeft.position.x+" and Y"+ this.ingredientLeft.position.y)
         this.lobbyController.sendToDisplays('updateIngredientLeft', [this.ingredientLeft.position.x, this.ingredientLeft.position.y, 0]);
       }
 
       if (this.ingredientCenter != null) {
-        console.log("IngredientCenter X before sending: "+this.ingredientCenter.position.x+" and Y"+ this.ingredientCenter.position.y)
+    //    console.log("IngredientCenter X before sending: "+this.ingredientCenter.position.x+" and Y"+ this.ingredientCenter.position.y)
         this.lobbyController.sendToDisplays('updateIngredientCenter', [this.ingredientCenter.position.x, this.ingredientCenter.position.y, 2]);
       }
 
       if (this.ingredientRight != null) {
-        console.log("IngredientRight X before sending: "+this.ingredientRight.position.x+" and Y"+ this.ingredientRight.position.y)
+    //    console.log("IngredientRight X before sending: "+this.ingredientRight.position.x+" and Y"+ this.ingredientRight.position.y)
         this.lobbyController.sendToDisplays('updateIngredientRight', [this.ingredientRight.position.x, this.ingredientRight.position.y, 1]);
       }
 
