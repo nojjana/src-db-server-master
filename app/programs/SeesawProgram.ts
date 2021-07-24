@@ -38,8 +38,8 @@ export class SeesawProgram implements Program {
   //private xLeftField = this.width * 0.25;
   //private xCenterField = this.width * 0.5;
   //private xRightField = this.width * 0.75;
-  private xLeftField = 1000-200;   //860 - 200
-  private xCenterField = 1200-200;   //1340-200
+  private xLeftField = 1100-200;   //860 - 200
+  private xCenterField = 860-200;   //1340-200
   private xRightField = 1300-200;    //1760 - 200
 
   // placement of seesaws
@@ -431,7 +431,6 @@ export class SeesawProgram implements Program {
         label: 'Seesaw1',
         isSensor: false,
         isStatic: false,
-        //angle: this.seesawRotation
       }
     )
     Matter.World.add(this.engine.world, this.seesaw1); 
@@ -454,16 +453,15 @@ export class SeesawProgram implements Program {
   // it can't move
   //https://itnext.io/modular-game-worlds-in-phaser-3-tilemaps-5-matter-physics-platformer-d14d1f614557
    const constraintSeesaw1 = this.Constraint.create({
+     //bodyA: this.seesaw1,
+     //pointA: {x: this.xSeesawLeftPosition, y: this.ySeesawPosition},
      bodyA: this.seesaw1,
-     //pointA: {x: this.xSeesawLeftPosition, y: this.ySeesawBeamPosition},
-     pointB: { x: (this.xSeesawLeftPosition+this.seesawLength*0.5), y: this.ySeesawPosition+this.seesawHeight*0.5},
-     //pointB: this.Vector.clone(this.seesaw1?.position),
-     //stiffness: 1, 
-     length: 0
-    //pointA: {x: this.seesawBeam1.position.x, y: this.seesawBeam1.position.y},
-    //pointB: {x: this.seesaw1.position.x+500, y: this.seesaw1.position.y},
-    //stiffness: 1,
-    //length: 0
+     //bodyB: this.seesawBeam1,
+     //pointB: { x: (this.xSeesawLeftPosition+this.seesawLength*0.5), y: this.ySeesawPosition+this.seesawHeight*0.5},
+     //pointB: this.Vector.clone(this.seesaw1.position),
+     pointB: { x: this.xSeesawLeftPosition, y: this.ySeesawBeamPosition-40},
+     stiffness: 1,
+     length: 0,
   })
   Matter.World.add(this.engine.world, constraintSeesaw1); 
 
@@ -477,7 +475,7 @@ export class SeesawProgram implements Program {
       {
         label: 'Seesaw2',
         isSensor: false,
-        isStatic: true,
+        isStatic: false,
       }
     )
     Matter.World.add(this.engine.world, this.seesaw2); 
@@ -503,14 +501,14 @@ export class SeesawProgram implements Program {
   //https://itnext.io/modular-game-worlds-in-phaser-3-tilemaps-5-matter-physics-platformer-d14d1f614557
   const constraintSeesaw2 = this.Constraint.create({
     bodyA: this.seesaw2,
-    pointB: { x: (this.xSeesawRightPosition+this.seesawLength*0.5), y: this.ySeesawPosition+this.seesawHeight*0.5},
-    //pointB: this.Vector.clone(this.seesaw1?.position),
-    //stiffness: 1, 
+    pointB: { x: this.xSeesawRightPosition, y: this.ySeesawBeamPosition-40},
+    //bodyB: this.seesawBeam2,
+    //pointB: { x: (this.xSeesawRightPosition+this.seesawLength*0.5), y: this.ySeesawPosition+this.seesawHeight*0.5},
+    //pointB: this.Vector.clone(this.seesaw2.position),
+    //pointA: {x: this.seesawBeam2.position.x, y: this.seesawBeam2.position.y},
+    //bodyB: this.seesaw2,
+    stiffness: 1, 
     length: 0
-   //pointA: {x: this.seesawBeam1.position.x, y: this.seesawBeam1.position.y},
-   //pointB: {x: this.seesaw1.position.x+500, y: this.seesaw1.position.y},
-   //stiffness: 1,
-   //length: 0
       }
     )
     Matter.World.add(this.engine.world, constraintSeesaw2); 
@@ -682,7 +680,7 @@ export class SeesawProgram implements Program {
     //  console.log("seesaw1Position BEFORE SENDING x: "+this.seesaw1.position.x+" seesaw1Position BEFORE SENDING y: "+this.seesaw1.position.y+" Lenght: "+this.seesawLength);
       this.lobbyController.sendToDisplays('seesaw1Position', [this.seesaw1.position.x, this.seesaw1.position.y, this.seesawLength, this.seesawHeight, this.seesaw1?.angle]);
     //  console.log("seesaw2Position BEFORE SENDING x: "+this.seesaw2.position.x+" seesaw2Position BEFORE SENDING y: "+this.seesaw2.position.y+" Lenght: "+this.seesawLength);
-      this.lobbyController.sendToDisplays('seesaw2Position', [this.seesaw2.position.x, this.seesaw2.position.y, this.seesawLength, this.seesawHeight, this.seesaw1?.angle]);
+      this.lobbyController.sendToDisplays('seesaw2Position', [this.seesaw2.position.x, this.seesaw2.position.y, this.seesawLength, this.seesawHeight, this.seesaw2?.angle]);
       this.lobbyController.sendToDisplays('seesawBeam1Position', [this.seesawBeam1?.position.x, this.seesawBeam1?.position.y, this.seesawBeamLenght, this.seesawBeamHeight]);
       this.lobbyController.sendToDisplays('seesawBeam2Position', [this.seesawBeam2?.position.x, this.seesawBeam2?.position.y, this.seesawBeamLenght, this.seesawBeamHeight]);
 
