@@ -38,9 +38,9 @@ export class SeesawProgram implements Program {
   //private xLeftField = this.width * 0.25;
   //private xCenterField = this.width * 0.5;
   //private xRightField = this.width * 0.75;
-  private xLeftField = 1100-200;   //860 - 200
-  private xCenterField = 860-200;   //1340-200
-  private xRightField = 1300-200;    //1760 - 200
+  private xLeftField = 2000-200;   //860 - 200
+  private xCenterField = 1760-200;   //1340-200
+  private xRightField = 2240-200;    //1760 - 200
 
   // placement of seesaws
   // TODO: 3 teile berrechnen und speichern
@@ -209,7 +209,7 @@ export class SeesawProgram implements Program {
   private setControllerDataListeners(): void {
     if (this.controller1 && this.controller2) {
       this.controller1.addSocketListener('controllerData', this.setControllerDataPlayer1.bind(this));
- //--     this.controller2.addSocketListener('controllerData', this.setControllerDataPlayer2.bind(this));
+      this.controller2.addSocketListener('controllerData', this.setControllerDataPlayer2.bind(this));
     }
   }
 
@@ -266,16 +266,22 @@ export class SeesawProgram implements Program {
     if (moveToValX != null && controllerId != null && this.seesaw1 != undefined) {
       if (controllerId != 1) return;
       this.setShakerPos(moveToValX, this.seesaw1);
+    //  this.seesaw1.angle = moveToValX;
     }
   }
 
   private setControllerDataPlayer2(controllerData: number[]): void {
-    let moveToValX = controllerData[0];
+    let moveToValY = controllerData[0];
     let controllerId = controllerData[1];
-    console.log("controllerData from Player 2 arrived:", moveToValX, controllerId);
-    if (moveToValX != null && controllerId != null && this.seesaw2 != undefined) {
+    console.log("controllerData from Player 2 arrived:", moveToValY, controllerId);
+    console.log("seesaw 2 angle: "+this.seesaw2?.angle)
+    if (moveToValY != null && controllerId != null && this.seesaw2 != undefined) {
       if (controllerId != 2) return;
-      this.setShakerPos(moveToValX, this.seesaw2);
+      this.setShakerPos(moveToValY, this.seesaw2);
+      console.log("seesaw 2 angle BEFORE: "+this.seesaw2?.angle)
+      this.seesaw2.angle = moveToValY;
+      console.log("seesaw 2 angle AFTER: "+this.seesaw2?.angle)
+
     }
   }  
 
@@ -418,8 +424,8 @@ export class SeesawProgram implements Program {
     if (this.engine == null) return;
 
     
-    console.log("seesaw left position x: "+this.xSeesawLeftPosition)
-    console.log("seesaw right position x: "+this.xSeesawRightPosition)
+  //  console.log("seesaw left position x: "+this.xSeesawLeftPosition)
+  //  console.log("seesaw right position x: "+this.xSeesawRightPosition)
 
     //seesaw1
     this.seesaw1 = Matter.Bodies.rectangle(
