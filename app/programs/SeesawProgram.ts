@@ -38,9 +38,9 @@ export class SeesawProgram implements Program {
   //private xLeftField = this.width * 0.25;
   //private xCenterField = this.width * 0.5;
   //private xRightField = this.width * 0.75;
-  private xLeftField = 2000-200;   //860 - 200
-  private xCenterField = 1760-200;   //1340-200
-  private xRightField = 2240-200;    //1760 - 200
+  private xLeftField = 1000-200;   //860 - 200
+  private xCenterField = 1800-200;   //1340-200
+  private xRightField = 2000-200;    //1760 - 200
 
   // placement of seesaws
   // TODO: 3 teile berrechnen und speichern
@@ -52,6 +52,8 @@ export class SeesawProgram implements Program {
   private seesawBeamLenght = 20;
   private seesawBeamHeight = 100;
   private ySeesawBeamPosition = 1000;
+  private seesaw2Angle = 0;
+
 
   //bei lenght: 500 / left: 1200 und right: 2000 / lenght500 und -400 auf browser seite (zeile 372 und 390) 
   // die resultate: 1000 - 1400 und 1800 - 2200
@@ -72,10 +74,10 @@ export class SeesawProgram implements Program {
   private ingredientRight?: Matter.Body;
   private seesaw1?: Matter.Body;
   private seesawBeam1?: Matter.Body;
-  private seesaw1Angle = 0;
+  private seesaw1Ground?: Matter.Body;
   private seesaw2?: Matter.Body;
   private seesawBeam2?: Matter.Body;
-  private seesaw2Angle = 0;
+  private seesaw2Ground?: Matter.Body;
 
      
   
@@ -92,6 +94,7 @@ export class SeesawProgram implements Program {
   private Constraint = Matter.Constraint;
   private Vector = Matter.Vector;
   private Composite = Matter.Composite;
+  setAngleOfSeesaw2BackTo0: any;
 
 
   constructor(lobbyController: LobbyController) {
@@ -238,23 +241,79 @@ export class SeesawProgram implements Program {
   private setControllerDataPlayer1(controllerData: number[]): void {
     let seesaw1Angle = controllerData[0];
     let controllerId = controllerData[1];
-    console.log("controllerData from Player 1 arrived:", this.seesaw1Angle, controllerId);
+    console.log("IONIC -> SERVER: this.seesaw1Angle (controller Data) / controllerId:", seesaw1Angle, controllerId);
     
-    if (this.seesaw1Angle != null && controllerId != null && this.seesaw1 != undefined) {
+    if (seesaw1Angle != null && controllerId != null && this.seesaw1 != undefined) {
       if (controllerId != 1) return;
-      this.seesaw1.angle = this.seesaw2Angle;  // zuweisen des angles an matter.js element im server
+      this.seesaw1.angle = seesaw1Angle;  // zuweisen des angles an matter.js element im server
     }
   }
 
   private setControllerDataPlayer2(controllerData: number[]): void {
-    this.seesaw2Angle = controllerData[0];
+    console.log("IONIC -> server: acceleration.y: "+controllerData[0])
+    let seesaw2Angle = controllerData[0];
     let controllerId = controllerData[1];
-    console.log("controllerData from Player 2 arrived:", this.seesaw2Angle, controllerId);
-    console.log("seesaw 2 angle: "+this.seesaw2?.angle)
-    if (this.seesaw2Angle != null && controllerId != null && this.seesaw2 != undefined) {
-      if (controllerId != 2) return;
-      this.seesaw2.angle = this.seesaw2Angle; // zuweisen des angles an matter.js element im server
 
+    if (controllerData[0] != null && controllerId != null && this.seesaw2 != undefined) {
+      console.log("setControllerDataPlayer 2 IONIC -> SERVER: this.seesaw2Angle:", controllerData[0]+" and ID: "+controllerId);
+      if (controllerId == 2){
+        if (!this.setAngleOfSeesaw2BackTo0) {
+            if (controllerData[0] < -1.0) {
+              this.seesaw2.angle = -0.27
+              this.lobbyController.sendToDisplays('seesaw2Position', [this.seesaw2.position.x, this.seesaw2.position.y, this.seesawLength, this.seesawHeight, this.seesaw2.angle]);
+              console.log("---LEFT --- SERVER -> BROWSER - seesaw2 Angle - this.seesaw2.angle: "+this.seesaw2.angle);
+              
+              this.setAngleOfSeesaw2BackTo0 = true;
+
+              setTimeout(() => {
+                this.setAngleOfSeesaw2BackTo0 = false;
+              }, 3000); //500
+
+            } else if (controllerData[0] > 1.0) {
+              this.seesaw2.angle = 0.27
+              this.lobbyController.sendToDisplays('seesaw2Position', [this.seesaw2.position.x, this.seesaw2.position.y, this.seesawLength, this.seesawHeight, this.seesaw2.angle]);
+              console.log("---RIGHT --- SERVER -> BROWSER - seesaw2 Angle - this.seesaw2.angle: "+this.seesaw2.angle);
+              
+              this.setAngleOfSeesaw2BackTo0 = true;
+
+              setTimeout(() => {
+                this.setAngleOfSeesaw2BackTo0 = false;
+              }, 3000); //500
+
+            } else {
+              this.seesaw2.angle = 0
+              this.lobbyController.sendToDisplays('seesaw2Position', [this.seesaw2.position.x, this.seesaw2.position.y, this.seesawLength, this.seesawHeight, this.seesaw2.angle]);
+              console.log("---CENTER --- SERVER -> BROWSER - seesaw2 Angle - this.seesaw2.angle: "+this.seesaw2.angle);
+              
+              this.setAngleOfSeesaw2BackTo0 = true;
+              
+              setTimeout(() => {
+                this.setAngleOfSeesaw2BackTo0 = false;
+              }, 3000); //500
+            } 
+        //return;
+        }   
+
+      //  if (!this.setAngleOfSeesaw2BackTo0) {
+          
+          //  this.seesaw2.angle = controllerData[0]; // zuweisen des angles an matter.js element im server
+          //  this.setAngleOfSeesaw2BackTo0 = true;
+          //  this.lobbyController.sendToDisplays('seesaw2Position', [this.seesaw2.position.x, this.seesaw2.position.y, this.seesawLength, this.seesawHeight, this.seesaw2.angle]);
+          //  console.log("SERVER -> BROWSER - seesaw2 Angle - this.seesaw2.angle: "+this.seesaw2.angle);
+
+            /* setTimeout(() => {
+              
+              this.setAngleOfSeesaw2BackTo0 = false;
+            }, 3000); //500 */
+            
+        //  }
+      }  
+      //this.seesaw2.angle = 0;
+      //this.lobbyController.sendToDisplays('seesaw2Position', [this.seesaw2.position.x, this.seesaw2.position.y, this.seesawLength, this.seesawHeight, this.seesaw2.angle]);
+      //console.log("SERVER -> BROWSER - seesaw2 Angle - this.seesaw2.angle: "+this.seesaw2.angle);
+      //console.log("seesaw2.angle set back to NULL: "+this.seesaw2.angle)
+      //return;
+ //   this.lobbyController.sendToDisplays('seesaw2Position', [this.seesaw2?.position.x, this.seesaw2?.position.y, this.seesawLength, this.seesawHeight, this.seesaw2?.angle]);
     }
   }  
 
@@ -409,7 +468,6 @@ export class SeesawProgram implements Program {
         isStatic: true
       }
     )
-
     Matter.World.add(this.engine.world, this.seesawBeam1); 
 
   // Create a point constraint that pins the center of the platform to a fixed point in space, so it can't move
@@ -421,6 +479,20 @@ export class SeesawProgram implements Program {
      length: 0,
   })
   Matter.World.add(this.engine.world, constraintSeesaw1); 
+
+  // ground stops seesaw of turning 360°
+  this.seesaw1Ground = Matter.Bodies.rectangle(
+    this.xSeesawLeftPosition,
+    this.ySeesawBeamPosition,
+    this.seesawLength,
+    this.seesawHeight,
+    {
+      label: 'Seesaw1Ground',
+      isSensor: false,
+      isStatic: true
+    }
+  )
+  Matter.World.add(this.engine.world, this.seesaw1Ground);
 
  
     //seesaw2
@@ -458,11 +530,26 @@ export class SeesawProgram implements Program {
   const constraintSeesaw2 = this.Constraint.create({
     bodyA: this.seesaw2,
     pointB: { x: this.xSeesawRightPosition, y: this.ySeesawBeamPosition-40},
-    stiffness: 1, 
+    stiffness: 1,//1 
     length: 0
       }
     )
     Matter.World.add(this.engine.world, constraintSeesaw2); 
+
+
+    // ground stops seesaw of turning 360°
+    this.seesaw2Ground = Matter.Bodies.rectangle(
+      this.xSeesawRightPosition,
+      this.ySeesawBeamPosition,
+      this.seesawLength,
+      this.seesawHeight,
+      {
+        label: 'Seesaw2Ground',
+        isSensor: false,
+        isStatic: true
+      }
+    )
+    Matter.World.add(this.engine.world, this.seesaw2Ground);
   }
   
 
@@ -521,7 +608,7 @@ export class SeesawProgram implements Program {
 
         if (pair.bodyA.label.includes('Seesaw') && pair.bodyB.label.includes('Ingredient') || pair.bodyB.label.includes('Seesaw') && pair.bodyA.label.includes('Ingredient')) {
           // ingredient fallen onto seesaw
-          console.log("Ingredient landet on seesaw");
+        //console.log("Ingredient landet on seesaw");
 
           }
         // TODO
@@ -584,7 +671,7 @@ export class SeesawProgram implements Program {
   }
 
   private respawnIngredient(body: Matter.Body) {
-    console.log("respawnIngredient: ");
+  ////  console.log("respawnIngredient: ");
     let newNumber = this.getRandomInt(this.availableIngredientTypes);;
     let newlabel = "Ingredient"+newNumber;
 
@@ -607,8 +694,9 @@ export class SeesawProgram implements Program {
       default:
         break;
     }
-    console.log("body.label =", body.label);
+  ////  console.log("body.label =", body.label);
   }
+
 
 
   /* -------------------- BASIC GAME METHODS WITH INDIVIDUAL IMPLEMENTATION --------------------*/
@@ -621,7 +709,7 @@ export class SeesawProgram implements Program {
     this.playing = true;
     this.lobbyController.sendToDisplays('playing', this.playing);
 
-    let fps = 60;
+    let fps = 60;    ///start value: 60
     this.gameLoop = setInterval(() => {
     if (this.engine == null || this.seesaw1 == null || this.seesaw2 == null) return;
       this.engine.world.gravity.x = this.gravityX;
@@ -629,8 +717,10 @@ export class SeesawProgram implements Program {
       Matter.Engine.update(this.engine, 1000 / fps);
 
       ////sending data to browser
-      this.lobbyController.sendToDisplays('seesaw1Position', [this.seesaw1.position.x, this.seesaw1.position.y, this.seesawLength, this.seesawHeight, this.seesaw1Angle]);
-      this.lobbyController.sendToDisplays('seesaw2Position', [this.seesaw2.position.x, this.seesaw2.position.y, this.seesawLength, this.seesawHeight, this.seesaw2Angle]);
+      console.log("SERVER -> BROWSER - seesaw1 Angle - this.seesaw1.angle: "+this.seesaw1.angle);
+      this.lobbyController.sendToDisplays('seesaw1Position', [this.seesaw1.position.x, this.seesaw1.position.y, this.seesawLength, this.seesawHeight, this.seesaw1.angle]);
+      console.log("SERVER -> BROWSER - seesaw2 Angle - this.seesaw2.angle: "+this.seesaw2.angle);
+      this.lobbyController.sendToDisplays('seesaw2Position', [this.seesaw2.position.x, this.seesaw2.position.y, this.seesawLength, this.seesawHeight, this.seesaw2.angle]);
       this.lobbyController.sendToDisplays('seesawBeam1Position', [this.seesawBeam1?.position.x, this.seesawBeam1?.position.y, this.seesawBeamLenght, this.seesawBeamHeight]);
       this.lobbyController.sendToDisplays('seesawBeam2Position', [this.seesawBeam2?.position.x, this.seesawBeam2?.position.y, this.seesawBeamLenght, this.seesawBeamHeight]);
 
