@@ -234,43 +234,15 @@ export class SeesawProgram implements Program {
 
   /* -------------------- SÄFTLIMACHER GAME METHODS WITH INDIVIDUAL IMPLEMENTATION --------------------*/
 
-
-  // private setControllerData(controllerData: number[]): void {
-  //   let moveToValX = controllerData[0];
-  //   let controllerId = controllerData[1];
-  //   console.log("controllerData arrived:", moveToValX, controllerId);
-    
-  //   if (moveToValX != null && controllerId != null) {
-  //     // TODO
-  //     // check which controller is sending
-  //     switch (controllerId) {
-  //       case 1:
-  //         if (this.catcherNet1 != undefined) {
-  //           this.setShakerPos(moveToValX, this.catcherNet1);
-  //         }
-  //       case 2:
-  //         if (this.catcherNet2 != undefined) {
-  //           this.setShakerPos(moveToValX, this.catcherNet2);
-  //         }
-  //       // case 3:
-  //       //   if (this.catcherNet3 != undefined) {
-  //       //     this.setShakerPos(moveToValX, this.catcherNet3);
-  //       //   }
-  //     }
-  //   }
-  // }
-
   //// receiving data from ionic (controller)
-
   private setControllerDataPlayer1(controllerData: number[]): void {
-    let moveToValX = controllerData[0];
+    let seesaw1Angle = controllerData[0];
     let controllerId = controllerData[1];
-    console.log("controllerData from Player 1 arrived:", moveToValX, controllerId);
+    console.log("controllerData from Player 1 arrived:", this.seesaw1Angle, controllerId);
     
-    if (moveToValX != null && controllerId != null && this.seesaw1 != undefined) {
+    if (this.seesaw1Angle != null && controllerId != null && this.seesaw1 != undefined) {
       if (controllerId != 1) return;
-      this.setShakerPos(moveToValX, this.seesaw1);
-    //  this.seesaw1.angle = moveToValX;
+      this.seesaw1.angle = this.seesaw2Angle;  // zuweisen des angles an matter.js element im server
     }
   }
 
@@ -281,7 +253,6 @@ export class SeesawProgram implements Program {
     console.log("seesaw 2 angle: "+this.seesaw2?.angle)
     if (this.seesaw2Angle != null && controllerId != null && this.seesaw2 != undefined) {
       if (controllerId != 2) return;
-    //  this.setShakerPos(moveToValY, this.seesaw2);
       this.seesaw2.angle = this.seesaw2Angle; // zuweisen des angles an matter.js element im server
 
     }
@@ -316,22 +287,6 @@ export class SeesawProgram implements Program {
       }
     }
   }
-
-  // private fallDown(body: Matter.Body, endY: number, pixelSteps: number): Matter.Vertices {
-  //   // moving ingredients down
-  //   let newY = body.position.y;
-  //   if (body.position.y < endY) {
-  //     // fall further down
-  //     newY = body.position.y + pixelSteps;
-  //   }
-  //   // console.log("body.position.y, endY, dy, newY: ", body.position.y, endY, dy, newY);
-  //   Matter.Body.setPosition(body, {
-  //     x: body.position.x,
-  //     y: newY
-  //   });
-
-  //   return {x: body.position.x, y: body.position.y};
-  // }
 
   private forceMove(body: Matter.Body, endX: number, endY: number, pixelSteps: number): Matter.Vertices {
     // moving shaker left and right
@@ -457,16 +412,10 @@ export class SeesawProgram implements Program {
 
     Matter.World.add(this.engine.world, this.seesawBeam1); 
 
-  // Create a point constraint that pins the center of the platform to a fixed point in space, so
-  // it can't move
+  // Create a point constraint that pins the center of the platform to a fixed point in space, so it can't move
   //https://itnext.io/modular-game-worlds-in-phaser-3-tilemaps-5-matter-physics-platformer-d14d1f614557
    const constraintSeesaw1 = this.Constraint.create({
-     //bodyA: this.seesaw1,
-     //pointA: {x: this.xSeesawLeftPosition, y: this.ySeesawPosition},
      bodyA: this.seesaw1,
-     //bodyB: this.seesawBeam1,
-     //pointB: { x: (this.xSeesawLeftPosition+this.seesawLength*0.5), y: this.ySeesawPosition+this.seesawHeight*0.5},
-     //pointB: this.Vector.clone(this.seesaw1.position),
      pointB: { x: this.xSeesawLeftPosition, y: this.ySeesawBeamPosition-40},
      stiffness: 1,
      length: 0,
@@ -504,17 +453,11 @@ export class SeesawProgram implements Program {
     Matter.World.add(this.engine.world, this.seesawBeam2);  
 
 
-  // Create a point constraint that pins the center of the platform to a fixed point in space, so
-  // it can't move
+  // Create a point constraint that pins the center of the platform to a fixed point in space, so it can't move
   //https://itnext.io/modular-game-worlds-in-phaser-3-tilemaps-5-matter-physics-platformer-d14d1f614557
   const constraintSeesaw2 = this.Constraint.create({
     bodyA: this.seesaw2,
     pointB: { x: this.xSeesawRightPosition, y: this.ySeesawBeamPosition-40},
-    //bodyB: this.seesawBeam2,
-    //pointB: { x: (this.xSeesawRightPosition+this.seesawLength*0.5), y: this.ySeesawPosition+this.seesawHeight*0.5},
-    //pointB: this.Vector.clone(this.seesaw2.position),
-    //pointA: {x: this.seesawBeam2.position.x, y: this.seesawBeam2.position.y},
-    //bodyB: this.seesaw2,
     stiffness: 1, 
     length: 0
       }
@@ -687,7 +630,6 @@ export class SeesawProgram implements Program {
 
       ////sending data to browser
       this.lobbyController.sendToDisplays('seesaw1Position', [this.seesaw1.position.x, this.seesaw1.position.y, this.seesawLength, this.seesawHeight, this.seesaw1Angle]);
-      console.log("SEESAW2POSITION angle before sending to browser: "+this.seesaw2?.angle+" and withouth ?: "+this.seesaw2.angle+" and seesaw2Angle:" +this.seesaw2Angle)
       this.lobbyController.sendToDisplays('seesaw2Position', [this.seesaw2.position.x, this.seesaw2.position.y, this.seesawLength, this.seesawHeight, this.seesaw2Angle]);
       this.lobbyController.sendToDisplays('seesawBeam1Position', [this.seesawBeam1?.position.x, this.seesawBeam1?.position.y, this.seesawBeamLenght, this.seesawBeamHeight]);
       this.lobbyController.sendToDisplays('seesawBeam2Position', [this.seesawBeam2?.position.x, this.seesawBeam2?.position.y, this.seesawBeamLenght, this.seesawBeamHeight]);
