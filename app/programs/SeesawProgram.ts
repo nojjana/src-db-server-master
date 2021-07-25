@@ -52,7 +52,6 @@ export class SeesawProgram implements Program {
   private seesawBeamLenght = 20;
   private seesawBeamHeight = 100;
   private ySeesawBeamPosition = 1000;
-  private seesawRotation = 75;
 
   //bei lenght: 500 / left: 1200 und right: 2000 / lenght500 und -400 auf browser seite (zeile 372 und 390) 
   // die resultate: 1000 - 1400 und 1800 - 2200
@@ -73,8 +72,11 @@ export class SeesawProgram implements Program {
   private ingredientRight?: Matter.Body;
   private seesaw1?: Matter.Body;
   private seesawBeam1?: Matter.Body;
+  private seesaw1Angle = 0;
   private seesaw2?: Matter.Body;
   private seesawBeam2?: Matter.Body;
+  private seesaw2Angle = 0;
+
      
   
   // säftlimacher game variables
@@ -258,6 +260,8 @@ export class SeesawProgram implements Program {
   //   }
   // }
 
+  //// receiving data from ionic (controller)
+
   private setControllerDataPlayer1(controllerData: number[]): void {
     let moveToValX = controllerData[0];
     let controllerId = controllerData[1];
@@ -271,16 +275,14 @@ export class SeesawProgram implements Program {
   }
 
   private setControllerDataPlayer2(controllerData: number[]): void {
-    let moveToValY = controllerData[0];
+    this.seesaw2Angle = controllerData[0];
     let controllerId = controllerData[1];
-    console.log("controllerData from Player 2 arrived:", moveToValY, controllerId);
+    console.log("controllerData from Player 2 arrived:", this.seesaw2Angle, controllerId);
     console.log("seesaw 2 angle: "+this.seesaw2?.angle)
-    if (moveToValY != null && controllerId != null && this.seesaw2 != undefined) {
+    if (this.seesaw2Angle != null && controllerId != null && this.seesaw2 != undefined) {
       if (controllerId != 2) return;
-      this.setShakerPos(moveToValY, this.seesaw2);
-      console.log("seesaw 2 angle BEFORE: "+this.seesaw2?.angle)
-      this.seesaw2.angle = moveToValY;
-      console.log("seesaw 2 angle AFTER: "+this.seesaw2?.angle)
+    //  this.setShakerPos(moveToValY, this.seesaw2);
+      this.seesaw2.angle = this.seesaw2Angle; // zuweisen des angles an matter.js element im server
 
     }
   }  
@@ -683,10 +685,10 @@ export class SeesawProgram implements Program {
       this.engine.world.gravity.y = this.gravityY;
       Matter.Engine.update(this.engine, 1000 / fps);
 
-    //  console.log("seesaw1Position BEFORE SENDING x: "+this.seesaw1.position.x+" seesaw1Position BEFORE SENDING y: "+this.seesaw1.position.y+" Lenght: "+this.seesawLength);
-      this.lobbyController.sendToDisplays('seesaw1Position', [this.seesaw1.position.x, this.seesaw1.position.y, this.seesawLength, this.seesawHeight, this.seesaw1?.angle]);
-    //  console.log("seesaw2Position BEFORE SENDING x: "+this.seesaw2.position.x+" seesaw2Position BEFORE SENDING y: "+this.seesaw2.position.y+" Lenght: "+this.seesawLength);
-      this.lobbyController.sendToDisplays('seesaw2Position', [this.seesaw2.position.x, this.seesaw2.position.y, this.seesawLength, this.seesawHeight, this.seesaw2?.angle]);
+      ////sending data to browser
+      this.lobbyController.sendToDisplays('seesaw1Position', [this.seesaw1.position.x, this.seesaw1.position.y, this.seesawLength, this.seesawHeight, this.seesaw1Angle]);
+      console.log("SEESAW2POSITION angle before sending to browser: "+this.seesaw2?.angle+" and withouth ?: "+this.seesaw2.angle+" and seesaw2Angle:" +this.seesaw2Angle)
+      this.lobbyController.sendToDisplays('seesaw2Position', [this.seesaw2.position.x, this.seesaw2.position.y, this.seesawLength, this.seesawHeight, this.seesaw2Angle]);
       this.lobbyController.sendToDisplays('seesawBeam1Position', [this.seesawBeam1?.position.x, this.seesawBeam1?.position.y, this.seesawBeamLenght, this.seesawBeamHeight]);
       this.lobbyController.sendToDisplays('seesawBeam2Position', [this.seesawBeam2?.position.x, this.seesawBeam2?.position.y, this.seesawBeamLenght, this.seesawBeamHeight]);
 
