@@ -23,7 +23,7 @@ export class CatcherProgram implements Program {
   private countdownInterval: any;
 
   // basic game variables
-  private secondsOfPlayTime: number = 30;
+  private secondsOfPlayTime: number = 60;
   private score: number = 0;
   private scoreInc: number = 50;
 
@@ -48,15 +48,15 @@ export class CatcherProgram implements Program {
   private catcherNet2?: Matter.Body;
   
   // säftlimacher game variables
-  private movePixelSteps = 30;  // möglichst in 10er Schritten, testen
+  private movePixelSteps = 180;  // möglichst in 10er Schritten, testen
   private ingredientRadius = 50;
   private shakerContainerRadius = 5;
   private availableIngredientTypes = 3;
   private allIngredientNumbersOnList: number[] = new Array();
-  private allIngredientsFalling: number[] = new Array();
+  // private allIngredientsFalling: number[] = new Array();
   // private allIngrFalling: Ingredient[] = new Array();
   private gravityX: number = 0;
-  private gravityY: number = 0.4;
+  private gravityY: number = 0.5;
 
   constructor(lobbyController: LobbyController) {
     this.lobbyController = lobbyController;
@@ -230,7 +230,7 @@ export class CatcherProgram implements Program {
     
     if (moveToValX != null && controllerId != null && this.catcherNet1 != undefined) {
       if (controllerId != 1) return;
-      this.setShakerPos(moveToValX, this.catcherNet1);
+      this.setNetPos(moveToValX, this.catcherNet1);
     }
   }
 
@@ -240,12 +240,12 @@ export class CatcherProgram implements Program {
     console.log("controllerData from Player 2 arrived:", moveToValX, controllerId);
     if (moveToValX != null && controllerId != null && this.catcherNet2 != undefined) {
       if (controllerId != 2) return;
-      this.setShakerPos(moveToValX, this.catcherNet2);
+      this.setNetPos(moveToValX, this.catcherNet2);
     }
   }
 
 
-  private setShakerPos(valX: number, netBody: Matter.Body) {
+  private setNetPos(valX: number, netBody: Matter.Body) {
     if (netBody != undefined && netBody != null) {
       switch (valX) {
         case 1:
