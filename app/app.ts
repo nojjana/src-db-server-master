@@ -52,7 +52,8 @@ io.on('connection', (socket: Socket) => {
 
         socketIds.push(socket.id);
 
-        let lobbyCode = createLobbyCode();
+        // let lobbyCode = createLobbyCode();
+        let lobbyCode = 1;
         let lobbyController = new LobbyController(lobbyCode, io);
         lobbies.set(lobbyCode, lobbyController);
         lobbyController.displayJoins(srcSocket);
