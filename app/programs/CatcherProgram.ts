@@ -252,21 +252,21 @@ export class CatcherProgram implements Program {
           // right
           // Matter.Body.applyForce(this.shakerContainer, {x: this.shakerContainer.position.x, y: this.shakerContainer.position.y}, {x: 0.05, y: 0});
           // Matter.Body.translate(this.shakerContainer, {x: this.xRightField, y:  0});
-          // Matter.Body.setPosition(this.shakerContainer, {x: this.xRightField, y:  this.shakerContainer.position.y});
-          this.forceMove(netBody, this.xRightField, netBody.position.y, this.movePixelSteps);
+          Matter.Body.setPosition(netBody, {x: this.xRightField, y:  netBody.position.y});
+          // this.forceMove(netBody, this.xRightField, netBody.position.y, this.movePixelSteps);
           break;
         case -1:
           // left
           // Matter.Body.applyForce(this.shakerContainer, {x: this.shakerContainer.position.x, y: this.shakerContainer.position.y}, {x: -0.05, y: 0});
           // Matter.Body.translate(this.shakerContainer, {x: this.xLeftField, y:  0});
-          // Matter.Body.setPosition(this.shakerContainer, {x: this.xLeftField, y:  this.shakerContainer.position.y});
-          this.forceMove(netBody, this.xLeftField, netBody.position.y, this.movePixelSteps);
+          Matter.Body.setPosition(netBody, {x: this.xLeftField, y:  netBody.position.y});
+          // this.forceMove(netBody, this.xLeftField, netBody.position.y, this.movePixelSteps);
           break;
         case 0:
           // center
           // Matter.Body.translate(this.shakerContainer, {x: this.xCenterField, y:  0});
-          // Matter.Body.setPosition(this.shakerContainer, {x: this.xCenterField, y:  this.shakerContainer.position.y});
-          this.forceMove(netBody, this.xCenterField, netBody.position.y, this.movePixelSteps);
+          Matter.Body.setPosition(netBody, {x: this.xCenterField, y: netBody.position.y});
+          // this.forceMove(netBody, this.xCenterField, netBody.position.y, this.movePixelSteps);
           break;
         default:
           break;
