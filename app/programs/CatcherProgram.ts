@@ -56,7 +56,7 @@ export class CatcherProgram implements Program {
   // private allIngredientsFalling: number[] = new Array();
   // private allIngrFalling: Ingredient[] = new Array();
   private gravityX: number = 0;
-  private gravityY: number = 0.5;
+  private gravityY: number = 0.4;
 
   constructor(lobbyController: LobbyController) {
     this.lobbyController = lobbyController;
@@ -328,7 +328,6 @@ export class CatcherProgram implements Program {
 
   private sendLevelInfoToDisplay(): void {
     let data: any[] = [];
-    this.generateIngredientListNumbers();
     // 0
     data.push(this.allIngredientNumbersOnList);
     // 1 2
@@ -436,6 +435,8 @@ export class CatcherProgram implements Program {
     this.initCatcherNets();
     this.initIngredients();
     this.initMatterEventCollision();
+
+    this.generateIngredientListNumbers();
     this.sendLevelInfoToDisplay();
   }
 
