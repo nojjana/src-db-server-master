@@ -48,15 +48,15 @@ export class CatcherProgram implements Program {
   private catcherNet2?: Matter.Body;
   
   // säftlimacher game variables
-  private movePixelSteps = 180;  // möglichst in 10er Schritten, testen
+  // private movePixelSteps = 180;  // möglichst in 10er Schritten, testen
   private ingredientRadius = 50;
   private shakerContainerRadius = 5;
-  private availableIngredientTypes = 3;
+  private availableIngredientTypes = 4;
   private allIngredientNumbersOnList: number[] = new Array();
   // private allIngredientsFalling: number[] = new Array();
   // private allIngrFalling: Ingredient[] = new Array();
   private gravityX: number = 0;
-  private gravityY: number = 0.5;
+  private gravityY: number = 0.4;
 
   constructor(lobbyController: LobbyController) {
     this.lobbyController = lobbyController;
@@ -252,21 +252,21 @@ export class CatcherProgram implements Program {
           // right
           // Matter.Body.applyForce(this.shakerContainer, {x: this.shakerContainer.position.x, y: this.shakerContainer.position.y}, {x: 0.05, y: 0});
           // Matter.Body.translate(this.shakerContainer, {x: this.xRightField, y:  0});
-          // Matter.Body.setPosition(this.shakerContainer, {x: this.xRightField, y:  this.shakerContainer.position.y});
-          this.forceMove(netBody, this.xRightField, netBody.position.y, this.movePixelSteps);
+          Matter.Body.setPosition(netBody, {x: this.xRightField, y:  netBody.position.y});
+          // this.forceMove(netBody, this.xRightField, netBody.position.y, this.movePixelSteps);
           break;
         case -1:
           // left
           // Matter.Body.applyForce(this.shakerContainer, {x: this.shakerContainer.position.x, y: this.shakerContainer.position.y}, {x: -0.05, y: 0});
           // Matter.Body.translate(this.shakerContainer, {x: this.xLeftField, y:  0});
-          // Matter.Body.setPosition(this.shakerContainer, {x: this.xLeftField, y:  this.shakerContainer.position.y});
-          this.forceMove(netBody, this.xLeftField, netBody.position.y, this.movePixelSteps);
+          Matter.Body.setPosition(netBody, {x: this.xLeftField, y:  netBody.position.y});
+          // this.forceMove(netBody, this.xLeftField, netBody.position.y, this.movePixelSteps);
           break;
         case 0:
           // center
           // Matter.Body.translate(this.shakerContainer, {x: this.xCenterField, y:  0});
-          // Matter.Body.setPosition(this.shakerContainer, {x: this.xCenterField, y:  this.shakerContainer.position.y});
-          this.forceMove(netBody, this.xCenterField, netBody.position.y, this.movePixelSteps);
+          Matter.Body.setPosition(netBody, {x: this.xCenterField, y: netBody.position.y});
+          // this.forceMove(netBody, this.xCenterField, netBody.position.y, this.movePixelSteps);
           break;
         default:
           break;
@@ -328,7 +328,6 @@ export class CatcherProgram implements Program {
 
   private sendLevelInfoToDisplay(): void {
     let data: any[] = [];
-    this.generateIngredientListNumbers();
     // 0
     data.push(this.allIngredientNumbersOnList);
     // 1 2
@@ -436,6 +435,8 @@ export class CatcherProgram implements Program {
     this.initCatcherNets();
     this.initIngredients();
     this.initMatterEventCollision();
+
+    this.generateIngredientListNumbers();
     this.sendLevelInfoToDisplay();
   }
 
@@ -469,6 +470,12 @@ export class CatcherProgram implements Program {
             this.lobbyController.sendToDisplays('checkIngredientOnList', ingredientTypeNr);
             this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient',
               [this.scoreInc, ingredientTypeNr, ingredientBody.position.x, ingredientBody.position.y]);
+          } else if (this.isInedible(ingredientTypeNr)) {
+            // beatle iiiih
+            console.log('catched something inedible! iiiiiks!');
+            this.score -= this.scoreInc*2;
+            this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient',
+              [-(this.scoreInc*2), ingredientTypeNr, ingredientBody.position.x, ingredientBody.position.y]);
           } else {
             // bad catch
             console.log('catched a wrong ingredient, NOT on list!!! -50 points.');
@@ -505,6 +512,11 @@ export class CatcherProgram implements Program {
       console.log("number on list: " + n);
     });
     return this.allIngredientNumbersOnList;
+  }
+
+  private isInedible(ingredientNr: number) {
+    // 4 is a beatle iiiiih
+    return ingredientNr == 3;
   }
 
   private respawnIngredient(body: Matter.Body) {
@@ -735,6 +747,7 @@ enum IngredientType {
   APPLE,
   BANANA,
   BERRY,
+  BEATLE
   // HONEY,
   // BEE
 }
