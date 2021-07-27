@@ -3,7 +3,8 @@ import { LobbyController } from "../LobbyController";
 import { SrcSocket } from "../SrcSocket";
 
 export class MainMenuProgramm implements Program {
-    private games: string[] = ["Labyrinth", "Spaceship", "Whack-a-mole", "Säftlimacher 1", "Säftlimacher 2"];
+    // private games: string[] = ["Labyrinth", "Spaceship", "Whack-a-mole", "Säftlimacher 1", "Säftlimacher 2"];
+    private games: string[] = ["Schütteln", "Auffangen"];
     private lobbyController: LobbyController;
     private selectedGame = 0;
     private mainControllerSocketId: string = "";
@@ -85,8 +86,9 @@ export class MainMenuProgramm implements Program {
     selectable games MAIN_MENU, NOT_IN_LOBBY) all listeners from the main-controller
     get removed, so that later on the listeners aren't added twice */
     private controllerPressedSelect(): void {
-        if(this.lobbyController.getControllers().length == 2){
-            this.lobbyController.changeProgram(this.selectedGame + 2);
+        if(this.lobbyController.getControllers().length == 2) {
+            // do not propose 3 first games (not säftlimacher!)
+            this.lobbyController.changeProgram(this.selectedGame + 2 + 3);
         }
     }
 
