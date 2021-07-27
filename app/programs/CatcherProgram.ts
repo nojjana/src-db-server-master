@@ -48,10 +48,10 @@ export class CatcherProgram implements Program {
   private catcherNet2?: Matter.Body;
   
   // säftlimacher game variables
-  private movePixelSteps = 180;  // möglichst in 10er Schritten, testen
+  // private movePixelSteps = 180;  // möglichst in 10er Schritten, testen
   private ingredientRadius = 50;
   private shakerContainerRadius = 5;
-  private availableIngredientTypes = 3;
+  private availableIngredientTypes = 4;
   private allIngredientNumbersOnList: number[] = new Array();
   // private allIngredientsFalling: number[] = new Array();
   // private allIngrFalling: Ingredient[] = new Array();
@@ -470,6 +470,12 @@ export class CatcherProgram implements Program {
             this.lobbyController.sendToDisplays('checkIngredientOnList', ingredientTypeNr);
             this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient',
               [this.scoreInc, ingredientTypeNr, ingredientBody.position.x, ingredientBody.position.y]);
+          } else if (this.isInedible(ingredientTypeNr)) {
+            // beatle iiiih
+            console.log('catched something inedible! iiiiiks!');
+            this.score -= this.scoreInc*2;
+            this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient',
+              [-(this.scoreInc*2), ingredientTypeNr, ingredientBody.position.x, ingredientBody.position.y]);
           } else {
             // bad catch
             console.log('catched a wrong ingredient, NOT on list!!! -50 points.');
@@ -506,6 +512,11 @@ export class CatcherProgram implements Program {
       console.log("number on list: " + n);
     });
     return this.allIngredientNumbersOnList;
+  }
+
+  private isInedible(ingredientNr: number) {
+    // 4 is a beatle iiiiih
+    return ingredientNr == 3;
   }
 
   private respawnIngredient(body: Matter.Body) {
@@ -736,6 +747,7 @@ enum IngredientType {
   APPLE,
   BANANA,
   BERRY,
+  BEATLE
   // HONEY,
   // BEE
 }
