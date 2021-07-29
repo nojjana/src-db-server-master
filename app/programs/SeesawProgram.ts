@@ -39,7 +39,7 @@ export class SeesawProgram implements Program {
   //private xCenterField = this.width * 0.5;
   //private xRightField = this.width * 0.75;
   private xLeftField = 1800-200;   //860 - 200
-  private xCenterField = 860-200;   //1340-200
+  private xCenterField = 2000-200;   //1340-200
   private xRightField = 1300-200;    //1760 - 200
 
   // placement of seesaws
@@ -73,9 +73,12 @@ export class SeesawProgram implements Program {
   private ingredientRight?: Matter.Body;
   private seesaw1?: Matter.Body;
   private seesawBeam1?: Matter.Body;
+  //private seesaw1TriggerSpaceLeft?: Matter.Body; //used to trigger if ingredient is on seesaw to set "landedOnSeesaw" to true so that the Y axis is set to the current position of the seesaw
+  //private seesaw1TriggerSpaceRight?: Matter.Body; //used to trigger if ingredient is on seesaw to set "landedOnSeesaw" to true so that the Y axis is set to the current position of the seesaw
   private seesaw2?: Matter.Body;
   private seesawBeam2?: Matter.Body;
-  private seesawTriggerSpace?: Matter.Body; //used to trigger if ingredient is on seesaw to set "landedOnSeesaw" to true so that the Y axis is set to the current position of the seesaw
+  //private seesaw2TriggerSpaceLeft?: Matter.Body; //used to trigger if ingredient is on seesaw to set "landedOnSeesaw" to true so that the Y axis is set to the current position of the seesaw
+  //private seesaw2TriggerSpaceRight?: Matter.Body; //used to trigger if ingredient is on seesaw to set "landedOnSeesaw" to true so that the Y axis is set to the current position of the seesaw
 
      
   
@@ -92,7 +95,9 @@ export class SeesawProgram implements Program {
   private Constraint = Matter.Constraint;
   private Vector = Matter.Vector;
   private Composite = Matter.Composite;
-  private landedOnSeesaw = false;
+  private LeftLandedOnSeesaw = false;
+  private CenterLandedOnSeesaw = false;
+  private RightLandedOnSeeasw = false;
 
 
   constructor(lobbyController: LobbyController) {
@@ -422,10 +427,6 @@ export class SeesawProgram implements Program {
   private initSeesaws(): void {
     if (this.engine == null) return;
 
-    
-    console.log("seesaw left position x: "+this.xSeesawLeftPosition+" and y: "+this.ySeesawBeamPosition)
-    console.log("seesaw right position x: "+this.xSeesawRightPosition+" and y: "+this.ySeesawBeamPosition)
-
     //seesaw1
     this.seesaw1 = Matter.Bodies.rectangle(
       this.xSeesawLeftPosition,
@@ -452,7 +453,35 @@ export class SeesawProgram implements Program {
         isStatic: true
       }
     )
-    Matter.World.add(this.engine.world, this.seesawBeam1); 
+    Matter.World.add(this.engine.world, this.seesawBeam1);
+    
+    /* //seesaw trigger space on the left side 
+    this.seesaw1TriggerSpaceLeft = Matter.Bodies.rectangle(
+      this.xSeesawLeftPosition-320,
+      this.ySeesawPosition-300,
+      40,
+      400,
+      {
+        label: 'Seesaw1TriggerSpace',
+        isSensor: true,
+        isStatic: true
+      }
+    )
+    Matter.World.add(this.engine.world, this.seesaw1TriggerSpaceLeft);
+
+    //seesaw trigger space on the left side 
+    this.seesaw1TriggerSpaceRight = Matter.Bodies.rectangle(
+      this.xSeesawLeftPosition+320,
+      this.ySeesawPosition-300,
+      40,
+      400,
+      {
+        label: 'Seesaw1TriggerSpace',
+        isSensor: true,
+        isStatic: true
+      }
+    )
+    Matter.World.add(this.engine.world, this.seesaw1TriggerSpaceRight); */
 
   // Create a point constraint that pins the center of the platform to a fixed point in space, so it can't move
   //https://itnext.io/modular-game-worlds-in-phaser-3-tilemaps-5-matter-physics-platformer-d14d1f614557
@@ -509,19 +538,33 @@ export class SeesawProgram implements Program {
     Matter.World.add(this.engine.world, this.seesawBeam2);  
 
 
-    //seesaw trigger space on the left side 
-    this.seesawTriggerSpace = Matter.Bodies.rectangle(
-      this.xSeesawRightPosition-300,
+    /* //seesaw trigger space on the left side 
+    this.seesaw2TriggerSpaceLeft = Matter.Bodies.rectangle(
+      this.xSeesawRightPosition-320,
       this.ySeesawPosition-300,
       40,
       400,
       {
-        label: 'SeesawTriggerSpace',
+        label: 'Seesaw2TriggerSpace',
         isSensor: true,
         isStatic: true
       }
     )
-    Matter.World.add(this.engine.world, this.seesawTriggerSpace);
+    Matter.World.add(this.engine.world, this.seesaw2TriggerSpaceLeft);
+
+    //seesaw trigger space on the left side 
+    this.seesaw2TriggerSpaceRight = Matter.Bodies.rectangle(
+      this.xSeesawRightPosition+320,
+      this.ySeesawPosition-300,
+      40,
+      400,
+      {
+        label: 'Seesaw2TriggerSpace',
+        isSensor: true,
+        isStatic: true
+      }
+    )
+    Matter.World.add(this.engine.world, this.seesaw2TriggerSpaceRight); */
 
 
   // Create a point constraint that pins the center of the platform to a fixed point in space, so it can't move
@@ -618,18 +661,44 @@ export class SeesawProgram implements Program {
       let i = 0, j = pairs.length;
       for (; i != j; ++i) {
         const pair = pairs[i];
-
+/* 
         if (pair.bodyA.label.includes('Seesaw2') && pair.bodyB.label.includes('Ingredient0') || pair.bodyB.label.includes('Seesaw2') && pair.bodyA.label.includes('Ingredient0')) {
           // ingredient fallen onto seesaw
             console.log("Ingredient0 landet on seesaw");
-            this.landedOnSeesaw = true;
+            this.LeftLandedOnSeesaw = true;
           }
 
-        if (pair.bodyA.label.includes('SeesawTriggerSpace') && pair.bodyB.label.includes('Ingredient0') || pair.bodyB.label.includes('SeesawTriggerSpace') && pair.bodyA.label.includes('Ingredient0')) {
+        if (pair.bodyA.label.includes('Seesaw2') && pair.bodyB.label.includes('Ingredient1') || pair.bodyB.label.includes('Seesaw2') && pair.bodyA.label.includes('Ingredient1')) {
+          // ingredient fallen onto seesaw
+            console.log("Ingredient1 landet on seesaw");
+            this.CenterLandedOnSeesaw = true;
+        }
+
+        if (pair.bodyA.label.includes('Seesaw2') && pair.bodyB.label.includes('Ingredient2') || pair.bodyB.label.includes('Seesaw2') && pair.bodyA.label.includes('Ingredient2')) {
+          // ingredient fallen onto seesaw
+            console.log("Ingredient1 landet on seesaw");
+            this.RightLandedOnSeeasw = true;
+        } */
+
+/*         if (pair.bodyA.label.includes('Seesaw2TriggerSpace') && pair.bodyB.label.includes('Ingredient0') || pair.bodyB.label.includes('Seesaw2TriggerSpace') && pair.bodyA.label.includes('Ingredient0')) {
           // ingredient fallen onto seesaw
           console.log("xxxx set landed on Seesaw false");
-          this.landedOnSeesaw = false;
+          this.LeftLandedOnSeesaw = false;
           } 
+                  if (pair.bodyA.label.includes('Seesaw2TriggerSpace') && pair.bodyB.label.includes('Ingredient1') || pair.bodyB.label.includes('Seesaw2TriggerSpace') && pair.bodyA.label.includes('Ingredient1')) {
+          // ingredient fallen onto seesaw
+          console.log("xxxx set landed on Seesaw false");
+          this.CenterLandedOnSeesaw = false;
+          } 
+          
+          if (pair.bodyA.label.includes('Seesaw2TriggerSpace') && pair.bodyB.label.includes('Ingredient2') || pair.bodyB.label.includes('Seesaw2TriggerSpace') && pair.bodyA.label.includes('Ingredient2')) {
+          // ingredient fallen onto seesaw
+          console.log("xxxx set landed on Seesaw false");
+          this.RightLandedOnSeeasw = false;
+          }  */ 
+
+
+ 
           
         // TODO
         if (pair.bodyA.label.includes('Container') && pair.bodyB.label.includes('Ingredient') || pair.bodyB.label.includes('Container') && pair.bodyA.label.includes('Ingredient')) {
@@ -738,7 +807,7 @@ export class SeesawProgram implements Program {
 
       ////sending data to browser
 
-      //console.log("SERVER -> BROWSER - 1 pos X: "+this.seesaw1.position.x+" pos y: "+this.seesaw1.position.y+" axes "+this.seesaw1.axes+" angle: "+this.seesaw1.angle);
+      console.log("SERVER -> BROWSER - 1 pos X: "+this.seesaw1.position.x+" pos y: "+this.seesaw1.position.y+" axes "+this.seesaw1.axes+" angle: "+this.seesaw1.angle);
       this.lobbyController.sendToDisplays('seesaw1Position', [this.seesaw1.position.x, this.seesaw1.position.y, this.seesawLength, this.seesawHeight, this.seesaw1.angle]);
       //console.log("SERVER -> BROWSER - 2 pos X: "+this.seesaw2.position.x+" pos y: "+this.seesaw2.position.y+" angle: "+this.seesaw2.angle);
       this.lobbyController.sendToDisplays('seesaw2Position', [this.seesaw2.position.x, this.seesaw2.position.y, this.seesawLength, this.seesawHeight, this.seesaw2.angle]);
@@ -747,29 +816,42 @@ export class SeesawProgram implements Program {
       //console.log("SERVER -> BROWSER - BEAM: pos X: "+this.seesawBeam1?.position.x+" pos y: "+this.seesawBeam1?.position.y+" axes "+this.seesawBeam1?.axes);
       this.lobbyController.sendToDisplays('seesawBeam2Position', [this.seesawBeam2?.position.x, this.seesawBeam2?.position.y, this.seesawBeamLenght, this.seesawBeamHeight]);
       
-      this.lobbyController.sendToDisplays('seesawTriggerSpace', [this.seesawTriggerSpace?.position.x, this.seesawTriggerSpace?.position.y, 40, 400]);
-
+     /*  this.lobbyController.sendToDisplays('seesaw1TriggerSpaceLeft', [this.seesaw1TriggerSpaceLeft?.position.x, this.seesaw1TriggerSpaceLeft?.position.y, 40, 400]);
+      this.lobbyController.sendToDisplays('seesaw1TriggerSpaceRight', [this.seesaw1TriggerSpaceRight?.position.x, this.seesaw1TriggerSpaceRight?.position.y, 40, 400]);
+      this.lobbyController.sendToDisplays('seesaw2TriggerSpaceLeft', [this.seesaw2TriggerSpaceLeft?.position.x, this.seesaw2TriggerSpaceLeft?.position.y, 40, 400]);
+      this.lobbyController.sendToDisplays('seesaw2TriggerSpaceRight', [this.seesaw2TriggerSpaceRight?.position.x, this.seesaw2TriggerSpaceRight?.position.y, 40, 400]);
+ */
       this.lobbyController.sendToDisplays('updateScore', this.score);
 
-      if (this.ingredientLeft != null && this.landedOnSeesaw == false) {
+      if (this.ingredientLeft != null) {
       //  console.log("IngredientLeft X before sending: "+this.ingredientLeft.position.x+" and Y"+ this.ingredientLeft.position.y)
         this.lobbyController.sendToDisplays('updateIngredientLeft', [this.ingredientLeft.position.x, this.ingredientLeft.position.y, this.ingredientLeft.angle]);
       }
 
-      if (this.ingredientLeft != null && this.landedOnSeesaw == true) {
-        console.log("--- ingredientLeft on seesaw was called // this seesaw2 position: "+this.seesaw2.position.y)
-        this.lobbyController.sendToDisplays('updateIngredientLeft', [this.ingredientLeft.position.x, this.seesaw2.position.y, this.ingredientLeft.angle]);
-      }
-
       if (this.ingredientCenter != null) {
-      //  console.log("IngredientCenter X before sending: "+this.ingredientCenter.position.x+" and Y"+ this.ingredientCenter.position.y)
-        this.lobbyController.sendToDisplays('updateIngredientCenter', [this.ingredientCenter.position.x, this.ingredientCenter.position.y, 2]);
+        //  console.log("IngredientLeft X before sending: "+this.ingredientLeft.position.x+" and Y"+ this.ingredientLeft.position.y)
+          this.lobbyController.sendToDisplays('updateIngredientCenter', [this.ingredientCenter.position.x, this.ingredientCenter.position.y, this.ingredientCenter.angle]);
       }
 
       if (this.ingredientRight != null) {
-      //  console.log("IngredientRight X before sending: "+this.ingredientRight.position.x+" and Y"+ this.ingredientRight.position.y)
-        this.lobbyController.sendToDisplays('updateIngredientRight', [this.ingredientRight.position.x, this.ingredientRight.position.y, 1]);
+        //  console.log("IngredientLeft X before sending: "+this.ingredientLeft.position.x+" and Y"+ this.ingredientLeft.position.y)
+          this.lobbyController.sendToDisplays('updateIngredientRight', [this.ingredientRight?.position.x, this.ingredientRight?.position.y, this.ingredientRight?.angle]);
+        }
+
+/*       if (this.ingredientLeft != null && this.LeftLandedOnSeesaw == true) {
+        console.log("--- ingredientLeft on seesaw was called // this seesaw2 position: "+this.seesaw2.position.y)
+        this.lobbyController.sendToDisplays('updateIngredientLeft', [this.ingredientLeft.position.x, this.seesaw2.position.y, this.ingredientLeft.angle]);
+      } 
+      
+      if (this.ingredientCenter != null && this.CenterLandedOnSeesaw == true) {
+        //  console.log("IngredientCenter X before sending: "+this.ingredientCenter.position.x+" and Y"+ this.ingredientCenter.position.y)
+          this.lobbyController.sendToDisplays('updateIngredientCenter', [this.ingredientCenter.position.x, this.ingredientCenter.position.y, this.ingredientCenter.angle]);
       }
+
+      if (this.ingredientRight != null && this.RightLandedOnSeeasw == true) {
+      //  console.log("IngredientRight X before sending: "+this.ingredientRight.position.x+" and Y"+ this.ingredientRight.position.y)
+        this.lobbyController.sendToDisplays('updateIngredientRight', [this.ingredientRight?.position.x, this.ingredientRight?.position.y, this.ingredientRight?.angle]);
+      } */
 
     }, 1000 / fps);
 
