@@ -34,37 +34,6 @@ export class SeesawProgram implements Program {
   private width = 2560;
   private height = 1440;
   //private worldSideMargin = 600;
-  // fields where ingredients fall: left, center, right
-  //private xLeftField = this.width * 0.25;
-  //private xCenterField = this.width * 0.5;
-  //private xRightField = this.width * 0.75;
-  private xLeftField = 1800-200;   //860 - 200
-  private xCenterField = 2000-200;   //1340-200
-  private xRightField = 1300-200;    //1760 - 200
-
-  // placement of seesaws
-  // TODO: 3 teile berrechnen und speichern
-  private xSeesawLeftPosition = 900;
-  private xSeesawRightPosition = 1800;
-  private ySeesawPosition = 1000;
-  private seesawLength = 500;
-  private seesawHeight = 40;
-  private seesawBeamLenght = 20;
-  private seesawBeamHeight = 100;
-  private ySeesawBeamPosition = 1040;
-
-
-  //bei lenght: 500 / left: 1200 und right: 2000 / lenght500 und -400 auf browser seite (zeile 372 und 390) 
-  // die resultate: 1000 - 1400 und 1800 - 2200
-
-  //ingredients -400 / left: 1200 / right: 2000 / length500 und weiterhin -400 auf browser seite
-  // resultate: (1400-400)-(1800-400)    (2200-400)-(2600-400)
-  // browser seite (zeile 372 und 390) angepasst auf: -200 -> gibt: 1200-200 - 1600-200   / 2000-200 - 2400-200
-
-  //seesawLeft: 900 / right: 1800
-  //left field: 860-200 bis 1340-200   //right: 1760-200 bis 2240-200
-  // ingredients placement: 50 for radius -> f.e. 950 or 1850
-  // on browser side: angepasst auf -240
 
 
   // säftlimacher visible objects
@@ -77,10 +46,46 @@ export class SeesawProgram implements Program {
   //private seesaw1TriggerSpaceRight?: Matter.Body; //used to trigger if ingredient is on seesaw to set "landedOnSeesaw" to true so that the Y axis is set to the current position of the seesaw
   private seesaw2?: Matter.Body;
   private seesawBeam2?: Matter.Body;
+
   //private seesaw2TriggerSpaceLeft?: Matter.Body; //used to trigger if ingredient is on seesaw to set "landedOnSeesaw" to true so that the Y axis is set to the current position of the seesaw
   //private seesaw2TriggerSpaceRight?: Matter.Body; //used to trigger if ingredient is on seesaw to set "landedOnSeesaw" to true so that the Y axis is set to the current position of the seesaw
+  private shakerContainer?: Matter.Body;
+  private garbageContainerLeft?: Matter.Body;
+  private garbageContainerRight?: Matter.Body;   
+  
+      // placement of seesaws
+  // TODO: 3 teile berrechnen und speichern
+  private xSeesawLeftPosition = 900;
+  private xSeesawRightPosition = 1800;
+  private ySeesawPosition = 500; //1000
 
-     
+  private seesawLength = 500;
+  private seesawHeight = 40;
+
+  private seesawBeamLenght = 20;
+  private seesawBeamHeight = 100;
+  private ySeesawBeamPosition = 540; //1040
+
+  //placment of containers
+  private garbageContainerLeftX = 550;
+  private shakerContainerLeftX = 1350; //800
+  private garbageContainerRightX = 2250; //2400
+  private shakerContainerY = 900;
+  private garbageContainerY = 1000;
+
+  //placement of ingredients
+    // fields where ingredients fall: left, center, right
+  //private xLeftField = this.width * 0.25;
+  //private xCenterField = this.width * 0.5;
+  //private xRightField = this.width * 0.75;
+  private xLeftField = 1000-200;   //860 - 200
+  private xCenterField = 1100-200;   //1340-200
+  private xRightField = 1300-200;    //1760 - 200
+
+    //seesawLeft: 900 / right: 1800
+  //left field: 860-200 bis 1340-200   //right: 1760-200 bis 2240-200
+  // ingredients placement: 50 for radius -> f.e. 950 or 1850
+  // on browser side: angepasst auf -240
   
   // säftlimacher game variables
   private movePixelSteps = 30;  // möglichst in 10er Schritten, testen
@@ -282,25 +287,23 @@ export class SeesawProgram implements Program {
         console.log("---- seesaw2.angle update called")
       //  this.seesaw2.angle = seesaw2Angle;  // zuweisen des angles an matter.js element im server
          if (seesaw2Angle == 0){
-          console.log("------------ seesaw 0 called")
-    //      this.seesaw2.angle = 0;
-    //      Matter.Body.rotate(this.seesaw2, -0.27);
+          //console.log("------------ seesaw 0 called")
           Matter.Body.setPosition(this.seesaw2, {x: this.xSeesawRightPosition, y: this.ySeesawPosition})
-          console.log("seesaw2OldAngle MINUS "+-seesaw2OldAngle);
+          //console.log("seesaw2OldAngle MINUS "+-seesaw2OldAngle);
           Matter.Body.rotate(this.seesaw2, -seesaw2OldAngle);
-          console.log("AFTER ROTATION seesaw2.angle: "+this.seesaw2.angle, " controller Data: "+seesaw2Angle)
+          //console.log("AFTER ROTATION seesaw2.angle: "+this.seesaw2.angle, " controller Data: "+seesaw2Angle)
           this.seesaw2.angle = seesaw2Angle;
-          console.log("AFTER ASSIGNING SEESAW2ANGLE: seesaw2.angle: "+this.seesaw2.angle+" controller Data: "+seesaw2Angle)
+          //console.log("AFTER ASSIGNING SEESAW2ANGLE: seesaw2.angle: "+this.seesaw2.angle+" controller Data: "+seesaw2Angle)
           seesaw2OldAngle = seesaw2Angle;
         }  else {
-          console.log("seesaw2.angle: "+this.seesaw2.angle)
+          //console.log("seesaw2.angle: "+this.seesaw2.angle)
           Matter.Body.setAngularVelocity(this.seesaw2, this.seesaw2.angle);
           Matter.Body.rotate(this.seesaw2, this.seesaw2.angle);
-          console.log("AFTER ROTATION: seesaw2.angle: "+this.seesaw2.angle+" controller Data: "+seesaw2Angle)
+          //console.log("AFTER ROTATION: seesaw2.angle: "+this.seesaw2.angle+" controller Data: "+seesaw2Angle)
           this.seesaw2.angle = seesaw2Angle;
-          console.log("AFTER ASSIGNING SEESAW2ANGLE: seesaw2.angle: "+this.seesaw2.angle+" controller Data: "+seesaw2Angle)
+          //console.log("AFTER ASSIGNING SEESAW2ANGLE: seesaw2.angle: "+this.seesaw2.angle+" controller Data: "+seesaw2Angle)
           seesaw2OldAngle = seesaw2Angle;
-          console.log("seesaw2OldAngle= "+seesaw2OldAngle);
+          //console.log("seesaw2OldAngle= "+seesaw2OldAngle);
         } 
     }
   }
@@ -593,6 +596,43 @@ export class SeesawProgram implements Program {
     )
     Matter.World.add(this.engine.world, this.seesaw2Ground);     */
   }  
+
+  private initShakerContainer(): void {
+    if (this.engine == null) return;
+
+    this.shakerContainer = Matter.Bodies.circle(
+      this.shakerContainerLeftX,
+      this.shakerContainerY,
+      this.shakerContainerRadius,
+      {
+        label: 'Shaker',
+        isSensor: true,
+        isStatic: true
+      });
+    Matter.World.add(this.engine.world, this.shakerContainer);
+
+    this.garbageContainerLeft = Matter.Bodies.circle(
+      this.garbageContainerLeftX,
+      this.garbageContainerY,
+      this.shakerContainerRadius,
+      {
+        label: 'Shaker',
+        isSensor: true,
+        isStatic: true
+      });
+    Matter.World.add(this.engine.world, this.garbageContainerLeft);
+
+    this.garbageContainerRight = Matter.Bodies.circle(
+      this.garbageContainerRightX,
+      this.garbageContainerY,
+      this.shakerContainerRadius,
+      {
+        label: 'Garbage',
+        isSensor: true,
+        isStatic: true
+      });
+    Matter.World.add(this.engine.world, this.garbageContainerRight);
+  }
   
 
   private initIngredients(): void {
@@ -609,8 +649,8 @@ export class SeesawProgram implements Program {
         friction: 0.005, 
       });  
     Matter.World.add(this.engine.world, this.ingredientLeft);
-    Matter.Body.setMass(this.ingredientLeft, 5)
-    Matter.Body.setAngularVelocity(this.ingredientLeft, 0.15)
+    // Matter.Body.setMass(this.ingredientLeft, 5)
+    // Matter.Body.setAngularVelocity(this.ingredientLeft, 0.15)
 
 
     this.ingredientCenter = Matter.Bodies.circle(
@@ -624,7 +664,8 @@ export class SeesawProgram implements Program {
         friction: 0.005,
       });
     Matter.World.add(this.engine.world, this.ingredientCenter);
-    //Matter.Body.setMass(this.ingredientCenter, 5)
+    // Matter.Body.setMass(this.ingredientCenter, 5)
+    // Matter.Body.setAngularVelocity(this.ingredientCenter, 0.15)
 
 
     this.ingredientRight = Matter.Bodies.circle(
@@ -639,7 +680,8 @@ export class SeesawProgram implements Program {
       //  friction: 0.5,
       });
     Matter.World.add(this.engine.world, this.ingredientRight);
-    Matter.Body.setMass(this.ingredientRight, 5)
+    // Matter.Body.setMass(this.ingredientRight, 5)
+    // Matter.Body.setAngularVelocity(this.ingredientRight, 0.15)
 
   }
 
@@ -647,6 +689,7 @@ export class SeesawProgram implements Program {
     this.engine = Matter.Engine.create();
     this.createWorldBounds();
     this.initSeesaws();
+    this.initShakerContainer();
     this.initIngredients();
     this.initMatterEventCollision();
     this.sendLevelInfoToDisplay();
@@ -807,7 +850,8 @@ export class SeesawProgram implements Program {
 
       ////sending data to browser
 
-      console.log("SERVER -> BROWSER - 1 pos X: "+this.seesaw1.position.x+" pos y: "+this.seesaw1.position.y+" axes "+this.seesaw1.axes+" angle: "+this.seesaw1.angle);
+
+      console.log("SERVER -> BROWSER - 1 pos X: "+this.seesaw1.position.x+" pos y: "+this.seesaw1.position.y+" angle: "+this.seesaw1.angle);
       this.lobbyController.sendToDisplays('seesaw1Position', [this.seesaw1.position.x, this.seesaw1.position.y, this.seesawLength, this.seesawHeight, this.seesaw1.angle]);
       //console.log("SERVER -> BROWSER - 2 pos X: "+this.seesaw2.position.x+" pos y: "+this.seesaw2.position.y+" angle: "+this.seesaw2.angle);
       this.lobbyController.sendToDisplays('seesaw2Position', [this.seesaw2.position.x, this.seesaw2.position.y, this.seesawLength, this.seesawHeight, this.seesaw2.angle]);
@@ -824,9 +868,12 @@ export class SeesawProgram implements Program {
       this.lobbyController.sendToDisplays('updateScore', this.score);
 
       if (this.ingredientLeft != null) {
-      //  console.log("IngredientLeft X before sending: "+this.ingredientLeft.position.x+" and Y"+ this.ingredientLeft.position.y)
+        Matter.Body.setPosition(this.ingredientLeft, {x: this.ingredientLeft.position.x, y: this.ingredientLeft.position.y});
+        Matter.Body.setAngle(this.ingredientLeft, this.ingredientLeft.angle);
         this.lobbyController.sendToDisplays('updateIngredientLeft', [this.ingredientLeft.position.x, this.ingredientLeft.position.y, this.ingredientLeft.angle]);
+      //  console.log("SERVER -> BROWSER IngredientLeft X AFTER sending : "+this.ingredientLeft.position.x+" and Y"+ this.ingredientLeft.position.y);
       }
+
 
       if (this.ingredientCenter != null) {
         //  console.log("IngredientLeft X before sending: "+this.ingredientLeft.position.x+" and Y"+ this.ingredientLeft.position.y)
