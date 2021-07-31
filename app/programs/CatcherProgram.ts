@@ -1,11 +1,11 @@
 import { Program, ProgramName } from "./Program";
-import { SaftBaseProgram } from "./SaftBaseProgram";
+import { SaftlimacherBaseProgram } from "./SaftlimacherBaseProgram";
 import { LobbyController } from "../LobbyController";
 import { Socket } from "socket.io";
 import Matter, { Bodies } from "matter-js";
 import { SrcSocket } from "../SrcSocket";
 
-export class CatcherProgram extends SaftBaseProgram implements Program {
+export class CatcherProgram extends SaftlimacherBaseProgram implements Program {
 
   // world
   private gravityX: number = 0;

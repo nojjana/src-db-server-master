@@ -4,7 +4,7 @@ import { Socket } from "socket.io";
 import Matter, { Bodies } from "matter-js";
 import { SrcSocket } from "../SrcSocket";
 
-export abstract class SaftBaseProgram implements Program {
+export abstract class SaftlimacherBaseProgram implements Program {
 
   // basic program setup
   protected lobbyController: LobbyController;
@@ -83,6 +83,7 @@ export abstract class SaftBaseProgram implements Program {
   protected generateIngredientListNumbers() {
     let lastRandomInt = -1;
     for (let index = 0; index < 2; index++) {
+      // generate 2 random numbers between 0 and 2 (for example: 0, 2)
       let currentRandomInt = this.getRandomInt(3);
       while (lastRandomInt == currentRandomInt) {
         currentRandomInt = this.getRandomInt(3);
@@ -90,14 +91,16 @@ export abstract class SaftBaseProgram implements Program {
       this.allIngredientNumbersOnList.push(currentRandomInt);
       lastRandomInt = currentRandomInt;
     }
+
     this.allIngredientNumbersOnList.forEach(n => {
       console.log("number on list: " + n);
     });
+
     return this.allIngredientNumbersOnList;
   }
 
   protected isInedible(ingredientNr: number) {
-    // 4 is a beatle iiiiih
+    // 3 is a beatle iiiiih
     return ingredientNr == 3;
   }
 

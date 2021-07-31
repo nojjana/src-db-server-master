@@ -1,10 +1,10 @@
 import { Program, ProgramName } from "./Program";
-import { SaftBaseProgram } from "./SaftBaseProgram";
+import { SaftlimacherBaseProgram } from "./SaftlimacherBaseProgram";
 import { LobbyController } from "../LobbyController";
 import Matter, { Bodies } from "matter-js";
 import { SrcSocket } from "../SrcSocket";
 
-export class ShakerProgram extends SaftBaseProgram implements Program {
+export class ShakerProgram extends SaftlimacherBaseProgram implements Program {
 
   private hit = false;
   private numberOfTilesWidth = 5;
@@ -33,7 +33,7 @@ export class ShakerProgram extends SaftBaseProgram implements Program {
 
   private shakeObjectChangeTimerId?: NodeJS.Timeout;
   private shakeObjectChangeAfterSeconds: number = 5;
-  private maxAmountOfFallingObjects = 3;
+  private maxAmountOfIngredientTypes = 3;
   private currentRandomShakingObjectNumber = 0;
   private oldShakeObjectNumber = -1;
 
@@ -276,10 +276,10 @@ export class ShakerProgram extends SaftBaseProgram implements Program {
     //console.log('Time for a new plant!');
 
     this.oldShakeObjectNumber = this.currentRandomShakingObjectNumber;
-    this.currentRandomShakingObjectNumber = this.getRandomInt(this.maxAmountOfFallingObjects);
+    this.currentRandomShakingObjectNumber = this.getRandomInt(this.maxAmountOfIngredientTypes);
     while (this.oldShakeObjectNumber == this.currentRandomShakingObjectNumber) {
       // avoid changing to the same shakeObject (i.e. 2x apple tree)
-      this.currentRandomShakingObjectNumber = this.getRandomInt(this.maxAmountOfFallingObjects);
+      this.currentRandomShakingObjectNumber = this.getRandomInt(this.maxAmountOfIngredientTypes);
     }
 
     this.lobbyController.sendToDisplays('changeShakeObject', this.currentRandomShakingObjectNumber);
@@ -306,7 +306,7 @@ export class ShakerProgram extends SaftBaseProgram implements Program {
     data.push(this.mole.position.x);
     data.push(this.mole.position.y);
 
-    this.generateIngredientListNumbers();
+    // this.generateIngredientListNumbers();
     data.push(this.allIngredientNumbersOnList);
     // this.lobbyController.sendToDisplays('allIngredientNumbersOnList', this.allIngredientNumbersOnList);
     data.push(this.shakePointsNeededForFalling);
