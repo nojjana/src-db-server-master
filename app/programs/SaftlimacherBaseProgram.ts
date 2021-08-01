@@ -41,6 +41,7 @@ export abstract class SaftlimacherBaseProgram implements Program {
     this.lobbyController = lobbyController;
     this.setControllerReadyListener();
     this.setDisplayReadyListener();
+    // this.setQuitGameListener();
   }
 
   /* -------------------- BASIC SÄFTLIMACHER GAME METHODS --------------------*/
@@ -128,7 +129,7 @@ export abstract class SaftlimacherBaseProgram implements Program {
 
   protected startGame(): void {
     this.gameTimerId = setTimeout(() => this.doGameOverCountdown(), (this.secondsOfPlayTime * 1000) - (this.gameOverCountdownSeconds * 1000));
-    this.gameTimerId = setTimeout(() => this.gameOver(), this.secondsOfPlayTime * 1000);
+    // this.gameTimerId = setTimeout(() => this.gameOver(), this.secondsOfPlayTime * 1000);
 
     this.lobbyController.sendToControllers('startSendingData', null);
     this.playing = true;
@@ -136,14 +137,17 @@ export abstract class SaftlimacherBaseProgram implements Program {
 
     let fps = 60;
     this.initGameLoop(fps);
+
+    // this.lobbyController.getControllers()[0].addSocketOnce('quitGame', this.shutDownGame.bind(this));
+    // this.lobbyController.getControllers()[1].addSocketOnce('quitGame', this.shutDownGame.bind(this));
   }
 
   protected gameOver() {
     console.log("SERVER: gameOver() called");
 
     this.cleanUp();
-
     this.playing = false;
+
     this.lobbyController.sendToDisplays('playing', this.playing);
     this.lobbyController.sendToDisplays('gameOver', true);
 
@@ -151,9 +155,8 @@ export abstract class SaftlimacherBaseProgram implements Program {
     this.lobbyController.getControllers()[1].emit('stopSendingData', false);
 
     this.lobbyController.getControllers()[0].addSocketOnce('goToMainMenu', this.goToMainMenu.bind(this));
-
-    this.lobbyController.getControllers()[0].addSocketOnce('quitGame', this.shutDownGame.bind(this));
-    this.lobbyController.getControllers()[1].addSocketOnce('quitGame', this.shutDownGame.bind(this));
+    // this.lobbyController.getControllers()[0].addSocketOnce('quitGame', this.shutDownGame.bind(this));
+    // this.lobbyController.getControllers()[1].addSocketOnce('quitGame', this.shutDownGame.bind(this));
   }
   protected cleanUp(): void {
     if (this.gameTimerId != null) clearTimeout(this.gameTimerId);
@@ -174,12 +177,13 @@ export abstract class SaftlimacherBaseProgram implements Program {
 
   protected shutDownGame(): void {    
     console.log("SERVER: shutDownGame() called");
-    this.cleanUp();
-    if (this.engine != null) {
-      Matter.World.clear(this.engine.world, false);
-      Matter.Engine.clear(this.engine);
-    }
 
+    this.gameOver();
+    // this.cleanUp();
+    // if (this.engine != null) {
+    //   Matter.World.clear(this.engine.world, false);
+    //   Matter.Engine.clear(this.engine);
+    // }
     this.lobbyController.changeProgram(ProgramName.MAIN_MENU);
   }
 
@@ -192,6 +196,14 @@ export abstract class SaftlimacherBaseProgram implements Program {
       controller.addSocketOnce('controllerReady', this.controllerIsReady.bind(this));
     }
   }
+
+  // private setQuitGameListener(): void {
+  //   this.controllers = this.lobbyController.getControllers();
+
+  //   for (let controller of this.controllers) {
+  //     controller.addSocketOnce('quitGame', this.shutDownGame.bind(this));
+  //   }
+  // }
 
   private setDisplayReadyListener(): void {
     let displays = this.lobbyController.getDisplays();
@@ -252,12 +264,13 @@ export abstract class SaftlimacherBaseProgram implements Program {
     if (this.readyDisplays === this.lobbyController.getDisplays().length) {
       this.doCountdown();
     }
-    this.setControllerListenerOnExitClicked();
+    // this.setControllerListenerOnExitClicked();
   }
 
   private doCountdown(): void {
     if (this.controller1 == null || this.controller2 == null) return;
     this.removeControllerDataListeners();
+    this.removeControllerListenerOnExitClicked();
 
     let i = this.startCountdownSeconds;
     this.lobbyController.sendToDisplays('countdown', i--);
@@ -266,6 +279,8 @@ export abstract class SaftlimacherBaseProgram implements Program {
       if (i == -1) {
         clearInterval(this.countdownInterval);
         this.setControllerDataListeners();
+        this.setControllerListenerOnExitClicked();
+
         this.startGame();
       }
     }, 1000);
@@ -280,9 +295,11 @@ export abstract class SaftlimacherBaseProgram implements Program {
       i--;
       this.lobbyController.sendToDisplays('gameOverCountdown', i);
       if (i == 0) {
+        this.gameOver();
         clearInterval(this.countdownInterval);
       }
     }, 1000);
+
   }
 
   private setControllerDataListeners(): void {
@@ -301,8 +318,20 @@ export abstract class SaftlimacherBaseProgram implements Program {
 
   // allows user to exit game
   private setControllerListenerOnExitClicked(): void{
-    this.lobbyController.getControllers()[0].addSocketOnce('quitGame', this.shutDownGame.bind(this));
-    this.lobbyController.getControllers()[1].addSocketOnce('quitGame', this.shutDownGame.bind(this));
+    if (this.controller1 && this.controller2) {
+      this.controller1.addSocketListener('quitGame', this.shutDownGame.bind(this));
+      this.controller2.addSocketListener('quitGame', this.shutDownGame.bind(this));
+    }
+    // this.lobbyController.getControllers()[0].addSocketOnce('quitGame', this.shutDownGame.bind(this));
+    // this.lobbyController.getControllers()[1].addSocketOnce('quitGame', this.shutDownGame.bind(this));
+  }
+
+  // allows user to exit game
+  private removeControllerListenerOnExitClicked(): void{
+    if (this.controller1 && this.controller2) {
+      this.controller1.removeSocketListener('quitGame');
+      this.controller2.removeSocketListener('quitGame');
+    }
   }
 
 

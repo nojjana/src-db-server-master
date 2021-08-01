@@ -33,7 +33,7 @@ export class ShakerProgram extends SaftlimacherBaseProgram implements Program {
 
   private shakeObjectChangeTimerId?: NodeJS.Timeout;
   private shakeObjectChangeAfterSeconds: number = 5;
-  private maxAmountOfIngredientTypes = 3;
+  private maxAmountOfIngredientTypes = 4;
   private currentRandomShakingObjectNumber = 0;
   private oldShakeObjectNumber = -1;
 
@@ -227,12 +227,12 @@ export class ShakerProgram extends SaftlimacherBaseProgram implements Program {
       this.shakeCounter = this.shakePointsNeededForFalling;
       if (!this.fallBlocked) {
         this.fallBlocked = true;
-              setTimeout(() => { 
-                this.triggerFallOfIngredient(this.currentRandomShakingObjectNumber);
-                this.shakeCounter = this.shakeCounter * 0.6;
-                this.fallBlocked = false;
-              }, 100);
-         }
+        setTimeout(() => { 
+          this.triggerFallOfIngredient(this.currentRandomShakingObjectNumber);
+          this.shakeCounter = this.shakeCounter * 0.6;
+          this.fallBlocked = false;
+        }, 100);
+        }
         // setTimeout(() => { this.shakeCounter = 0; }, 50);
 
     }
@@ -251,24 +251,46 @@ export class ShakerProgram extends SaftlimacherBaseProgram implements Program {
 
     // after some seconds (test!) the fruit reached shaker -> give points 
     // TODO: solve with collision!! not with estimating seconds for falling...
-    
-    if (this.allIngredientNumbersOnList.includes(ingredientNumber)) {
+    setTimeout(() => {
 
-      setTimeout(() => { 
+      if (this.allIngredientNumbersOnList.includes(ingredientNumber)) {
+
         this.score += this.scoreInc;
         this.lobbyController.sendToDisplays('checkIngredientOnList', ingredientNumber);
-        this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient', [this.scoreInc, ingredientNumber]); 
-      }, this.secondsForFalling * 1000);
+        this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient', [this.scoreInc, ingredientNumber]);
 
-   } else {
-      // TODO: wrong ingredient! descrease score? display message?
-      setTimeout(() => { 
+      } else if (this.isInedible(ingredientNumber)) {
+        // beatle iiiih
+        this.score -= this.scoreInc * 2;
+        this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient', [-(this.scoreInc * 2), ingredientNumber]);
+      }
+      else {
         //console.log('catched a wrong ingredient, NOT on list!!! -50 Punkte.');
         this.score -= this.scoreInc;
-        this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient', [-this.scoreInc, ingredientNumber]); 
-      }, this.secondsForFalling * 1000);
+        this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient', [-this.scoreInc, ingredientNumber]);
+      }
 
-    }
+    }, this.secondsForFalling * 1000);
+
+
+
+  //   if (this.allIngredientNumbersOnList.includes(ingredientNumber)) {
+
+  //     setTimeout(() => { 
+  //       this.score += this.scoreInc;
+  //       this.lobbyController.sendToDisplays('checkIngredientOnList', ingredientNumber);
+  //       this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient', [this.scoreInc, ingredientNumber]); 
+  //     }, this.secondsForFalling * 1000);
+
+  //  } else {
+      // TODO: wrong ingredient! descrease score? display message?
+      // setTimeout(() => { 
+      //   //console.log('catched a wrong ingredient, NOT on list!!! -50 Punkte.');
+      //   this.score -= this.scoreInc;
+      //   this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient', [-this.scoreInc, ingredientNumber]); 
+      // }, this.secondsForFalling * 1000);
+
+    // }
       
     }
 

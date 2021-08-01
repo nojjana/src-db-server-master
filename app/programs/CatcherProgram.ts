@@ -158,7 +158,7 @@ export class CatcherProgram extends SaftlimacherBaseProgram implements Program {
 
           if (this.allIngredientNumbersOnList.includes(ingredientTypeNr)) {
             // good catch
-            console.log('catched a good ingredient, +50 points!!');
+            // console.log('catched a good ingredient, +50 points!!');
             this.score += this.scoreInc;
             this.lobbyController.sendToControllers('vibrate', [catcherNr]);
             this.lobbyController.sendToDisplays('checkIngredientOnList', ingredientTypeNr);
@@ -166,13 +166,13 @@ export class CatcherProgram extends SaftlimacherBaseProgram implements Program {
               [this.scoreInc, ingredientTypeNr, ingredientBody.position.x, ingredientBody.position.y]);
           } else if (this.isInedible(ingredientTypeNr)) {
             // beatle iiiih
-            console.log('catched something inedible! iiiiiks!');
+            // console.log('catched something inedible! iiiiiks!');
             this.score -= this.scoreInc*2;
             this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient',
               [-(this.scoreInc*2), ingredientTypeNr, ingredientBody.position.x, ingredientBody.position.y]);
           } else {
             // bad catch
-            console.log('catched a wrong ingredient, NOT on list!!! -50 points.');
+            // console.log('catched a wrong ingredient, NOT on list!!! -50 points.');
             this.score -= this.scoreInc;
             this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient',
               [-this.scoreInc, ingredientTypeNr, ingredientBody.position.x, ingredientBody.position.y]);
@@ -220,7 +220,7 @@ export class CatcherProgram extends SaftlimacherBaseProgram implements Program {
   setControllerDataPlayer1(controllerData: number[]): void {
     let moveToValX = controllerData[0];
     let controllerId = controllerData[1];
-    console.log("controllerData from Player 1 arrived:", moveToValX, controllerId);
+    // console.log("controllerData from Player 1 arrived:", moveToValX, controllerId);
     
     if (moveToValX != null && controllerId != null && this.net1 != undefined) {
       if (controllerId != 1) return;
@@ -231,7 +231,7 @@ export class CatcherProgram extends SaftlimacherBaseProgram implements Program {
   setControllerDataPlayer2(controllerData: number[]): void {
     let moveToValX = controllerData[0];
     let controllerId = controllerData[1];
-    console.log("controllerData from Player 2 arrived:", moveToValX, controllerId);
+    // console.log("controllerData from Player 2 arrived:", moveToValX, controllerId);
     if (moveToValX != null && controllerId != null && this.net2 != undefined) {
       if (controllerId != 2) return;
       this.setNetPos(moveToValX, this.net2);
@@ -336,7 +336,7 @@ export class CatcherProgram extends SaftlimacherBaseProgram implements Program {
   }
 
   respawnIngredient(body: Matter.Body) {
-    console.log("respawnIngredient: ");
+    // console.log("respawnIngredient: ");
     let newNumber = this.getRandomInt(this.availableIngredientTypes);;
     let newlabel = "Ingredient"+newNumber;
 
@@ -359,7 +359,7 @@ export class CatcherProgram extends SaftlimacherBaseProgram implements Program {
       default:
         break;
     }
-    console.log("body.label =", body.label);
+    // console.log("body.label =", body.label);
   }
   
   clearInGameTimers() {
