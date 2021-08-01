@@ -58,7 +58,8 @@ export class ShakerProgram extends SaftlimacherBaseProgram implements Program {
   /* -------------------- SHAKER GAME LOOP --------------------*/
   initGameLoop(fps: number) {
     // change shakeObject after X seconds
-    this.shakeObjectChangeTimerId = setTimeout(() => this.triggerChangeShakeObject(), this.shakeObjectChangeAfterSeconds * 1000);
+    // this.shakeObjectChangeTimerId = setInterval(() => this.triggerChangeShakeObject(), this.shakeObjectChangeAfterSeconds * 1000);
+    this.initShakeObjectTimer();
 
     this.gameLoop = setInterval(() => {
       if (this.engine == null || this.hammer == null || this.mole == null) return;
@@ -100,6 +101,23 @@ export class ShakerProgram extends SaftlimacherBaseProgram implements Program {
     );
     Matter.World.add(this.engine.world, this.mole);
     this.moleTimerId = setInterval(() => this.resetMole(), this.getRandomIntInterval(3000, 5000));
+  }
+
+  private initShakeObjectTimer(): void {
+    // if (this.engine == null) return;
+    // this.mole = Matter.Bodies.circle(
+    //   this.halfTileSize + this.getRandomInt(this.numberOfTilesWidth) * this.tileSize,
+    //   this.halfTileSize + this.getRandomInt(this.numberOfTilesHeight) * this.tileSize,
+    //   this.moleRadius,
+    //   {
+    //     label: 'Mole',
+    //     isSensor: true,
+    //     isStatic: true
+    //   }
+    // );
+    // Matter.World.add(this.engine.world, this.mole);
+    // change shakeObject after X seconds
+    this.shakeObjectChangeTimerId = setInterval(() => this.triggerChangeShakeObject(), this.shakeObjectChangeAfterSeconds * 1000);
   }
 
   private resetMole(): void {
@@ -338,7 +356,8 @@ export class ShakerProgram extends SaftlimacherBaseProgram implements Program {
 
   clearInGameTimers() {
     if (this.moleTimerId != null) clearInterval(this.moleTimerId);
-    if (this.shakeObjectChangeTimerId != null) clearTimeout(this.shakeObjectChangeTimerId);
+    // if (this.shakeObjectChangeTimerId != null) clearTimeout(this.shakeObjectChangeTimerId);
+    if (this.shakeObjectChangeTimerId != null) clearInterval(this.shakeObjectChangeTimerId);
   }
 
 }

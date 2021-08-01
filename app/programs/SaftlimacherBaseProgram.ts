@@ -151,10 +151,16 @@ export abstract class SaftlimacherBaseProgram implements Program {
     this.lobbyController.sendToDisplays('playing', this.playing);
     this.lobbyController.sendToDisplays('gameOver', true);
 
-    this.lobbyController.getControllers()[0].emit('stopSendingData', true);
-    this.lobbyController.getControllers()[1].emit('stopSendingData', false);
+    // true: main player
+    if (this.controller1 && this.controller2) {
+          this.controller1.emit('stopSendingData', true);
+          this.controller2.emit('stopSendingData', false);
+          this.controller1.addSocketOnce('goToMainMenu', this.goToMainMenu.bind(this));
+    }
 
-    this.lobbyController.getControllers()[0].addSocketOnce('goToMainMenu', this.goToMainMenu.bind(this));
+    // this.lobbyController.getControllers()[0].emit('stopSendingData', true);
+    // this.lobbyController.getControllers()[1].emit('stopSendingData', false);
+
     // this.lobbyController.getControllers()[0].addSocketOnce('quitGame', this.shutDownGame.bind(this));
     // this.lobbyController.getControllers()[1].addSocketOnce('quitGame', this.shutDownGame.bind(this));
   }
@@ -348,6 +354,7 @@ export abstract class SaftlimacherBaseProgram implements Program {
   }
 
   socketLeft(socketId: string): void {
+    console.log("SERVER: socketLeft() called");
     let displays = this.lobbyController.getDisplays();
     let controllers = this.lobbyController.getControllers();
 
