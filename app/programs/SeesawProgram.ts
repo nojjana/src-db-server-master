@@ -59,8 +59,8 @@ export class SeesawProgram implements Program {
   
       // placement of seesaws
   // TODO: 3 teile berrechnen und speichern
-  private xSeesawLeftPosition = 900;
-  private xSeesawRightPosition = 1800;
+  private xSeesawLeftPosition = 1050; //900
+  private xSeesawRightPosition = 1950; //1800
   private ySeesawPosition = 500; //1000
 
   private seesawLength = 500;
@@ -71,11 +71,11 @@ export class SeesawProgram implements Program {
   private ySeesawBeamPosition = 540; //1040
 
   //placment of containers
-  private garbageContainerLeftX = 550;
-  private shakerContainerLeftX = 1350; //800
-  private garbageContainerRightX = 2250; //2400
-  private shakerContainerY = 900;
-  private garbageContainerY = 1000;
+  private xGarbageContainerLeft = 700;
+  private xShakerContainer = 1500; //800
+  private xGarbageContainerRight = 2250; //2400
+  private yShakerContainer = 930;
+  private yGarbageContainer = 1000;
 
   //placement of ingredients
   // fields where ingredients fall: left, center, right
@@ -83,13 +83,8 @@ export class SeesawProgram implements Program {
   //private xCenterField = this.width * 0.5;
   //private xRightField = this.width * 0.75;
 
-  private xLeftField0 = 900;   //860 - 200
-  private xLeftField1 = 900;   //1000-200
-  private xLeftField2 = 900;    //1340 - 200
-
-  private xRightField0 = 1700;   //1760 - 200
-  private xRightField1 = 1700;   //1760-200
-  private xRightField2 = 1700;    //1760 - 200
+  private xIngredientLeftPosition = 1050;   //860 - 200
+  private xIngredientRightPosition = 1950;   //1760 - 200
 
     //seesawLeft: 900 / right: 1800
   //left field: 860-200 bis 1340-200   //right: 1760-200 bis 2240-200
@@ -99,7 +94,7 @@ export class SeesawProgram implements Program {
   // säftlimacher game variables
   private movePixelSteps = 30;  // möglichst in 10er Schritten, testen
   private ingredientRadius = 50;
-  private shakerContainerRadius = 5;
+  private shakerContainerRadius = 6;
   private availableIngredientTypes = 3;
   private allIngredientNumbersOnList: number[] = new Array();
   private allIngredientsFalling: number[] = new Array();
@@ -111,7 +106,7 @@ export class SeesawProgram implements Program {
   private Composite = Matter.Composite;
   private LeftLandedOnSeesaw = false;  //used to trigger if ingredient is on seesaw to set "landedOnSeesaw" to true so that the Y axis is set to the current position of the seesaw
   private RightLandedOnSeesaw = false;  //used to trigger if ingredient is on seesaw to set "landedOnSeesaw" to true so that the Y axis is set to the current position of the seesaw
-  private RightLandedOnSeeasw = false;  
+  private seesaw1Angle = 0;
 
   constructor(lobbyController: LobbyController) {
     this.lobbyController = lobbyController;
@@ -255,30 +250,30 @@ export class SeesawProgram implements Program {
 
   // receiving data from ionic (controller)
   private setControllerDataPlayer1(controllerData: number[]): void {
-    let seesaw1Angle = controllerData[0];
+    this.seesaw1Angle = controllerData[0];
     let controllerId = controllerData[1];
     let seesaw1OldAngle = 0;
   //  console.log("IONIC -> SERVER: this.seesaw1Angle (controller Data) / controllerId:", seesaw1Angle, controllerId);
     
-    if (seesaw1Angle != null && controllerId != null && this.seesaw1 != undefined) {
+    if (this.seesaw1Angle != null && controllerId != null && this.seesaw1 != undefined) {
       if (controllerId != 1) return;
     //  console.log("---- seesaw1.angle update called")
-      if (seesaw1Angle == 0){
+      if (this.seesaw1Angle == 0){
         Matter.Body.setPosition(this.seesaw1, {x: this.xSeesawLeftPosition, y: this.ySeesawPosition})
     //    console.log("seesaw1OldAngle MINUS "+-seesaw1OldAngle);
         Matter.Body.rotate(this.seesaw1, -seesaw1OldAngle);
     //    console.log("AFTER ROTATION seesaw1.angle: "+this.seesaw1.angle, " controller Data: "+seesaw1Angle)
-        this.seesaw1.angle = seesaw1Angle;
+        this.seesaw1.angle = this.seesaw1Angle;
     //    console.log("AFTER ASSIGNING SEESAW1ANGLE: seesaw2.angle: "+this.seesaw1.angle+" controller Data: "+seesaw1Angle)
-        seesaw1OldAngle = seesaw1Angle;
+        seesaw1OldAngle = this.seesaw1Angle;
       }  else {
     //    console.log("seesaw1.angle: "+this.seesaw1.angle)
         Matter.Body.setAngularVelocity(this.seesaw1, this.seesaw1.angle);
         Matter.Body.rotate(this.seesaw1, this.seesaw1.angle);
     //    console.log("AFTER ROTATION: seesaw1.angle: "+this.seesaw1.angle+" controller Data: "+seesaw1Angle)
-        this.seesaw1.angle = seesaw1Angle;
+        this.seesaw1.angle = this.seesaw1Angle;
     //    console.log("AFTER ASSIGNING SEESAW1ANGLE: seesaw2.angle: "+this.seesaw1.angle+" controller Data: "+seesaw1Angle)
-        seesaw1OldAngle = seesaw1Angle;
+        seesaw1OldAngle = this.seesaw1Angle;
     //    console.log("seesaw1OldAngle= "+seesaw1OldAngle);
       } 
     }
@@ -559,8 +554,8 @@ export class SeesawProgram implements Program {
     if (this.engine == null) return;
 
     this.shakerContainer = Matter.Bodies.circle(
-      this.shakerContainerLeftX,
-      this.shakerContainerY,
+      this.xShakerContainer,
+      this.yShakerContainer,
       this.shakerContainerRadius,
       {
         label: 'Container',
@@ -570,8 +565,8 @@ export class SeesawProgram implements Program {
     Matter.World.add(this.engine.world, this.shakerContainer);
 
     this.garbageContainerLeft = Matter.Bodies.circle(
-      this.garbageContainerLeftX,
-      this.garbageContainerY,
+      this.xGarbageContainerLeft,
+      this.yGarbageContainer,
       this.shakerContainerRadius,
       {
         label: 'Garbage',
@@ -581,8 +576,8 @@ export class SeesawProgram implements Program {
     Matter.World.add(this.engine.world, this.garbageContainerLeft);
 
     this.garbageContainerRight = Matter.Bodies.circle(
-      this.garbageContainerRightX,
-      this.garbageContainerY,
+      this.xGarbageContainerRight,
+      this.yGarbageContainer,
       this.shakerContainerRadius,
       {
         label: 'Garbage',
@@ -597,7 +592,7 @@ export class SeesawProgram implements Program {
     if (this.engine == null) return;
 
     this.ingredientLeft0 = Matter.Bodies.circle(
-      this.xLeftField0,
+      this.xIngredientLeftPosition,
       -50,
       this.ingredientRadius,
       {
@@ -613,7 +608,7 @@ export class SeesawProgram implements Program {
 
 
     this.ingredientLeft1 = Matter.Bodies.circle(
-      this.xLeftField1,
+      this.xIngredientLeftPosition,
       -2000,
       this.ingredientRadius,
       {
@@ -629,7 +624,7 @@ export class SeesawProgram implements Program {
 
 
     this.ingredientLeft2 = Matter.Bodies.circle(
-      this.xLeftField2,
+      this.xIngredientLeftPosition,
       -4000,
       this.ingredientRadius,
       {
@@ -645,7 +640,7 @@ export class SeesawProgram implements Program {
   
 
     this.ingredientRight0 = Matter.Bodies.circle(
-      this.xRightField0,
+      this.xIngredientRightPosition,
       -50,
       this.ingredientRadius,
       {
@@ -660,7 +655,7 @@ export class SeesawProgram implements Program {
 
 
     this.ingredientRight1 = Matter.Bodies.circle(
-      this.xRightField1,
+      this.xIngredientRightPosition,
       -2000,
       this.ingredientRadius,
       {
@@ -675,7 +670,7 @@ export class SeesawProgram implements Program {
 
 
     this.ingredientRight2 = Matter.Bodies.circle(
-      this.xRightField2,
+      this.xIngredientRightPosition,
       -4000,
       this.ingredientRadius,
       {
@@ -719,7 +714,7 @@ export class SeesawProgram implements Program {
          if (pair.bodyA.label.includes('Seesaw2') && pair.bodyB.label.includes('IngredientRight0') || pair.bodyB.label.includes('Seesaw2') && pair.bodyA.label.includes('IngredientRight0')) {
           // ingredient fallen onto seesaw
             this.RightLandedOnSeesaw = true;
-            console.log("Ingredient0 landet on seesaw 2: "+this.RightLandedOnSeeasw);
+            console.log("Ingredient0 landet on seesaw 2: "+this.RightLandedOnSeesaw);
         }
 
         /*
@@ -847,22 +842,22 @@ export class SeesawProgram implements Program {
     });
     
     switch (body.position.x) {
-      case this.xLeftField0:
+      case this.xIngredientLeftPosition:
         this.lobbyController.sendToDisplays('changeImageIngredientLeft0', [newNumber]);
         break;
-      case this.xLeftField1:
+      case this.xIngredientLeftPosition:
         this.lobbyController.sendToDisplays('changeImageIngredientLeft1', [newNumber]);
         break;
-      case this.xLeftField2:
+      case this.xIngredientLeftPosition:
         this.lobbyController.sendToDisplays('changeImageIngredientLeft2', [newNumber]);
         break;
-      case this.xRightField0:
+      case this.xIngredientRightPosition:
         this.lobbyController.sendToDisplays('changeImageIngredientRight0', [newNumber]);
         break;  
-      case this.xRightField1:
+      case this.xIngredientRightPosition:
         this.lobbyController.sendToDisplays('changeImageIngredientRight1', [newNumber]);
         break;
-      case this.xRightField2:
+      case this.xIngredientRightPosition:
         this.lobbyController.sendToDisplays('changeImageIngredientRight2', [newNumber]);
         break;  
       default:
@@ -952,6 +947,14 @@ export class SeesawProgram implements Program {
     // this.testClasses();
 
   }
+
+/*   private calcIngredientYOnSeesaw(number: ingredientPositionX){
+    
+    let yPosition;
+    this.seesaw1Angle
+    this.ySeesawPosition
+    return yPosition
+  } */
 
 
   /* -------------------- BASIC GAME METHODS --------------------*/
