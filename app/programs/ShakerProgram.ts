@@ -321,13 +321,21 @@ export class ShakerProgram extends SaftlimacherBaseProgram implements Program {
       // avoid changing to the same shakeObject (i.e. 2x apple tree)
       this.currentRandomShakingObjectNumber = this.getRandomInt(this.maxAmountOfIngredientTypes);
     }
-
     this.lobbyController.sendToDisplays('changeShakeObject', this.currentRandomShakingObjectNumber);
-
-    if (this.shakeObjectChangeTimerId != null) {
-      this.shakeObjectChangeTimerId.refresh();
+   
+    // TODO test
+    if (!this.allIngredientNumbersOnList.includes(this.currentRandomShakingObjectNumber)) {
+      if (this.shakeObjectChangeTimerId != null) clearInterval(this.shakeObjectChangeTimerId);
+      // change tree quicker if fruits not needed...
+      this.shakeObjectChangeTimerId = setInterval(() => this.triggerChangeShakeObject(), (this.shakeObjectChangeAfterSeconds/2) * 1000);
+    } else {
+      if (this.shakeObjectChangeTimerId != null) {
+        // this.shakeObjectChangeTimerId.refresh();
+        if (this.shakeObjectChangeTimerId != null) clearInterval(this.shakeObjectChangeTimerId);
+        // change tree quicker if fruits not needed...
+        this.shakeObjectChangeTimerId = setInterval(() => this.triggerChangeShakeObject(), (this.shakeObjectChangeAfterSeconds) * 1000);
+      }
     }
-
     // new plant -> shake effect back to 0
     this.shakeCounter = 0;
 
