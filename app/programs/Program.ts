@@ -15,6 +15,7 @@ export enum ProgramName {
     WHACK_A_MOLE,
     SHAKER,
     CATCHER,
+    SEESAW,
     VARIANZ_TEST,
     LAST_TEST,
 }
