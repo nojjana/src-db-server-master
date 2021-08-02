@@ -88,7 +88,7 @@ export class SeesawProgram implements Program {
   
   // säftlimacher game variables
   private movePixelSteps = 30;  // möglichst in 10er Schritten, testen
-  private ingredientRadius = 50;
+  private ingredientRadius = 40;
   private shakerContainerRadius = 50; //6
   private availableIngredientTypes = 3;
   private allIngredientNumbersOnList: number[] = new Array();
@@ -554,7 +554,7 @@ export class SeesawProgram implements Program {
       {
         label: 'Container',
         isSensor: true,
-        isStatic: true
+        isStatic: true,
       });
     Matter.World.add(this.engine.world, this.shakerContainer);
 
