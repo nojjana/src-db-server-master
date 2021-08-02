@@ -27,7 +27,7 @@ export abstract class SaftlimacherBaseProgram implements Program {
   // basic game variables
   protected secondsOfPlayTime: number = 60;
   protected score: number = 0;
-  protected scoreInc: number = 50;
+  protected scoreInc: number = 5;
 
   // säftlimacher world dimensions
   protected width = 2560;
