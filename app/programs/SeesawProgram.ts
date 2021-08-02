@@ -78,11 +78,6 @@ export class SeesawProgram implements Program {
   private yGarbageContainer = 1000;
 
   //placement of ingredients
-  // fields where ingredients fall: left, center, right
-  //private xLeftField = this.width * 0.25;
-  //private xCenterField = this.width * 0.5;
-  //private xRightField = this.width * 0.75;
-
   private xIngredientLeftPosition = 1050;   //860 - 200
   private xIngredientRightPosition = 1950;   //1760 - 200
 
@@ -933,14 +928,18 @@ export class SeesawProgram implements Program {
         this.lobbyController.sendToDisplays('updateIngredientRight2', [this.ingredientRight2.position.x, this.ingredientRight2.position.y, this.ingredientRight2.angle]);
       }       
 
-       if (this.ingredientLeft0 != null && this.LeftLandedOnSeesaw == true) {
-      //  console.log("ingredientLeft on seesaw was called // this seesaw1 position: "+this.ingredientLeft0.position.x+" and Y: "+ this.seesaw1.position.y)
-        this.lobbyController.sendToDisplays('updateIngredientLeft0', [this.ingredientLeft0.position.x, this.seesaw1.position.y, this.ingredientLeft0.angle]);
+      if (this.ingredientLeft0 != null && this.LeftLandedOnSeesaw == true) {
+        let g = this.calcOppositeCathetus(this.xSeesawLeftPosition, this.ingredientLeft0.position.x);
+        this.lobbyController.sendToDisplays('updateIngredientLeft0', [this.ingredientLeft0.position.x, (this.ingredientLeft0.position.y+this.ingredientRadius+g), this.ingredientLeft0.angle]);
+        console.log("ingredientLeftPositionY: "+this.ingredientLeft0.position.y);
+        console.log("ingredientLeft on seesaw// ingredientLeftPositionX: "+this.ingredientLeft0.position.x+" and new Y: "+ (this.ingredientLeft0.position.y+this.ingredientRadius+g))
       } 
       
       if (this.ingredientRight0 != null && this.RightLandedOnSeesaw == true) {
-          console.log("ingredientRight on seesaw was called // this seesaw2 position: "+this.ingredientRight0.position.x+" and Y: "+ this.seesaw2.position.y)
-          this.lobbyController.sendToDisplays('updateIngredientRight0', [this.ingredientRight0.position.x, this.seesaw2.position.y, this.ingredientRight0.angle]);
+        let g = this.calcOppositeCathetus(this.xSeesawRightPosition, this.ingredientRight0.position.x);
+        this.lobbyController.sendToDisplays('updateIngredientRight0', [this.ingredientRight0.position.x, (this.ingredientRight0.position.y+this.ingredientRadius+g), this.ingredientRight0.angle]);
+        console.log("ingredientLeftPositionY: "+this.ingredientRight0.position.y);
+        console.log("ingredientLeft on seesaw// ingredientLeftPositionX: "+this.ingredientRight0.position.x+" and new Y: "+ (this.ingredientRight0.position.y+this.ingredientRadius+g))
       }
     }, 1000 / fps);
 
@@ -948,13 +947,20 @@ export class SeesawProgram implements Program {
 
   }
 
-/*   private calcIngredientYOnSeesaw(number: ingredientPositionX){
-    
-    let yPosition;
-    this.seesaw1Angle
-    this.ySeesawPosition
-    return yPosition
-  } */
+  private calcOppositeCathetus(xSeesawPosition: any, xIngredientPosition: any){
+    let a = xIngredientPosition - xSeesawPosition; //Ankathete
+    console.log("--xSeesawPosition: " +xSeesawPosition + " xIngredientPosition: "+xIngredientPosition);
+    console.log("--seesawAngle: "+this.seesaw1Angle);
+    let angle;
+    if (this.seesaw1Angle < 0){
+      angle = this.seesaw1Angle*-9;
+     }else{
+      angle = this.seesaw1Angle*9;
+     }
+    let g = Math.tan(angle*Math.PI/180) * a;  //Gegenkathete = (Tangenz von angle in radians(bogenmass)) * Ankathete
+    console.log("--Ankathete: "+a+" Angle: "+angle+" Gegenkathete: "+g);
+    return g  //yPosition von Ingredient + Länge Gegenkathete 
+  }
 
 
   /* -------------------- BASIC GAME METHODS --------------------*/
