@@ -109,10 +109,9 @@ export class SeesawProgram implements Program {
   private Constraint = Matter.Constraint;
   private Vector = Matter.Vector;
   private Composite = Matter.Composite;
-  private LeftLandedOnSeesaw = false;
-  private RightLandedOnSeesaw = false;
-  private RightLandedOnSeeasw = false;
-
+  private LeftLandedOnSeesaw = false;  //used to trigger if ingredient is on seesaw to set "landedOnSeesaw" to true so that the Y axis is set to the current position of the seesaw
+  private RightLandedOnSeesaw = false;  //used to trigger if ingredient is on seesaw to set "landedOnSeesaw" to true so that the Y axis is set to the current position of the seesaw
+  private RightLandedOnSeeasw = false;  
 
   constructor(lobbyController: LobbyController) {
     this.lobbyController = lobbyController;
@@ -263,24 +262,24 @@ export class SeesawProgram implements Program {
     
     if (seesaw1Angle != null && controllerId != null && this.seesaw1 != undefined) {
       if (controllerId != 1) return;
-      console.log("---- seesaw1.angle update called")
+    //  console.log("---- seesaw1.angle update called")
       if (seesaw1Angle == 0){
         Matter.Body.setPosition(this.seesaw1, {x: this.xSeesawLeftPosition, y: this.ySeesawPosition})
-        console.log("seesaw1OldAngle MINUS "+-seesaw1OldAngle);
+    //    console.log("seesaw1OldAngle MINUS "+-seesaw1OldAngle);
         Matter.Body.rotate(this.seesaw1, -seesaw1OldAngle);
-        console.log("AFTER ROTATION seesaw1.angle: "+this.seesaw1.angle, " controller Data: "+seesaw1Angle)
+    //    console.log("AFTER ROTATION seesaw1.angle: "+this.seesaw1.angle, " controller Data: "+seesaw1Angle)
         this.seesaw1.angle = seesaw1Angle;
-        console.log("AFTER ASSIGNING SEESAW1ANGLE: seesaw2.angle: "+this.seesaw1.angle+" controller Data: "+seesaw1Angle)
+    //    console.log("AFTER ASSIGNING SEESAW1ANGLE: seesaw2.angle: "+this.seesaw1.angle+" controller Data: "+seesaw1Angle)
         seesaw1OldAngle = seesaw1Angle;
       }  else {
-        console.log("seesaw1.angle: "+this.seesaw1.angle)
+    //    console.log("seesaw1.angle: "+this.seesaw1.angle)
         Matter.Body.setAngularVelocity(this.seesaw1, this.seesaw1.angle);
         Matter.Body.rotate(this.seesaw1, this.seesaw1.angle);
-        console.log("AFTER ROTATION: seesaw1.angle: "+this.seesaw1.angle+" controller Data: "+seesaw1Angle)
+    //    console.log("AFTER ROTATION: seesaw1.angle: "+this.seesaw1.angle+" controller Data: "+seesaw1Angle)
         this.seesaw1.angle = seesaw1Angle;
-        console.log("AFTER ASSIGNING SEESAW1ANGLE: seesaw2.angle: "+this.seesaw1.angle+" controller Data: "+seesaw1Angle)
+    //    console.log("AFTER ASSIGNING SEESAW1ANGLE: seesaw2.angle: "+this.seesaw1.angle+" controller Data: "+seesaw1Angle)
         seesaw1OldAngle = seesaw1Angle;
-        console.log("seesaw1OldAngle= "+seesaw1OldAngle);
+    //    console.log("seesaw1OldAngle= "+seesaw1OldAngle);
       } 
     }
   }
@@ -293,7 +292,7 @@ export class SeesawProgram implements Program {
 
     if (seesaw2Angle != null && controllerId != null && this.seesaw2 != undefined) {
       if (controllerId != 2) return;
-        console.log("---- seesaw2.angle update called")
+      //  console.log("seesaw2.angle update called")
       //  this.seesaw2.angle = seesaw2Angle;  // zuweisen des angles an matter.js element im server
          if (seesaw2Angle == 0){
           //console.log("------------ seesaw 0 called")
@@ -395,13 +394,11 @@ export class SeesawProgram implements Program {
         isStatic: true,
         restitution: 0,
         friction: 1,
+      //  position: {x: this.xSeesawLeftPosition+0.5*this.seesawLength, y: this.ySeesawPosition+0.5*this.seesawHeight} // no inpact
       //  friction: 0,  
       }
     )
     Matter.World.add(this.engine.world, this.seesaw1);
-    Matter.Body.setVertices(this.seesaw1, {
-      x: this.xSeesawLeftPosition+0.5*this.seesawHeight, 
-      y: this.ySeesawPosition+0.5*this.seesawLength}) 
      
    
     this.seesawBeam1 = Matter.Bodies.rectangle(
@@ -713,16 +710,16 @@ export class SeesawProgram implements Program {
       for (; i != j; ++i) {
         const pair = pairs[i];
  
-        if (pair.bodyA.label.includes('Seesaw2') && pair.bodyB.label.includes('Ingredient0') || pair.bodyB.label.includes('Seesaw2') && pair.bodyA.label.includes('Ingredient0')) {
+        if (pair.bodyA.label.includes('Seesaw1') && pair.bodyB.label.includes('IngredientLeft0') || pair.bodyB.label.includes('Seesaw1') && pair.bodyA.label.includes('IngredientLeft0')) {
           // ingredient fallen onto seesaw
-            console.log("Ingredient0 landet on seesaw");
             this.LeftLandedOnSeesaw = true;
+            console.log("Ingredient0 landet on seesaw 1: "+this.LeftLandedOnSeesaw);
           }
 
-         if (pair.bodyA.label.includes('Seesaw1') && pair.bodyB.label.includes('Ingredient1') || pair.bodyB.label.includes('Seesaw1') && pair.bodyA.label.includes('Ingredient1')) {
+         if (pair.bodyA.label.includes('Seesaw2') && pair.bodyB.label.includes('IngredientRight0') || pair.bodyB.label.includes('Seesaw2') && pair.bodyA.label.includes('IngredientRight0')) {
           // ingredient fallen onto seesaw
-            console.log("Ingredient1 landet on seesaw");
             this.RightLandedOnSeesaw = true;
+            console.log("Ingredient0 landet on seesaw 2: "+this.RightLandedOnSeeasw);
         }
 
         /*
@@ -732,14 +729,14 @@ export class SeesawProgram implements Program {
             this.RightLandedOnSeeasw = true;
         } */ 
 
-         if (pair.bodyA.label.includes('Seesaw1TriggerSpace') && pair.bodyB.label.includes('Ingredient0') || pair.bodyB.label.includes('Seesaw1TriggerSpace') && pair.bodyA.label.includes('Ingredient0')) {
+         if (pair.bodyA.label.includes('Seesaw1TriggerSpace') && pair.bodyB.label.includes('IngredientLeft0') || pair.bodyB.label.includes('Seesaw1TriggerSpace') && pair.bodyA.label.includes('IngredientLeft0')) {
           // ingredient fallen onto seesaw
-          console.log("xxxx set landed on Seesaw false");
+          console.log("Set landed on Seesaw false");
           this.LeftLandedOnSeesaw = false;
           } 
-         if (pair.bodyA.label.includes('Seesaw2TriggerSpace') && pair.bodyB.label.includes('Ingredient0') || pair.bodyB.label.includes('Seesaw2TriggerSpace') && pair.bodyA.label.includes('Ingredient0')) {
+         if (pair.bodyA.label.includes('Seesaw2TriggerSpace') && pair.bodyB.label.includes('IngredientRight0') || pair.bodyB.label.includes('Seesaw2TriggerSpace') && pair.bodyA.label.includes('IngredientRight0')) {
           // ingredient fallen onto seesaw
-          console.log("xxxx set landed on Seesaw false");
+          console.log("Set landed on Seesaw false");
           this.RightLandedOnSeesaw = false;
           } 
 
@@ -942,12 +939,12 @@ export class SeesawProgram implements Program {
       }       
 
        if (this.ingredientLeft0 != null && this.LeftLandedOnSeesaw == true) {
-        console.log("------------------------  ingredientLeft on seesaw was called // this seesaw1 position: "+this.ingredientLeft0.position.x+" and Y: "+ this.seesaw1.position.y)
+      //  console.log("ingredientLeft on seesaw was called // this seesaw1 position: "+this.ingredientLeft0.position.x+" and Y: "+ this.seesaw1.position.y)
         this.lobbyController.sendToDisplays('updateIngredientLeft0', [this.ingredientLeft0.position.x, this.seesaw1.position.y, this.ingredientLeft0.angle]);
       } 
       
       if (this.ingredientRight0 != null && this.RightLandedOnSeesaw == true) {
-          console.log("------------------------  ingredientRight on seesaw was called // this seesaw2 position: "+this.ingredientRight0.position.x+" and Y: "+ this.seesaw2.position.y)
+          console.log("ingredientRight on seesaw was called // this seesaw2 position: "+this.ingredientRight0.position.x+" and Y: "+ this.seesaw2.position.y)
           this.lobbyController.sendToDisplays('updateIngredientRight0', [this.ingredientRight0.position.x, this.seesaw2.position.y, this.ingredientRight0.angle]);
       }
     }, 1000 / fps);
