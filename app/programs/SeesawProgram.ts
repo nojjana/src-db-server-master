@@ -58,10 +58,11 @@ export class SeesawProgram extends SaftlimacherBaseProgram implements Program {
   private seesawBeamLenght = 20;
   private seesawBeamHeight = 100;
 
-  // placement of containers
-  private xGarbageContainerLeft = 700;
+
+  //placment of containers
+  private xGarbageContainerLeft = 600;
   private xShakerContainer = 1500; //800
-  private xGarbageContainerRight = 2250; //2400
+  private xGarbageContainerRight = 2350; //2400
   private yShakerContainer = 930;
   private yGarbageContainer = 1000;
 
@@ -181,8 +182,6 @@ export class SeesawProgram extends SaftlimacherBaseProgram implements Program {
         density: 1.0,
         friction: 0.0, 
         restitution: 1.0,
-      //  position: {x: this.xSeesawLeftPosition+0.5*this.seesawLength, y: this.ySeesawPosition+0.5*this.seesawHeight} // no inpact
-      //  friction: 0,  
       }
     )
     Matter.World.add(this.engine.world, this.seesaw1);
@@ -229,30 +228,6 @@ export class SeesawProgram extends SaftlimacherBaseProgram implements Program {
     )
     Matter.World.add(this.engine.world, this.seesaw1TriggerSpaceRight); 
 
-  // Create a point constraint that pins the center of the platform to a fixed point in space, so it can't move
-  //https://itnext.io/modular-game-worlds-in-phaser-3-tilemaps-5-matter-physics-platformer-d14d1f614557
-  /*  const constraintSeesaw1 = this.Constraint.create({
-     bodyA: this.seesaw1,
-     pointB: { x: this.xSeesawLeftPosition, y: this.ySeesawBeamPosition-40},
-     stiffness: 1,
-     length: 0,
-  })
-  Matter.World.add(this.engine.world, constraintSeesaw1); */ 
-
-  // ground stops seesaw of turning 360°
-  /*  this.seesaw1Ground = Matter.Bodies.rectangle(
-    this.xSeesawLeftPosition,
-    this.ySeesawBeamPosition,
-    this.seesawLength,
-    this.seesawHeight,
-    {
-      label: 'Seesaw1Ground',
-      isSensor: false,
-      isStatic: true
-    }
-  )
-  Matter.World.add(this.engine.world, this.seesaw1Ground); */
- 
  
     //seesaw2
   this.seesaw2 = Matter.Bodies.rectangle(
@@ -313,33 +288,6 @@ export class SeesawProgram extends SaftlimacherBaseProgram implements Program {
       }
     )
     Matter.World.add(this.engine.world, this.seesaw2TriggerSpaceRight);
-
-
-  // Create a point constraint that pins the center of the platform to a fixed point in space, so it can't move
-  //https://itnext.io/modular-game-worlds-in-phaser-3-tilemaps-5-matter-physics-platformer-d14d1f614557
-  /*  const constraintSeesaw2 = this.Constraint.create({
-    bodyA: this.seesaw2,
-    pointB: { x: this.xSeesawRightPosition, y: this.ySeesawBeamPosition-40},
-      stiffness: 1,//1 
-      length: 0
-      }
-    )
-    Matter.World.add(this.engine.world, constraintSeesaw2);   */
-
-
-    // ground stops seesaw of turning 360°  
-    /* this.seesaw2Ground = Matter.Bodies.rectangle(
-      this.xSeesawRightPosition,
-      this.ySeesawBeamPosition+100,
-      this.seesawLength,
-      this.seesawHeight,
-      {
-        label: 'Seesaw2Ground',
-        isSensor: false,
-        isStatic: true,
-      }
-    )
-    Matter.World.add(this.engine.world, this.seesaw2Ground);     */
   }  
 
   private initShakerContainer(): void {
@@ -395,41 +343,8 @@ export class SeesawProgram extends SaftlimacherBaseProgram implements Program {
         restitution: 0.05,
       });  
     Matter.World.add(this.engine.world, this.ingredientLeft0);
-    //Matter.Body.setMass(this.ingredientLeft0, 100)
-    // Matter.Body.setAngularVelocity(this.ingredientLeft, 0.15)
 
-
-    /* this.ingredientLeft1 = Matter.Bodies.circle(
-      this.xIngredientLeftPosition,
-      -2000,
-      this.ingredientRadius,
-      {
-        label: 'IngredientLeft1',
-        isSensor: false,
-        restitution: 0,        
-        density: 1,
-//        friction: 0.005,
-      });
-    Matter.World.add(this.engine.world, this.ingredientLeft1);
-    //Matter.Body.setMass(this.ingredientLeft1, 100)
-    // Matter.Body.setAngularVelocity(this.ingredientCenter, 0.15)
-
-
-    this.ingredientLeft2 = Matter.Bodies.circle(
-      this.xIngredientLeftPosition,
-      -4000,
-      this.ingredientRadius,
-      {
-        label: 'IngredientLeft2',
-        isSensor: false,
-        restitution: 0,
-        density: 1.0,
-//        friction: 0.005,
-      });
-    Matter.World.add(this.engine.world, this.ingredientLeft2);
-    //Matter.Body.setMass(this.ingredientLeft2, 100)
-    // Matter.Body.setAngularVelocity(this.ingredientRight, 0.15) */
-  
+ 
 
     this.ingredientRight0 = Matter.Bodies.circle(
       this.xIngredientRightPosition,
@@ -443,39 +358,7 @@ export class SeesawProgram extends SaftlimacherBaseProgram implements Program {
         restitution: 0.05,
       });  
     Matter.World.add(this.engine.world, this.ingredientRight0);
-    // Matter.Body.setMass(this.ingredientLeft, 5)
-    // Matter.Body.setAngularVelocity(this.ingredientLeft, 0.15)
 
-
-    /* this.ingredientRight1 = Matter.Bodies.circle(
-      this.xIngredientRightPosition,
-      -2000,
-      this.ingredientRadius,
-      {
-        label: 'IngredientRight1',
-        isSensor: false,
-        restitution: 0,
-        friction: 0.005,
-      });
-    Matter.World.add(this.engine.world, this.ingredientRight1);
-    // Matter.Body.setMass(this.ingredientCenter, 5)
-    // Matter.Body.setAngularVelocity(this.ingredientCenter, 0.15)
-
-
-    this.ingredientRight2 = Matter.Bodies.circle(
-      this.xIngredientRightPosition,
-      -4000,
-      this.ingredientRadius,
-      {
-        label: 'IngredientRight2',
-        isSensor: false,
-        restitution: 0,
-        //density: 0.01
-        friction: 0.005,
-      });
-    Matter.World.add(this.engine.world, this.ingredientRight2);
-    // Matter.Body.setMass(this.ingredientRight, 5)
-    // Matter.Body.setAngularVelocity(this.ingredientRight, 0.15)*/
   } 
 
   // private setUpGame() {
@@ -497,38 +380,6 @@ export class SeesawProgram extends SaftlimacherBaseProgram implements Program {
       let i = 0, j = pairs.length;
       for (; i != j; ++i) {
         const pair = pairs[i];
- 
-/*         if (pair.bodyA.label.includes('Seesaw1') && pair.bodyB.label.includes('IngredientLeft0') || pair.bodyB.label.includes('Seesaw1') && pair.bodyA.label.includes('IngredientLeft0')) {
-          // ingredient fallen onto seesaw
-            this.LeftLandedOnSeesaw = true;
-            console.log("Ingredient0 landet on seesaw 1: "+this.LeftLandedOnSeesaw);
-          }
-
-         if (pair.bodyA.label.includes('Seesaw2') && pair.bodyB.label.includes('IngredientRight0') || pair.bodyB.label.includes('Seesaw2') && pair.bodyA.label.includes('IngredientRight0')) {
-          // ingredient fallen onto seesaw
-            this.RightLandedOnSeesaw = true;
-            console.log("Ingredient0 landet on seesaw 2: "+this.RightLandedOnSeesaw);
-        } */
-
-        /*
-        if (pair.bodyA.label.includes('Seesaw2') && pair.bodyB.label.includes('Ingredient2') || pair.bodyB.label.includes('Seesaw2') && pair.bodyA.label.includes('Ingredient2')) {
-          // ingredient fallen onto seesaw
-            console.log("Ingredient1 landet on seesaw");
-            this.RightLandedOnSeeasw = true;
-        } */ 
-
-        // if (pair.bodyA.label.includes('Seesaw1TriggerSpace') && pair.bodyB.label.includes('IngredientLeft0') || pair.bodyB.label.includes('Seesaw1TriggerSpace') && pair.bodyA.label.includes('IngredientLeft0')) {
-        //   // ingredient fallen onto seesaw
-        //   console.log("Set landed on Seesaw false");
-        //   this.LeftLandedOnSeesaw = false;
-        // } 
-
-        // if (pair.bodyA.label.includes('Seesaw2TriggerSpace') && pair.bodyB.label.includes('IngredientRight0') || pair.bodyB.label.includes('Seesaw2TriggerSpace') && pair.bodyA.label.includes('IngredientRight0')) {
-        //   // ingredient fallen onto seesaw
-        //   console.log("Set landed on Seesaw false");
-        //   this.RightLandedOnSeesaw = false;
-        // } 
-
           
         // Container - Ingredient catched
         if (pair.bodyA.label.includes('Container') && pair.bodyB.label.includes('Ingredient') || pair.bodyB.label.includes('Container') && pair.bodyA.label.includes('Ingredient')) {
