@@ -429,12 +429,12 @@ export class SeesawProgram extends SaftlimacherBaseProgram implements Program {
           // TODO
           let seesawNr: number = parseInt(containerBody.label.charAt(containerBody.label.length - 1));
 
-          if (this.allIngredientNumbersOnList.includes(ingredientTypeNr)) {
+          if (!this.allIngredientNumbersOnList.includes(ingredientTypeNr)) {
             // good catch
           //  console.log('thrown away a bad ingredient!! +50 points.  ');
             this.score += this.scoreInc;
             // this.lobbyController.sendToControllers('vibrate', [seesawNr]);
-            this.lobbyController.sendToDisplays('checkIngredientOnList', ingredientTypeNr);
+            // this.lobbyController.sendToDisplays('checkIngredientOnList', ingredientTypeNr);
             this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient',
               [this.scoreInc, ingredientTypeNr, ingredientBody.position.x, ingredientBody.position.y]);
           } else {
