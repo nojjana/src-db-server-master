@@ -355,8 +355,10 @@ export class ShakerProgram extends SaftlimacherBaseProgram implements Program {
     data.push(this.mole.position.y);
 
     // this.generateIngredientListNumbers();
+    // 6
     data.push(this.allIngredientNumbersOnList);
     // this.lobbyController.sendToDisplays('allIngredientNumbersOnList', this.allIngredientNumbersOnList);
+    // 7
     data.push(this.shakePointsNeededForFalling);
 
     return data;
@@ -366,6 +368,35 @@ export class ShakerProgram extends SaftlimacherBaseProgram implements Program {
     if (this.moleTimerId != null) clearInterval(this.moleTimerId);
     // if (this.shakeObjectChangeTimerId != null) clearTimeout(this.shakeObjectChangeTimerId);
     if (this.shakeObjectChangeTimerId != null) clearInterval(this.shakeObjectChangeTimerId);
+  }
+
+  createWorldBounds(): void {
+    if (this.engine == null) return;
+
+    Matter.World.add(this.engine.world, [
+      // Top
+      // Matter.Bodies.rectangle(this.width / 2, 0, this.width, 10, {
+      //   isStatic: true
+      // }),
+      // Left
+      Matter.Bodies.rectangle(this.worldSideMargin, this.height / 2, 10, this.height, {
+        isStatic: true,
+        // render: { 
+        //   visible: true, 
+        // }
+      }),
+      // Bottom
+      // not visible, further down. trigger for respawning fruit
+      Matter.Bodies.rectangle(this.width / 2, this.height+400, this.width, 10, {
+        label: 'Floor',
+        isStatic: true,
+        isSensor: true
+      }),
+      // Right
+      Matter.Bodies.rectangle(this.width - this.worldSideMargin, this.height / 2, 10, this.height, {
+        isStatic: true
+      })
+    ])
   }
 
 }

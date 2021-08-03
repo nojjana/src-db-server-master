@@ -31,7 +31,7 @@ export class CatcherProgram extends SaftlimacherBaseProgram implements Program {
   // floors of nets: bottom, middle
   private yCatcherFieldBottom1 = this.height * 0.8
   private yCatcherFieldMiddle2 = this.height * 0.6
-  
+
   // moving nets
   // private movePixelSteps = 180;  // möglichst in 10er Schritten, testen ob funktioniert
 
@@ -71,10 +71,11 @@ export class CatcherProgram extends SaftlimacherBaseProgram implements Program {
 
   /* -------------------- CATCHER GAME METHODS --------------------*/
 
-  initLevelData(): void  {
+  initLevelData(): void {
     this.initCatcherNets();
     this.initIngredients();
   }
+
   initIngredients(): void {
     if (this.engine == null) return;
 
@@ -167,9 +168,9 @@ export class CatcherProgram extends SaftlimacherBaseProgram implements Program {
           } else if (this.isInedible(ingredientTypeNr)) {
             // beatle iiiih
             // console.log('catched something inedible! iiiiiks!');
-            this.score -= this.scoreInc*2;
+            this.score -= this.scoreInc * 2;
             this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient',
-              [-(this.scoreInc*2), ingredientTypeNr, ingredientBody.position.x, ingredientBody.position.y]);
+              [-(this.scoreInc * 2), ingredientTypeNr, ingredientBody.position.x, ingredientBody.position.y]);
           } else {
             // bad catch
             // console.log('catched a wrong ingredient, NOT on list!!! -50 points.');
@@ -196,7 +197,7 @@ export class CatcherProgram extends SaftlimacherBaseProgram implements Program {
   //   let moveToValX = controllerData[0];
   //   let controllerId = controllerData[1];
   //   console.log("controllerData arrived:", moveToValX, controllerId);
-    
+
   //   if (moveToValX != null && controllerId != null) {
   //     // TODO
   //     // check which controller is sending
@@ -221,7 +222,7 @@ export class CatcherProgram extends SaftlimacherBaseProgram implements Program {
     let moveToValX = controllerData[0];
     let controllerId = controllerData[1];
     // console.log("controllerData from Player 1 arrived:", moveToValX, controllerId);
-    
+
     if (moveToValX != null && controllerId != null && this.net1 != undefined) {
       if (controllerId != 1) return;
       this.setNetPos(moveToValX, this.net1);
@@ -247,20 +248,20 @@ export class CatcherProgram extends SaftlimacherBaseProgram implements Program {
           // Matter.Body.applyForce(this.shakerContainer, {x: this.shakerContainer.position.x, y: this.shakerContainer.position.y}, {x: 0.05, y: 0});
           // Matter.Body.translate(this.shakerContainer, {x: this.xRightField, y:  0});
           // this.forceMove(netBody, this.xRightField, netBody.position.y, this.movePixelSteps);
-          Matter.Body.setPosition(netBody, {x: this.xRightField, y:  netBody.position.y});
+          Matter.Body.setPosition(netBody, { x: this.xRightField, y: netBody.position.y });
           break;
         case -1:
           // left
           // Matter.Body.applyForce(this.shakerContainer, {x: this.shakerContainer.position.x, y: this.shakerContainer.position.y}, {x: -0.05, y: 0});
           // Matter.Body.translate(this.shakerContainer, {x: this.xLeftField, y:  0});
           // this.forceMove(netBody, this.xLeftField, netBody.position.y, this.movePixelSteps);
-          Matter.Body.setPosition(netBody, {x: this.xLeftField, y:  netBody.position.y});
+          Matter.Body.setPosition(netBody, { x: this.xLeftField, y: netBody.position.y });
           break;
         case 0:
           // center
           // Matter.Body.translate(this.shakerContainer, {x: this.xCenterField, y:  0});
           // this.forceMove(netBody, this.xCenterField, netBody.position.y, this.movePixelSteps);
-          Matter.Body.setPosition(netBody, {x: this.xCenterField, y: netBody.position.y});
+          Matter.Body.setPosition(netBody, { x: this.xCenterField, y: netBody.position.y });
           break;
         default:
           break;
@@ -295,11 +296,11 @@ export class CatcherProgram extends SaftlimacherBaseProgram implements Program {
 
     let newX = body.position.x
     if (dx > 0) {
-    // if (dx > pixelSteps) {
+      // if (dx > pixelSteps) {
       // a little bit to the right
       newX = body.position.x + pixelSteps;
     } else if (dx < 0) {
-    // } else if (dx < -pixelSteps) {
+      // } else if (dx < -pixelSteps) {
       // a little bit to the left
       newX = body.position.x - pixelSteps;
     }
@@ -317,7 +318,7 @@ export class CatcherProgram extends SaftlimacherBaseProgram implements Program {
       y: newY
     });
 
-    return {x: newX, y: newY};
+    return { x: newX, y: newY };
   }
 
   collectLevelData() {
@@ -338,14 +339,14 @@ export class CatcherProgram extends SaftlimacherBaseProgram implements Program {
   respawnIngredient(body: Matter.Body) {
     // console.log("respawnIngredient: ");
     let newNumber = this.getRandomInt(this.availableIngredientTypes);;
-    let newlabel = "Ingredient"+newNumber;
+    let newlabel = "Ingredient" + newNumber;
 
     body.label = newlabel;
     Matter.Body.setPosition(body, {
       x: body.position.x,
       y: -500
     });
-    
+
     switch (body.position.x) {
       case this.xLeftField:
         this.lobbyController.sendToDisplays('changeImageIngredientLeft', [newNumber]);
@@ -361,9 +362,38 @@ export class CatcherProgram extends SaftlimacherBaseProgram implements Program {
     }
     // console.log("body.label =", body.label);
   }
-  
+
   clearInGameTimers() {
 
+  }
+
+  createWorldBounds(): void {
+    if (this.engine == null) return;
+
+    Matter.World.add(this.engine.world, [
+      // Top
+      // Matter.Bodies.rectangle(this.width / 2, 0, this.width, 10, {
+      //   isStatic: true
+      // }),
+      // Left
+      Matter.Bodies.rectangle(this.worldSideMargin, this.height / 2, 10, this.height, {
+        isStatic: true
+        // render: { 
+        //   visible: true, 
+        // }
+      }),
+      // Bottom
+      // not visible, further down. trigger for respawning fruit
+      Matter.Bodies.rectangle(this.width / 2, this.height+400, this.width, 10, {
+        label: 'Floor',
+        isStatic: true,
+        isSensor: true
+      }),
+      // Right
+      Matter.Bodies.rectangle(this.width - this.worldSideMargin, this.height / 2, 10, this.height, {
+        isStatic: true
+      })
+    ])
   }
 
 }

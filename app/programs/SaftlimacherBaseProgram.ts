@@ -55,31 +55,34 @@ export abstract class SaftlimacherBaseProgram implements Program {
     this.sendLevelInfoToDisplay();
   }
 
-  protected createWorldBounds(): void {
-    if (this.engine == null) return;
+  // protected createWorldBounds(): void {
+  //   if (this.engine == null) return;
 
-    Matter.World.add(this.engine.world, [
-      // Top
-      // Matter.Bodies.rectangle(this.width / 2, 0, this.width, 10, {
-      //   isStatic: true
-      // }),
-      // Left
-      Matter.Bodies.rectangle(this.worldSideMargin, this.height / 2, 10, this.height, {
-        isStatic: true
-      }),
-      // Bottom
-      // not visible, further down. trigger for respawning fruit
-      Matter.Bodies.rectangle(this.width / 2, this.height+400, this.width, 10, {
-        label: 'Floor',
-        isStatic: true,
-        isSensor: true
-      }),
-      // Right
-      Matter.Bodies.rectangle(this.width - this.worldSideMargin, this.height / 2, 10, this.height, {
-        isStatic: true
-      })
-    ])
-  }
+  //   Matter.World.add(this.engine.world, [
+  //     // Top
+  //     // Matter.Bodies.rectangle(this.width / 2, 0, this.width, 10, {
+  //     //   isStatic: true
+  //     // }),
+  //     // Left
+  //     Matter.Bodies.rectangle(this.worldSideMargin, this.height / 2, 10, this.height, {
+  //       isStatic: true,
+  //       // render: { 
+  //       //   visible: true, 
+  //       // }
+  //     }),
+  //     // Bottom
+  //     // not visible, further down. trigger for respawning fruit
+  //     Matter.Bodies.rectangle(this.width / 2, this.height+400, this.width, 10, {
+  //       label: 'Floor',
+  //       isStatic: true,
+  //       isSensor: true
+  //     }),
+  //     // Right
+  //     Matter.Bodies.rectangle(this.width - this.worldSideMargin, this.height / 2, 10, this.height, {
+  //       isStatic: true
+  //     })
+  //   ])
+  // }
 
   protected generateIngredientListNumbers() {
     let lastRandomInt = -1;
@@ -117,6 +120,7 @@ export abstract class SaftlimacherBaseProgram implements Program {
   abstract setControllerDataPlayer1(controllerData: number[]): void;
   abstract setControllerDataPlayer2(controllerData: number[]): void;
   
+  abstract createWorldBounds(): void;
   abstract initLevelData(): void;
   abstract initIngredients(): void;
   abstract initMatterEventCollision(): void;
