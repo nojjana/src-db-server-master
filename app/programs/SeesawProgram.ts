@@ -275,8 +275,6 @@ export class SeesawProgram extends SaftlimacherBaseProgram implements Program {
           if (!this.allIngredientNumbersOnList.includes(ingredientTypeNr)) {
             // good catch
             this.score += this.scoreInc;
-            // this.lobbyController.sendToControllers('vibrate', [seesawNr]);
-            // this.lobbyController.sendToDisplays('checkIngredientOnList', ingredientTypeNr);
             this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient',
               [this.scoreInc, ingredientTypeNr, ingredientBody.position.x, ingredientBody.position.y]);
           } else {
