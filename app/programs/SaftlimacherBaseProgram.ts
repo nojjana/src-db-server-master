@@ -35,7 +35,7 @@ export abstract class SaftlimacherBaseProgram implements Program {
 
   // list
   protected allIngredientNumbersOnList: number[] = new Array();
- 
+
   controllerQuitGame = false;
 
   constructor(lobbyController: LobbyController) {
@@ -45,7 +45,7 @@ export abstract class SaftlimacherBaseProgram implements Program {
   }
 
   /* -------------------- BASIC SÄFTLIMACHER GAME METHODS --------------------*/
-  
+
   private setUpGame() {
     this.engine = Matter.Engine.create();
     this.createWorldBounds();
@@ -86,13 +86,13 @@ export abstract class SaftlimacherBaseProgram implements Program {
 
   abstract setControllerDataPlayer1(controllerData: number[]): void;
   abstract setControllerDataPlayer2(controllerData: number[]): void;
-  
+
   abstract createWorldBounds(): void;
   abstract initLevelData(): void;
   abstract initIngredients(): void;
   abstract initMatterEventCollision(): void;
   abstract collectLevelData(): any[];
-  abstract initGameLoop(fps: number):void; 
+  abstract initGameLoop(fps: number): void;
   abstract clearInGameTimers(): void;
 
   /* -------------------- BASIC GAME METHODS --------------------*/
@@ -117,12 +117,12 @@ export abstract class SaftlimacherBaseProgram implements Program {
 
     // true: main player, controls lobby
     if (this.controller1 && this.controller2) {
-          this.controller1.emit('stopSendingData', true);
-          this.controller2.emit('stopSendingData', false);
-         
-          if (!this.controllerQuitGame) {
-            this.controller1.addSocketOnce('goToMainMenu', this.goToMainMenu.bind(this));
-          }
+      this.controller1.emit('stopSendingData', true);
+      this.controller2.emit('stopSendingData', false);
+
+      if (!this.controllerQuitGame) {
+        this.controller1.addSocketOnce('goToMainMenu', this.goToMainMenu.bind(this));
+      }
     }
   }
 
@@ -143,7 +143,7 @@ export abstract class SaftlimacherBaseProgram implements Program {
     this.lobbyController.changeProgram(ProgramName.MAIN_MENU);
   }
 
-  protected shutDownGame(): void {    
+  protected shutDownGame(): void {
     this.controllerQuitGame = true;
     this.gameOver();
 
@@ -190,8 +190,8 @@ export abstract class SaftlimacherBaseProgram implements Program {
     this.controller1 = this.controllers[0];
     this.controller2 = this.controllers[1];
 
-    this.controller1.emit('controllerResponsibility', {tutorial: true, controllerId: 1});
-    this.controller2.emit('controllerResponsibility', {tutorial: true, controllerId: 2});
+    this.controller1.emit('controllerResponsibility', { tutorial: true, controllerId: 1 });
+    this.controller2.emit('controllerResponsibility', { tutorial: true, controllerId: 2 });
 
     for (let controller of this.controllers) {
       controller.addSocketOnce('endedTutorial', this.controllerEndedTutorial.bind(this));
@@ -251,7 +251,6 @@ export abstract class SaftlimacherBaseProgram implements Program {
       this.lobbyController.sendToDisplays('gameOverCountdown', i);
       if (i == 0) {
         this.gameOver();
-        // clearInterval(this.countdownInterval);
       }
     }, 1000);
 
@@ -271,20 +270,16 @@ export abstract class SaftlimacherBaseProgram implements Program {
     }
   }
 
-  // allows user to exit game
-  private setControllerListenerOnExitClicked(): void{
-    // if (this.controller1 && this.controller2) {
+  // allows main controller to quit game
+  private setControllerListenerOnExitClicked(): void {
     if (this.controller1) {
       this.controller1.addSocketListener('quitGame', this.shutDownGame.bind(this));
-      // this.controller2.addSocketListener('quitGame', this.shutDownGame.bind(this));
     }
   }
 
-  private removeControllerListenerOnExitClicked(): void{
-    // if (this.controller1 && this.controller2) {
+  private removeControllerListenerOnExitClicked(): void {
     if (this.controller1) {
       this.controller1.removeSocketListener('quitGame');
-      // this.controller2.removeSocketListener('quitGame');
     }
   }
 
@@ -346,7 +341,6 @@ export abstract class SaftlimacherBaseProgram implements Program {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
-  
 }
 
 

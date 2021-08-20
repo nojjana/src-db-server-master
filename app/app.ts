@@ -53,7 +53,6 @@ io.on('connection', (socket: Socket) => {
         socketIds.push(socket.id);
 
         let lobbyCode = createLobbyCode();
-        // let lobbyCode = 1;
         let lobbyController = new LobbyController(lobbyCode, io);
         lobbies.set(lobbyCode, lobbyController);
         lobbyController.displayJoins(srcSocket);
@@ -126,7 +125,10 @@ io.on('connection', (socket: Socket) => {
 
 /* Recursivly creates a unique lobby code between 10'000 - 99'999 */
 function createLobbyCode() : number {
+    // long code
     // let tmp = Math.floor(Math.random() * (99999 - 10000) + 10000);
+
+    // short code
     let tmp = Math.floor(Math.random() * (9 - 1) + 1);
 
     if(Array.from(lobbies.keys()).includes(tmp)) {

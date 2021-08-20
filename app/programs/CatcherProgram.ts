@@ -1,9 +1,7 @@
-import { Program, ProgramName } from "./Program";
-import { SaftlimacherBaseProgram } from "./SaftlimacherBaseProgram";
+import Matter from "matter-js";
 import { LobbyController } from "../LobbyController";
-import { Socket } from "socket.io";
-import Matter, { Bodies } from "matter-js";
-import { SrcSocket } from "../SrcSocket";
+import { Program } from "./Program";
+import { SaftlimacherBaseProgram } from "./SaftlimacherBaseProgram";
 
 export class CatcherProgram extends SaftlimacherBaseProgram implements Program {
 
@@ -32,9 +30,6 @@ export class CatcherProgram extends SaftlimacherBaseProgram implements Program {
   private yCatcherFieldBottom1 = this.height * 0.8
   private yCatcherFieldMiddle2 = this.height * 0.6
 
-  // moving nets
-  // private movePixelSteps = 180;  // möglichst in 10er Schritten, testen ob funktioniert
-
   constructor(lobbyController: LobbyController) {
     super(lobbyController);
   }
@@ -51,7 +46,6 @@ export class CatcherProgram extends SaftlimacherBaseProgram implements Program {
 
       this.lobbyController.sendToDisplays('catcherNet1Position', [this.net1.position.x, this.net1.position.y]);
       this.lobbyController.sendToDisplays('catcherNet2Position', [this.net2.position.x, this.net2.position.y]);
-
       this.lobbyController.sendToDisplays('updateScore', this.score);
 
       if (this.ingredientLeft != null) {
@@ -136,7 +130,6 @@ export class CatcherProgram extends SaftlimacherBaseProgram implements Program {
   }
 
   initMatterEventCollision() {
-    // Matter.Events.on(this.engine, 'collisionActive', (event) => {
     Matter.Events.on(this.engine, 'collisionStart', (event) => {
       const pairs = event.pairs;
 
@@ -144,7 +137,6 @@ export class CatcherProgram extends SaftlimacherBaseProgram implements Program {
       for (; i != j; ++i) {
         const pair = pairs[i];
 
-        // TODO
         if (pair.bodyA.label.includes('Catcher') && pair.bodyB.label.includes('Ingredient') || pair.bodyB.label.includes('Catcher') && pair.bodyA.label.includes('Ingredient')) {
           // ingredient catched
           let catcherBody = pair.bodyA;
@@ -154,12 +146,10 @@ export class CatcherProgram extends SaftlimacherBaseProgram implements Program {
             ingredientBody = pair.bodyA;
           }
           let ingredientTypeNr: number = parseInt(ingredientBody.label.charAt(ingredientBody.label.length - 1));
-          // TODO
           let catcherNr: number = parseInt(catcherBody.label.charAt(catcherBody.label.length - 1));
 
           if (this.allIngredientNumbersOnList.includes(ingredientTypeNr)) {
             // good catch
-            // console.log('catched a good ingredient, +50 points!!');
             this.score += this.scoreInc;
             this.lobbyController.sendToControllers('vibrate', [catcherNr]);
             this.lobbyController.sendToDisplays('checkIngredientOnList', ingredientTypeNr);
@@ -167,13 +157,11 @@ export class CatcherProgram extends SaftlimacherBaseProgram implements Program {
               [this.scoreInc, ingredientTypeNr, ingredientBody.position.x, ingredientBody.position.y]);
           } else if (this.isInedible(ingredientTypeNr)) {
             // beatle iiiih
-            // console.log('catched something inedible! iiiiiks!');
             this.score -= this.scoreInc * 2;
             this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient',
               [-(this.scoreInc * 2), ingredientTypeNr, ingredientBody.position.x, ingredientBody.position.y]);
           } else {
             // bad catch
-            // console.log('catched a wrong ingredient, NOT on list!!! -50 points.');
             this.score -= this.scoreInc;
             this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient',
               [-this.scoreInc, ingredientTypeNr, ingredientBody.position.x, ingredientBody.position.y]);
@@ -193,38 +181,12 @@ export class CatcherProgram extends SaftlimacherBaseProgram implements Program {
     });
   }
 
-  // private setControllerData(controllerData: number[]): void {
-  //   let moveToValX = controllerData[0];
-  //   let controllerId = controllerData[1];
-  //   console.log("controllerData arrived:", moveToValX, controllerId);
-
-  //   if (moveToValX != null && controllerId != null) {
-  //     // TODO
-  //     // check which controller is sending
-  //     switch (controllerId) {
-  //       case 1:
-  //         if (this.catcherNet1 != undefined) {
-  //           this.setShakerPos(moveToValX, this.catcherNet1);
-  //         }
-  //       case 2:
-  //         if (this.catcherNet2 != undefined) {
-  //           this.setShakerPos(moveToValX, this.catcherNet2);
-  //         }
-  //       // case 3:
-  //       //   if (this.catcherNet3 != undefined) {
-  //       //     this.setShakerPos(moveToValX, this.catcherNet3);
-  //       //   }
-  //     }
-  //   }
-  // }
-
   setControllerDataPlayer1(controllerData: number[]): void {
     let moveToValX = controllerData[0];
     let controllerId = controllerData[1];
-    // console.log("controllerData from Player 1 arrived:", moveToValX, controllerId);
-
     if (moveToValX != null && controllerId != null && this.net1 != undefined) {
       if (controllerId != 1) return;
+      // move net1
       this.setNetPos(moveToValX, this.net1);
     }
   }
@@ -232,9 +194,9 @@ export class CatcherProgram extends SaftlimacherBaseProgram implements Program {
   setControllerDataPlayer2(controllerData: number[]): void {
     let moveToValX = controllerData[0];
     let controllerId = controllerData[1];
-    // console.log("controllerData from Player 2 arrived:", moveToValX, controllerId);
     if (moveToValX != null && controllerId != null && this.net2 != undefined) {
       if (controllerId != 2) return;
+      // move net2
       this.setNetPos(moveToValX, this.net2);
     }
   }
@@ -245,80 +207,20 @@ export class CatcherProgram extends SaftlimacherBaseProgram implements Program {
       switch (valX) {
         case 1:
           // right
-          // Matter.Body.applyForce(this.shakerContainer, {x: this.shakerContainer.position.x, y: this.shakerContainer.position.y}, {x: 0.05, y: 0});
-          // Matter.Body.translate(this.shakerContainer, {x: this.xRightField, y:  0});
-          // this.forceMove(netBody, this.xRightField, netBody.position.y, this.movePixelSteps);
           Matter.Body.setPosition(netBody, { x: this.xRightField, y: netBody.position.y });
           break;
         case -1:
           // left
-          // Matter.Body.applyForce(this.shakerContainer, {x: this.shakerContainer.position.x, y: this.shakerContainer.position.y}, {x: -0.05, y: 0});
-          // Matter.Body.translate(this.shakerContainer, {x: this.xLeftField, y:  0});
-          // this.forceMove(netBody, this.xLeftField, netBody.position.y, this.movePixelSteps);
           Matter.Body.setPosition(netBody, { x: this.xLeftField, y: netBody.position.y });
           break;
         case 0:
           // center
-          // Matter.Body.translate(this.shakerContainer, {x: this.xCenterField, y:  0});
-          // this.forceMove(netBody, this.xCenterField, netBody.position.y, this.movePixelSteps);
           Matter.Body.setPosition(netBody, { x: this.xCenterField, y: netBody.position.y });
           break;
         default:
           break;
       }
     }
-  }
-
-  // private fallDown(body: Matter.Body, endY: number, pixelSteps: number): Matter.Vertices {
-  //   // moving ingredients down
-  //   let newY = body.position.y;
-  //   if (body.position.y < endY) {
-  //     // fall further down
-  //     newY = body.position.y + pixelSteps;
-  //   }
-  //   // console.log("body.position.y, endY, dy, newY: ", body.position.y, endY, dy, newY);
-  //   Matter.Body.setPosition(body, {
-  //     x: body.position.x,
-  //     y: newY
-  //   });
-
-  //   return {x: body.position.x, y: body.position.y};
-  // }
-
-  private forceMove(body: Matter.Body, endX: number, endY: number, pixelSteps: number): Matter.Vertices {
-    // moving shaker left and right
-
-    // dx is the total distance to move in the X direction
-    let dx = endX - body.position.x;
-
-    // dy is the total distance to move in the Y direction
-    let dy = endY - body.position.y;
-
-    let newX = body.position.x
-    if (dx > 0) {
-      // if (dx > pixelSteps) {
-      // a little bit to the right
-      newX = body.position.x + pixelSteps;
-    } else if (dx < 0) {
-      // } else if (dx < -pixelSteps) {
-      // a little bit to the left
-      newX = body.position.x - pixelSteps;
-    }
-
-    let newY = body.position.y;
-    if (dy > 0) {
-      // a little bit down
-      newY = body.position.y + pixelSteps;
-    } else if (dy < 0) {
-      // a little bit up
-      newY = body.position.y - pixelSteps;
-    }
-    Matter.Body.setPosition(body, {
-      x: newX,
-      y: newY
-    });
-
-    return { x: newX, y: newY };
   }
 
   collectLevelData() {
@@ -337,7 +239,6 @@ export class CatcherProgram extends SaftlimacherBaseProgram implements Program {
   }
 
   respawnIngredient(body: Matter.Body) {
-    // console.log("respawnIngredient: ");
     let newNumber = this.getRandomInt(this.availableIngredientTypes);;
     let newlabel = "Ingredient" + newNumber;
 
@@ -360,31 +261,23 @@ export class CatcherProgram extends SaftlimacherBaseProgram implements Program {
       default:
         break;
     }
-    // console.log("body.label =", body.label);
   }
 
   clearInGameTimers() {
-
+    // no timers
   }
 
   createWorldBounds(): void {
     if (this.engine == null) return;
 
     Matter.World.add(this.engine.world, [
-      // Top
-      // Matter.Bodies.rectangle(this.width / 2, 0, this.width, 10, {
-      //   isStatic: true
-      // }),
       // Left
       Matter.Bodies.rectangle(this.worldSideMargin, this.height / 2, 10, this.height, {
         isStatic: true
-        // render: { 
-        //   visible: true, 
-        // }
       }),
       // Bottom
       // not visible, further down. trigger for respawning fruit
-      Matter.Bodies.rectangle(this.width / 2, this.height+400, this.width, 10, {
+      Matter.Bodies.rectangle(this.width / 2, this.height + 400, this.width, 10, {
         label: 'Floor',
         isStatic: true,
         isSensor: true
