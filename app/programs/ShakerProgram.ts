@@ -1,29 +1,28 @@
-import { Program, ProgramName } from "./Program";
-import { SaftlimacherBaseProgram } from "./SaftlimacherBaseProgram";
+import Matter from "matter-js";
 import { LobbyController } from "../LobbyController";
-import Matter, { Bodies } from "matter-js";
-import { SrcSocket } from "../SrcSocket";
+import { Program } from "./Program";
+import { SaftlimacherBaseProgram } from "./SaftlimacherBaseProgram";
 
 export class ShakerProgram extends SaftlimacherBaseProgram implements Program {
 
   private hit = false;
   private numberOfTilesWidth = 5;
   private numberOfTilesHeight = 4;
-  private tileSize = 128;
-  width = this.tileSize * this.numberOfTilesWidth;
-  height = this.tileSize * this.numberOfTilesHeight;
-  private halfTileSize = this.tileSize / 2;
-  private holeRadius = 50;
-  private hammerPosX = 1100;
-  private hammerPosY = 300;
+  // private tileSize = 128;
+  // width = this.tileSize * this.numberOfTilesWidth;
+  // height = this.tileSize * this.numberOfTilesHeight;
+  // private halfTileSize = this.tileSize / 2;
+  // private holeRadius = 50;
+  // private hammerPosX = 1100;
+  // private hammerPosY = 300;
 
-  private hammer?: Matter.Body;
-  private hammerRadius = this.holeRadius;
+  // private hammer?: Matter.Body;
+  // private hammerRadius = this.holeRadius;
   private gravityX: number = 0;
   private gravityY: number = 0;
-  private moleRadius = this.holeRadius;
-  private mole?: Matter.Body;
-  private moleTimerId?: NodeJS.Timeout;
+  // private moleRadius = this.holeRadius;
+  // private mole?: Matter.Body;
+  // private moleTimerId?: NodeJS.Timeout;
 
   private shaking = false;
   private shakeCounter: number = 0;
@@ -39,13 +38,16 @@ export class ShakerProgram extends SaftlimacherBaseProgram implements Program {
 
   // TODO set correct position
   private shakerContainer?: Matter.Body;
-  private shakerContainerPosX = this.halfTileSize;
-  private shakerContainerPosY = this.halfTileSize;
-  private shakerContainerRadius = this.holeRadius;
+  private shakerContainerPosX = 0;
+  // private shakerContainerPosX = this.halfTileSize;
+  private shakerContainerPosY = 0;
+  // private shakerContainerPosY = this.halfTileSize;
+  // private shakerContainerRadius = this.holeRadius;
+  private shakerContainerRadius = 50;
   private ingredient?: Matter.Body;
-  private ingredientPosX = this.halfTileSize;
-  private ingredientPosY = this.halfTileSize;
-  private ingredientRadius = this.holeRadius;
+  private ingredientPosX = 0;
+  private ingredientPosY = 0;
+  private ingredientRadius = 50;
 
   // secondsForFalling = 1.8;   // je nach Bildschirm. TODO: fix.
   secondsForFalling = 0.8;
@@ -62,46 +64,53 @@ export class ShakerProgram extends SaftlimacherBaseProgram implements Program {
     this.initShakeObjectTimer();
 
     this.gameLoop = setInterval(() => {
-      if (this.engine == null || this.hammer == null || this.mole == null) return;
+      if (this.engine == null) return;
+        // || 
+        // this.hammer == null 
+        // || this.mole == null
 
       this.engine.world.gravity.x = this.gravityX;
       this.engine.world.gravity.y = this.gravityY;
       Matter.Engine.update(this.engine, 1000 / fps);
 
-      this.lobbyController.sendToDisplays('updateHammer', [this.hammer.position.x, this.hammer.position.y, this.mole.position.x, this.mole.position.y, this.hit, this.score]);
+      // this.lobbyController.sendToDisplays('updateHammer', [this.hammer.position.x, this.hammer.position.y, this.mole.position.x, this.mole.position.y, this.hit, this.score]);
       this.lobbyController.sendToDisplays('updateShaking', this.shaking);
       this.lobbyController.sendToDisplays('updateScore', this.score);  
       this.lobbyController.sendToDisplays('updateShakeCounter', this.shakeCounter);  
       
       // if nobody shakes, shakecounter decreases (progressbar empties)
-      // this.shakeCounter = this.shakeCounter - 0.01;
-      this.shakeCounter = this.shakeCounter - 0.1;
-      if (this.shakeCounter < 0) {
-        this.shakeCounter = 0;
-      }
+      this.reduceShakeCounter();
         
     }, 1000 / fps);
 
   }
 
+
   /* -------------------- SHAKER GAME METHODS --------------------*/
 
-  private initMole(): void {
-    if (this.engine == null) return;
-
-    this.mole = Matter.Bodies.circle(
-      this.halfTileSize + this.getRandomInt(this.numberOfTilesWidth) * this.tileSize,
-      this.halfTileSize + this.getRandomInt(this.numberOfTilesHeight) * this.tileSize,
-      this.moleRadius,
-      {
-        label: 'Mole',
-        isSensor: true,
-        isStatic: true
-      }
-    );
-    Matter.World.add(this.engine.world, this.mole);
-    this.moleTimerId = setInterval(() => this.resetMole(), this.getRandomIntInterval(3000, 5000));
+  
+  private reduceShakeCounter() {
+    this.shakeCounter = this.shakeCounter - 0.1;
+    if (this.shakeCounter < 0) {
+      this.shakeCounter = 0;
+    }
   }
+  // private initMole(): void {
+  //   if (this.engine == null) return;
+
+  //   this.mole = Matter.Bodies.circle(
+  //     this.halfTileSize + this.getRandomInt(this.numberOfTilesWidth) * this.tileSize,
+  //     this.halfTileSize + this.getRandomInt(this.numberOfTilesHeight) * this.tileSize,
+  //     this.moleRadius,
+  //     {
+  //       label: 'Mole',
+  //       isSensor: true,
+  //       isStatic: true
+  //     }
+  //   );
+  //   Matter.World.add(this.engine.world, this.mole);
+  //   this.moleTimerId = setInterval(() => this.resetMole(), this.getRandomIntInterval(3000, 5000));
+  // }
 
   private initShakeObjectTimer(): void {
     // if (this.engine == null) return;
@@ -120,28 +129,28 @@ export class ShakerProgram extends SaftlimacherBaseProgram implements Program {
     this.shakeObjectChangeTimerId = setInterval(() => this.triggerChangeShakeObject(), this.shakeObjectChangeAfterSeconds * 1000);
   }
 
-  private resetMole(): void {
-    if (this.mole == null || this.moleTimerId == null) return;
+  // private resetMole(): void {
+  //   if (this.mole == null || this.moleTimerId == null) return;
 
-    Matter.Body.setPosition(this.mole,
-      {
-        x: this.halfTileSize + this.getRandomInt(this.numberOfTilesWidth) * this.tileSize,
-        y: this.halfTileSize + this.getRandomInt(this.numberOfTilesHeight) * this.tileSize
-      });
-    this.moleTimerId.refresh();
-  }
+  //   Matter.Body.setPosition(this.mole,
+  //     {
+  //       x: this.halfTileSize + this.getRandomInt(this.numberOfTilesWidth) * this.tileSize,
+  //       y: this.halfTileSize + this.getRandomInt(this.numberOfTilesHeight) * this.tileSize
+  //     });
+  //   this.moleTimerId.refresh();
+  // }
 
-  private initHammer(): void {
-    if (this.engine == null) return;
+  // private initHammer(): void {
+  //   if (this.engine == null) return;
 
-    this.hammer = Matter.Bodies.circle(
-      this.hammerPosX, this.hammerPosY, this.hammerRadius,
-      {
-        label: 'Hammer',
-        mass: 100
-      });
-    Matter.World.add(this.engine.world, this.hammer);
-  }
+  //   this.hammer = Matter.Bodies.circle(
+  //     this.hammerPosX, this.hammerPosY, this.hammerRadius,
+  //     {
+  //       label: 'Hammer',
+  //       mass: 100
+  //     });
+  //   Matter.World.add(this.engine.world, this.hammer);
+  // }
 
 
   private initShakerContainer(): void {
@@ -173,8 +182,8 @@ export class ShakerProgram extends SaftlimacherBaseProgram implements Program {
   }
 
   initLevelData() {
-    this.initHammer();
-    this.initMole();
+    // this.initHammer();
+    // this.initMole();
     this.initShakerContainer();
     this.initIngredients();
   }
@@ -220,20 +229,20 @@ export class ShakerProgram extends SaftlimacherBaseProgram implements Program {
   }
 
   setControllerDataPlayer1(controllerData: any): void {
-    this.hammerHit();
+    // this.hammerHit();
     this.shakeMovement();
   }
 
   setControllerDataPlayer2(controllerData: any): void {
-    this.hammerHit();
+    // this.hammerHit();
     this.shakeMovement();
   }
 
-  private hammerHit(): void {
-    this.hit = true;
-    // console.log('hammerHit. hit = ' + this.hit);
-    setTimeout(() => { this.hit = false; }, 300);
-  }
+  // private hammerHit(): void {
+  //   this.hit = true;
+  //   // console.log('hammerHit. hit = ' + this.hit);
+  //   setTimeout(() => { this.hit = false; }, 300);
+  // }
 
   private shakeMovement(): void {
     this.shaking = true;
@@ -343,29 +352,30 @@ export class ShakerProgram extends SaftlimacherBaseProgram implements Program {
 
   collectLevelData() {
     let data: any[] = [];
-    if (this.mole == null) return data;
+    // if (this.mole == null) return data;
 
-    data.push(this.numberOfTilesWidth);
-    data.push(this.numberOfTilesHeight);
+    // data.push(this.numberOfTilesWidth);
+    // data.push(this.numberOfTilesHeight);
     // Hammer Start Position to left upper corner hole
-    data.push(this.hammerPosX);
-    data.push(this.hammerPosY);
+    // data.push(this.hammerPosX);
+    // data.push(this.hammerPosY);
     // Mole Start Position
-    data.push(this.mole.position.x);
-    data.push(this.mole.position.y);
+    // data.push(this.mole.position.x);
+    // data.push(this.mole.position.y);
 
     // this.generateIngredientListNumbers();
-    // 6
+    
+    // 0
     data.push(this.allIngredientNumbersOnList);
     // this.lobbyController.sendToDisplays('allIngredientNumbersOnList', this.allIngredientNumbersOnList);
-    // 7
+    // 1
     data.push(this.shakePointsNeededForFalling);
 
     return data;
   }
 
   clearInGameTimers() {
-    if (this.moleTimerId != null) clearInterval(this.moleTimerId);
+    // if (this.moleTimerId != null) clearInterval(this.moleTimerId);
     // if (this.shakeObjectChangeTimerId != null) clearTimeout(this.shakeObjectChangeTimerId);
     if (this.shakeObjectChangeTimerId != null) clearInterval(this.shakeObjectChangeTimerId);
   }
