@@ -6,7 +6,7 @@ export class MainMenuProgramm implements Program {
 
     // private games: string[] = ["Labyrinth", "Spaceship", "Whack-a-mole", "Säftlimacher 1", "Säftlimacher 2"];
     // private games: string[] = ["Labyrinth", "Spaceship", "Whack-a-mole", "Säftlimacher 1", "Säftlimacher 2", "Wippender Säftlimacher"];
-    private games: string[] = ["Schütteln", "Auffangen", "Wippen"];
+    private games: string[] = ["Schütteln", "Fangen", "Wippen"];
     private lobbyController: LobbyController;
     private selectedGame = 0;
     private mainControllerSocketId: string = "";
