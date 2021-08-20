@@ -279,7 +279,6 @@ export class SeesawProgram extends SaftlimacherBaseProgram implements Program {
               [this.scoreInc, ingredientTypeNr, ingredientBody.position.x, ingredientBody.position.y]);
           } else {
             // bad catch
-            //  console.log('thrown away a good ingredient,, NOT on list!S -50 points!!');
             this.score -= this.scoreInc;
             this.lobbyController.sendToDisplays('adjustScoreByCatchedIngredient',
               [-this.scoreInc, ingredientTypeNr, ingredientBody.position.x, ingredientBody.position.y]);
